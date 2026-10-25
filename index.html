@@ -3,151 +3,206 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0a5c2b">
+<meta name="theme-color" content="#1B5A39">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Golfträning">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-192.png">
 <title>Golfträning</title>
 <style>
-:root{
-  --bg:#fff; --fg:#000; --muted:#222; --card:#f1f1f1; --line:#000;
-  --accent:#0a5c2b; --accentFg:#fff; --btn:#000; --btnFg:#fff;
-  --warn:#b00020; --dl:#ffd400; --dlFg:#000; --hl:#e6f2ea;
+/* Typsnitt i repot (SIL OFL 1.1, se fonts/). Variabla filer: en fil täcker alla vikter. */
+@font-face { font-family: "Big Shoulders Display"; src: url(fonts/BigShouldersDisplay.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Atkinson Hyperlegible Next"; src: url(fonts/AtkinsonHyperlegibleNext.woff2) format("woff2"); font-weight: 200 800; font-display: swap; }
+@font-face { font-family: "Atkinson Hyperlegible Mono"; src: url(fonts/AtkinsonHyperlegibleMono.woff2) format("woff2"); font-weight: 200 800; font-display: swap; }
+
+/* Designtokens från Golfrounds */
+:root {
+  --paper: #ECF0E6; --card: #FAFBF7; --ink: #12211A; --muted: #536257; --rule: #CBD4C6; --chip: #DFE6DA;
+  --accent: #1B5A39; --accent-ink: #FFFFFF; --accent-soft: #CFE2D3;
+  --flag: #C0392B; --gorse: #D4A21E; --good: #23704A; --bad: #A8432F;
+  --shadow: 0 1px 0 rgba(18, 33, 26, .06), 0 6px 18px -10px rgba(18, 33, 26, .35);
+  --f-num: "Big Shoulders Display", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --f-body: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "Atkinson Hyperlegible Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --r-sm: 8px; --r-md: 14px;
+  --tabbar: 64px;
 }
-:root[data-theme=dark]{
-  --bg:#000; --fg:#fff; --muted:#e5e5e5; --card:#151515; --line:#fff;
-  --accent:#3ddc84; --accentFg:#000; --btn:#fff; --btnFg:#000;
-  --warn:#ff6b6b; --dl:#ffd400; --dlFg:#000; --hl:#0d2a19;
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0D1510; --card: #16211A; --ink: #E4EBE5; --muted: #98A79D; --rule: #2A3830;
+    --chip: #1E2B23; --accent: #6CC491; --accent-ink: #0A1A10; --accent-soft: #1F3A2A;
+    --flag: #F0806F; --gorse: #E3BE52; --good: #6CC491; --bad: #F0907A;
+    --shadow: 0 1px 0 rgba(0,0,0,.4), 0 8px 20px -12px rgba(0,0,0,.8);
+    color-scheme: dark;
+  }
 }
-*{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{
-  margin:0; background:var(--bg); color:var(--fg);
-  font:20px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
-  font-variant-numeric:tabular-nums; touch-action:manipulation;
-  padding:0 max(12px,env(safe-area-inset-right)) calc(40px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
+:root[data-theme="dark"] {
+  --paper: #0D1510; --card: #16211A; --ink: #E4EBE5; --muted: #98A79D; --rule: #2A3830;
+  --chip: #1E2B23; --accent: #6CC491; --accent-ink: #0A1A10; --accent-soft: #1F3A2A;
+  --flag: #F0806F; --gorse: #E3BE52; --good: #6CC491; --bad: #F0907A;
+  --shadow: 0 1px 0 rgba(0,0,0,.4), 0 8px 20px -12px rgba(0,0,0,.8);
+  color-scheme: dark;
 }
-button,input,select{font:inherit;color:inherit;touch-action:manipulation}
-button{cursor:pointer;-webkit-tap-highlight-color:transparent}
-header.top{
-  position:sticky; top:0; z-index:10; background:var(--bg);
-  margin:0 -12px; padding:calc(env(safe-area-inset-top) + 8px) 12px 8px;
-  border-bottom:3px solid var(--line); display:flex; gap:6px; align-items:center;
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+html, body { background: var(--paper); }
+body {
+  margin: 0; color: var(--ink); font-family: var(--f-body); font-size: 18px; line-height: 1.45;
+  -webkit-tap-highlight-color: transparent; -webkit-font-smoothing: antialiased; touch-action: manipulation;
 }
-.tabs{display:flex; flex:1; gap:6px}
-.tab{flex:1; min-height:52px; border:3px solid var(--line); background:var(--bg); border-radius:12px; font-weight:800; font-size:17px; padding:0 4px}
-.tab[aria-selected=true]{background:var(--btn); color:var(--btnFg)}
-.tab.icon{flex:none; width:52px; font-size:24px}
-.theme{width:52px; min-height:52px; border:3px solid var(--line); background:var(--bg); border-radius:12px; font-size:22px; flex:none}
+button, input, select, textarea { font: inherit; color: inherit; touch-action: manipulation; }
+button { cursor: pointer; border: 0; background: none; padding: 0; }
+:focus-visible { outline: 3px solid var(--gorse); outline-offset: 2px; border-radius: 6px; }
+.muted { color: var(--muted); }
+.small { font-size: 15.5px; }
 
-h1{font-size:28px; line-height:1.15; margin:16px 0 8px; font-weight:900}
-h2{font-size:22px; margin:22px 0 8px; font-weight:900}
-h3{font-size:20px; margin:0 0 4px; font-weight:800}
-p{margin:0 0 12px}
-.muted{color:var(--muted); font-weight:600}
-.small{font-size:17px}
-.box{border:3px solid var(--line); border-radius:18px; padding:14px; margin:12px 0; background:var(--bg)}
-.box.soft{background:var(--card)}
-.box.alert{border-color:var(--accent); background:var(--hl)}
-.row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-.grow{flex:1}
-
-.btn{display:block; width:100%; min-height:68px; border-radius:16px; border:3px solid var(--line); background:transparent; font-weight:900; font-size:21px; padding:8px 12px; margin:8px 0}
-.btn.primary{background:var(--accent); color:var(--accentFg); border-color:var(--accent)}
-.btn.dark{background:var(--btn); color:var(--btnFg)}
-.btn.danger{color:var(--warn); border-color:var(--warn)}
-.btn.small{min-height:52px; font-size:18px}
-.btn.huge{min-height:96px; font-size:26px}
-.btn:disabled{opacity:.4}
-.btn .sub{display:block; font-size:16px; font-weight:600; opacity:.85}
-.inline{display:inline-block; width:auto; margin:0}
-.btnrow{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-.btnrow .btn{margin:0}
-
-.chips{display:flex; flex-wrap:wrap; gap:8px; margin:8px 0}
-.chip{min-height:56px; padding:0 16px; border-radius:28px; border:3px solid var(--line); background:transparent; font-weight:800; font-size:19px}
-.chip[aria-pressed=true]{background:var(--btn); color:var(--btnFg)}
-
-.list .item{display:flex; align-items:center; gap:12px; width:100%; text-align:left; min-height:72px; border:3px solid var(--line); border-radius:16px; background:transparent; padding:10px 14px; margin:8px 0}
-.item .t{flex:1; font-weight:800}
-.item .t small{display:block; font-weight:600; font-size:16px; color:var(--muted)}
-.item .go{font-size:26px; font-weight:900}
-
-.numgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:10px 0}
-.numgrid.c3{grid-template-columns:repeat(3,1fr)}
-.numgrid.c6{grid-template-columns:repeat(6,1fr)}
-.numgrid button{min-height:76px; border-radius:16px; border:3px solid var(--line); background:transparent; font-size:30px; font-weight:900}
-.numgrid button[aria-pressed=true]{background:var(--accent); color:var(--accentFg); border-color:var(--accent)}
-.numgrid.c6 button{font-size:24px; min-height:64px}
-.numgrid.aim{grid-template-columns:repeat(4,minmax(0,1fr))}
-.numgrid.aim button{font-size:26px; min-height:64px}
-
-.runhead{padding:12px 0 2px}
-.runhead .crumb{font-weight:700; color:var(--muted); font-size:17px}
-.series{border:3px solid var(--line); border-radius:18px; padding:12px 14px; margin:12px 0}
-.series .shot{display:flex; gap:12px; padding:10px 0; border-bottom:2px solid var(--card)}
-.series .shot:last-child{border-bottom:0}
-.series .n{flex:none; width:40px; height:40px; border-radius:50%; background:var(--btn); color:var(--btnFg); display:grid; place-items:center; font-weight:900}
-.series .big{font-size:30px; font-weight:900; line-height:1.15}
-.series .sub{font-size:21px; font-weight:700}
-.series .head{font-size:34px; font-weight:900; margin-bottom:4px}
-.dl{display:inline-block; margin-top:6px; background:var(--dl); color:var(--dlFg); border-radius:10px; padding:4px 10px; font-weight:900; font-size:19px}
-.explain{background:var(--card); border-radius:14px; padding:10px 12px; font-weight:700; font-size:18px; margin:8px 0}
-.prog{font-weight:800; font-size:18px; color:var(--muted)}
-
-.stats{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:8px 0}
-.stat{background:var(--card); border-radius:12px; padding:8px 12px}
-.stat b{display:block; font-size:24px}
-.stat span{font-size:15px; font-weight:700; color:var(--muted)}
-.ref{font-size:17px; font-weight:600; margin-top:6px}
-.ref .src{display:block; color:var(--muted); font-size:15px}
-
-.shotcard{border:3px solid var(--line); border-radius:18px; padding:14px; margin:12px 0}
-.shotcard .no{font-weight:800; color:var(--muted)}
-.shotcard .big{font-size:34px; font-weight:900; line-height:1.15}
-.opts{display:grid; gap:10px}
-.opts.c2{grid-template-columns:1fr 1fr}
-.opts.c3{grid-template-columns:1fr 1fr 1fr}
-.opts .btn{margin:0; min-height:80px}
-.dots{display:flex; flex-wrap:wrap; gap:4px; margin:10px 0}
-.dots i{width:14px; height:14px; border-radius:50%; border:2px solid var(--line)}
-.dots i.on{background:var(--fg)}
-
-label.f{display:block; font-weight:800; margin:12px 0 4px}
-input[type=text],input[type=number],input[type=date],select{
-  width:100%; min-height:60px; border:3px solid var(--line); border-radius:14px; background:var(--bg); padding:0 12px; font-size:22px; font-weight:700
+/* ---------- Ram ---------- */
+.shell {
+  max-width: 620px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: calc(env(safe-area-inset-top, 0px) + 10px);
+  padding-bottom: calc(var(--tabbar) + 40px + env(safe-area-inset-bottom, 0px));
 }
-.check{display:flex; align-items:center; gap:12px; min-height:56px; font-weight:700}
-.check input{width:30px; height:30px; accent-color:var(--accent); flex:none}
-.stepper{display:grid; grid-template-columns:76px 1fr 76px; gap:10px; align-items:center}
-.stepper button{min-height:68px; border-radius:16px; border:3px solid var(--line); background:transparent; font-size:34px; font-weight:900}
-.stepper output{text-align:center; font-size:36px; font-weight:900}
+.topbar { display: flex; align-items: center; min-height: 40px; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--f-num); font-weight: 800; font-size: 26px; letter-spacing: .02em; }
+.brand svg { width: 22px; height: 26px; stroke: var(--accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-table.t{border-collapse:collapse; width:100%; font-size:16px}
-table.t th,table.t td{border:2px solid var(--line); padding:6px 4px; text-align:center}
-table.t th{background:var(--card)}
-.scroll{overflow-x:auto}
-svg.chart{width:100%; height:110px; display:block}
-svg.chart polyline{fill:none; stroke:var(--accent); stroke-width:3}
-svg.chart circle{fill:var(--accent)}
-svg.chart text{fill:var(--fg); font-size:12px; font-weight:700}
-svg.chart line{stroke:var(--muted); stroke-width:1; stroke-dasharray:3 3}
+.tabs {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  background: var(--card); border-top: 1px solid var(--rule);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px));
+}
+.tabs > div { max-width: 620px; margin: 0 auto; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); height: var(--tabbar); }
+.tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 12.5px; color: var(--muted); font-weight: 600; min-height: 52px; }
+.tab svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tab[aria-current="page"] { color: var(--accent); font-weight: 700; }
+.tab[aria-current="page"] svg { stroke-width: 2.3; }
 
-.toast{position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom)); transform:translateX(-50%) translateY(200%);
-  background:var(--btn); color:var(--btnFg); padding:14px 20px; border-radius:14px; font-weight:800; transition:transform .25s; max-width:90vw; text-align:center; z-index:20}
-.toast.show{transform:translateX(-50%) translateY(0)}
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+h1 { font-family: var(--f-num); font-weight: 800; font-size: 40px; line-height: .98; letter-spacing: .01em; margin: 18px 0 12px; }
+.h-sec { font-family: var(--f-num); font-weight: 700; font-size: 24px; letter-spacing: .01em; margin: 28px 0 10px; }
+h3 { font-size: 18px; font-weight: 700; margin: 0 0 4px; }
+p { margin: 0 0 12px; }
+
+/* ---------- Kort ---------- */
+.card { background: var(--card); border-radius: var(--r-md); box-shadow: var(--shadow); padding: 14px 16px; margin: 10px 0; }
+.card.soft { background: var(--chip); box-shadow: none; }
+.card.soft .btn, .card.soft .chip { background: var(--card); }
+.card.alert { background: color-mix(in srgb, var(--gorse) 16%, var(--card)); border: 1px solid color-mix(in srgb, var(--gorse) 60%, transparent); }
+details.card summary { min-height: 40px; display: flex; align-items: center; cursor: pointer; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.grow { flex: 1; }
+
+/* ---------- Kontroller ---------- */
+.btn {
+  display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 2px; width: 100%;
+  min-height: 56px; padding: 8px 20px; margin: 8px 0; border-radius: var(--r-md); font-weight: 700; font-size: 17px; text-align: center;
+  background: var(--chip); color: var(--ink); transition: transform .08s ease;
+}
+.btn:active { transform: scale(.98); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.btn.dark { background: var(--ink); color: var(--paper); }
+.btn.danger { background: transparent; color: var(--bad); border: 1.5px solid color-mix(in srgb, var(--bad) 45%, transparent); }
+.btn.small { min-height: 52px; font-size: 15.5px; padding: 0 14px; }
+.btn.huge { min-height: 72px; font-size: 21px; }
+.btn[disabled] { opacity: .45; cursor: default; }
+.btn .sub { display: block; font-size: 14px; font-weight: 400; opacity: .85; }
+.btnrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btnrow .btn { margin: 0; }
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+.chip { min-height: 52px; padding: 0 18px; border-radius: 99px; background: var(--chip); font-weight: 700; font-size: 17px; border: 2px solid transparent; }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+
+.list { display: grid; gap: 8px; margin-top: 10px; }
+.list .item { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; min-height: 64px; padding: 12px 14px; background: var(--card); border-radius: var(--r-md); box-shadow: var(--shadow); }
+.item .t { flex: 1; font-weight: 700; font-size: 17px; }
+.item .t small { display: block; font-weight: 400; font-size: 14px; color: var(--muted); margin-top: 2px; }
+.item .go { font-family: var(--f-num); font-size: 28px; font-weight: 700; color: var(--muted); }
+
+.numgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 10px 0; }
+.numgrid.c3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.numgrid.c6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.numgrid button { min-height: 64px; border-radius: 12px; background: var(--chip); font-family: var(--f-num); font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.numgrid button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.numgrid.c6 button { font-size: 24px; min-height: 56px; }
+.numgrid.aim { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.numgrid.aim button { font-size: 26px; min-height: 56px; }
+
+.runhead { padding: 4px 0 2px; }
+.runhead h1 { margin-top: 6px; }
+.runhead .crumb { font-weight: 700; color: var(--muted); font-size: 14px; text-transform: uppercase; letter-spacing: .06em; margin-top: 14px; }
+.series { background: var(--card); border-radius: var(--r-md); box-shadow: var(--shadow); padding: 12px 16px; margin: 12px 0; }
+.card .series { box-shadow: none; padding: 0; margin: 4px 0; background: transparent; }
+.series .shot { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.series .shot:last-child { border-bottom: 0; }
+.series .n { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--accent-soft); color: var(--ink); display: grid; place-items: center; font-family: var(--f-num); font-size: 22px; font-weight: 800; }
+.series .big { font-family: var(--f-num); font-size: 32px; font-weight: 800; line-height: 1.05; }
+.series .sub { font-size: 17px; font-weight: 600; color: var(--muted); }
+.series .head { font-family: var(--f-num); font-size: 40px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+.dl { display: inline-block; margin-top: 6px; background: var(--gorse); color: #1d1600; border-radius: 99px; padding: 3px 12px; font-weight: 700; font-size: 16px; }
+.explain { background: var(--chip); border-radius: 12px; padding: 10px 12px; font-size: 15.5px; margin: 8px 0; }
+.prog { font-weight: 700; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+.stat { background: var(--chip); border-radius: 12px; padding: 10px 12px; display: grid; gap: 1px; }
+.stat b { font-family: var(--f-num); font-size: 30px; font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 13.5px; font-weight: 600; color: var(--muted); }
+.ref { font-size: 15px; margin-top: 8px; }
+.ref .src { display: block; color: var(--muted); font-family: var(--f-mono); font-size: 12.5px; margin-top: 2px; }
+
+.shotcard { background: var(--card); border-radius: var(--r-md); box-shadow: var(--shadow); padding: 14px 16px; margin: 12px 0; }
+.shotcard .no { font-weight: 700; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.shotcard .big { font-family: var(--f-num); font-size: 44px; font-weight: 800; line-height: 1; margin-top: 4px; }
+.shotcard .sub { font-size: 17px; color: var(--muted); }
+.opts { display: grid; gap: 8px; }
+.opts.c2 { grid-template-columns: 1fr 1fr; }
+.opts.c3 { grid-template-columns: 1fr 1fr 1fr; }
+.opts .btn { margin: 0; min-height: 72px; }
+.dots { display: flex; flex-wrap: wrap; gap: 4px; margin: 10px 0; }
+.dots i { width: 12px; height: 12px; border-radius: 50%; background: var(--chip); border: 1.5px solid var(--rule); }
+.dots i.on { background: var(--accent); border-color: var(--accent); }
+
+label.f { display: block; font-weight: 700; font-size: 15px; margin: 14px 0 6px; }
+input[type=text], input[type=number], input[type=date], select {
+  width: 100%; min-height: 56px; background: var(--card); border: 1.5px solid var(--rule); border-radius: 12px; padding: 0 14px; font-size: 20px;
+}
+input[type=number] { font-family: var(--f-num); font-size: 26px; font-weight: 700; }
+.check { display: flex; align-items: center; gap: 12px; min-height: 52px; font-weight: 600; border-top: 1px solid var(--rule); }
+.check input { width: 26px; height: 26px; accent-color: var(--accent); flex: none; }
+.stepper { display: grid; grid-template-columns: 72px 1fr 72px; gap: 10px; align-items: center; margin: 6px 0; }
+.stepper button { width: 72px; height: 72px; border-radius: 50%; background: var(--chip); font-family: var(--f-num); font-size: 40px; font-weight: 700; line-height: 1; }
+.stepper button:active { background: var(--accent-soft); }
+.stepper output { text-align: center; font-family: var(--f-num); font-size: 56px; font-weight: 800; line-height: 1; }
+
+table.t { border-collapse: collapse; width: 100%; font-family: var(--f-mono); font-size: 15px; font-variant-numeric: tabular-nums; }
+table.t th { text-align: right; font-size: 12.5px; color: var(--muted); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+table.t td { text-align: right; padding: 8px; border-bottom: 1px solid color-mix(in srgb, var(--rule) 55%, transparent); white-space: nowrap; }
+table.t th:first-child, table.t td:first-child { text-align: left; padding-left: 0; }
+.scroll { overflow-x: auto; background: var(--card); border-radius: var(--r-md); box-shadow: var(--shadow); padding: 6px 14px; }
+svg.chart { width: 100%; height: auto; display: block; margin-top: 10px; }
+svg.chart polyline { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+svg.chart circle { fill: var(--accent); }
+svg.chart text { fill: var(--muted); font-family: var(--f-body); font-size: 11px; }
+svg.chart line { stroke: var(--rule); stroke-width: 1; stroke-dasharray: 3 3; }
+ul { padding-left: 20px; margin: 8px 0 0; }
+
+.toast { position: fixed; left: 50%; bottom: calc(var(--tabbar) + 16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(30px); opacity: 0; pointer-events: none;
+  background: var(--ink); color: var(--paper); padding: 10px 18px; border-radius: 99px; font-size: 15px; font-weight: 600; z-index: 50; max-width: calc(100vw - 32px); text-align: center; transition: transform .2s, opacity .2s; }
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 </style>
 </head>
 <body>
-<header class="top">
-  <nav class="tabs" role="tablist" id="tabs"></nav>
-  <button class="theme" data-act="theme" id="themeBtn"></button>
-</header>
-<main id="view"></main>
+<div class="shell">
+  <header class="topbar"><div class="brand"><svg viewBox="0 0 22 26" aria-hidden="true"><path d="M5 25V2"/><path d="M5 3l13 4.5L5 12"/><path d="M1 25h9"/></svg>Golfträning</div></header>
+  <main id="view"></main>
+</div>
+<nav class="tabs" id="tabs"></nav>
 <input type="file" id="importFile" accept="application/json,.json" hidden>
 <div class="toast" id="toast" role="status"></div>
 
@@ -161,7 +216,7 @@ const I18N = {
   sv: {
     ui: {
       appName: 'Golfträning', tabHome: 'Start', tabRun: 'Pass', tabHist: 'Historik', tabSettings: 'Inställningar',
-      themeLabel: 'Byt ljust/mörkt läge',
+      menu: 'Meny', theme: 'Utseende', themeSystem: 'System', themeLight: 'Ljust', themeDark: 'Mörkt',
       choosePlace: 'Var tränar du?', editPlace: 'Ändra platsen', stationsHere: 'Stationer: {list}', maxClub: 'Längsta klubba: {club}',
       ongoing: 'Pågående pass', ongoingText: '{n} moment hittills. Fortsätt eller avsluta och spara.', resume: 'Fortsätt passet',
       suggest: 'Förslag idag', suggestBoth: 'Kör båda (≈ 60 min)', suggestOne: 'Bara {name} (≈ 30 min)',
@@ -623,12 +678,17 @@ function reminders(place) {
 // =====================================================================
 // Rendering
 // =====================================================================
+const ICONS = {
+  home: '<path d="M6 21V3"/><path d="M6 4l12 4-12 4"/><path d="M3 21h8"/>',
+  run: '<circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.6 2"/><path d="M9.5 2.5h5"/><path d="M12 2.5v3.5"/>',
+  hist: '<path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M21 20H3"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>'
+};
 function render() {
   const tabs = [['home', 'ui.tabHome'], ...(D.cur ? [['run', 'ui.tabRun']] : []), ['hist', 'ui.tabHist'], ['settings', 'ui.tabSettings']];
   const active = view === 'placeEdit' ? 'settings' : view === 'summary' ? 'hist' : view;
-  $('#tabs').innerHTML = tabs.map(([v, k]) => `<button class="tab ${v === 'settings' ? 'icon' : ''}" role="tab" data-act="tab" data-v="${v}" aria-selected="${active === v}" aria-label="${t(k)}">${v === 'settings' ? '⚙︎' : t(k)}</button>`).join('');
-  $('#themeBtn').textContent = document.documentElement.dataset.theme === 'dark' ? '☀︎' : '☾';
-  $('#themeBtn').setAttribute('aria-label', t('ui.themeLabel'));
+  $('#tabs').setAttribute('aria-label', t('ui.menu'));
+  $('#tabs').innerHTML = `<div>${tabs.map(([v, k]) => `<button class="tab" data-act="tab" data-v="${v}" ${active === v ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[v]}</svg>${t(k)}</button>`).join('')}</div>`;
   const V = { home: homeHTML, run: runHTML, hist: histHTML, settings: settingsHTML, placeEdit: placeEditHTML, summary: summaryHTML }[view] || homeHTML;
   $('#view').innerHTML = V();
 }
@@ -638,25 +698,25 @@ function homeHTML() {
   const stList = STATIONS.filter(k => p.st[k]).map(k => t('stations.' + k)).join(', ');
   let h = `<h1>${t('ui.choosePlace')}</h1><div class="chips">${D.places.map(x =>
     `<button class="chip" data-act="place" data-id="${x.id}" aria-pressed="${x.id === p.id}">${esc(x.name)}</button>`).join('')}</div>
-    <div class="box soft"><div class="small">${t('ui.stationsHere', { list: stList || t('ui.none') })}</div>
+    <div class="card soft"><div class="small">${t('ui.stationsHere', { list: stList || t('ui.none') })}</div>
     <div class="small">${t('ui.maxClub', { club: club(p.maxClub || 'D') })}</div>
     <button class="btn small" data-act="editPlace" data-id="${p.id}">${t('ui.editPlace')}</button></div>`;
-  if (D.cur) h += `<div class="box alert"><h3>${t('ui.ongoing')}</h3><p class="small">${t('ui.ongoingText', { n: D.cur.items.length })}</p>
+  if (D.cur) h += `<div class="card alert"><h3>${t('ui.ongoing')}</h3><p class="small">${t('ui.ongoingText', { n: D.cur.items.length })}</p>
     <button class="btn primary" data-act="tab" data-v="run">${t('ui.resume')}</button></div>`;
   const rem = reminders(p);
-  if (rem.length) h += `<h2>${t('ui.reminders')}</h2>` + rem.map(r => `<div class="box alert"><h3>${r.head}</h3>
+  if (rem.length) h += `<h2 class="h-sec">${t('ui.reminders')}</h2>` + rem.map(r => `<div class="card alert"><h3>${r.head}</h3>
     ${r.tests.map(id => `<button class="btn dark small" data-act="startTest" data-id="${id}">${t('ui.dueTest', { name: testName(id) })}</button>`).join('')}</div>`).join('');
   const sug = suggestions(p);
   if (sug.length) {
-    h += `<h2>${t('ui.suggest')}</h2><div class="box">${sug.map(id => `<h3>${t('mod.' + id + '.name')}</h3><p class="small muted">${t('mod.' + id + '.desc')}</p>`).join('')}
+    h += `<h2 class="h-sec">${t('ui.suggest')}</h2><div class="card">${sug.map(id => `<h3>${t('mod.' + id + '.name')}</h3><p class="small muted">${t('mod.' + id + '.desc')}</p>`).join('')}
       ${sug.length === 2 ? `<button class="btn primary huge" data-act="startMods" data-ids="${sug.join(',')}">${t('ui.suggestBoth')}</button>` : ''}
       <button class="btn ${sug.length === 2 ? '' : 'primary huge'}" data-act="startMods" data-ids="${sug[0]}">${t('ui.suggestOne', { name: t('mod.' + sug[0] + '.name') })}</button></div>`;
-  } else h += `<p class="box">${t('ui.noModules')}</p>`;
+  } else h += `<p class="card">${t('ui.noModules')}</p>`;
   const mods = Object.keys(MODULES).filter(id => fits(p, MODULES[id]));
-  if (mods.length) h += `<h2>${t('ui.modulesHere')}</h2><div class="list">${mods.map(id => { const ld = lastDoneModule(id);
+  if (mods.length) h += `<h2 class="h-sec">${t('ui.modulesHere')}</h2><div class="list">${mods.map(id => { const ld = lastDoneModule(id);
     return `<button class="item" data-act="startMods" data-ids="${id}"><span class="t">${t('mod.' + id + '.name')}<small>${t('mod.' + id + '.desc')}<br>${ld ? t('ui.lastDone', { when: when(ld) }) : t('ui.never')}</small></span><span class="go">›</span></button>`; }).join('')}</div>`;
   const tests = Object.keys(TESTS).filter(id => fits(p, TESTS[id]));
-  if (tests.length) h += `<h2>${t('ui.testsHere')}</h2><div class="list">${tests.map(id => { const lt = lastTest(id), b = bestOf(id), lv = tstate(id).level;
+  if (tests.length) h += `<h2 class="h-sec">${t('ui.testsHere')}</h2><div class="list">${tests.map(id => { const lt = lastTest(id), b = bestOf(id), lv = tstate(id).level;
     const meta = [lt ? `${t('ui.latest')} ${fmtVal(id, lt)} (${when(lt.date)})` : t('ui.never'), b ? `${t('ui.best')} ${fmtVal(id, b)}` : '', lv != null ? lvlText(id, lv) : ''].filter(Boolean).join(' · ');
     return `<button class="item" data-act="startTest" data-id="${id}"><span class="t">${testName(id)}<small>${meta}</small></span><span class="go">›</span></button>`; }).join('')}</div>`;
   return h;
@@ -674,7 +734,7 @@ function runHTML() {
   const crumb = [c.queue.length > 1 ? t('ui.item', { i: c.qi + 1, n: c.queue.length }) : '', steps.length > 1 ? t('ui.step', { i: c.si + 1, n: steps.length }) : ''].filter(Boolean).join(' · ');
   let body = '';
   switch (step.type) {
-    case 'tech': body = `<div class="box soft"><h3>${t('ui.techOptional')}</h3><p>${t('mod.' + q.id + '.tech')}</p></div>
+    case 'tech': body = `<div class="card soft"><h3>${t('ui.techOptional')}</h3><p>${t('mod.' + q.id + '.tech')}</p></div>
       <button class="btn primary huge" data-act="techDone">${t('ui.done')}</button>`; break;
     case 'series': body = seriesHTML(step); break;
     case 'streak': body = streakHTML(); break;
@@ -691,11 +751,11 @@ function seriesHTML(step) {
   const st = D.cur.st, place = runPlace(), g = GENS[step.gen];
   if (step.askDist && st.dist == null) {
     const [a, b] = step.askDist, nums = []; for (let d = a; d <= b; d++) nums.push(d);
-    return `<h2>${t('ui.chooseDist', { n: step.station })}</h2><div class="numgrid">${nums.map(d => `<button data-act="setDist" data-v="${d}">${d}</button>`).join('')}</div>`;
+    return `<h2 class="h-sec">${t('ui.chooseDist', { n: step.station })}</h2><div class="numgrid">${nums.map(d => `<button data-act="setDist" data-v="${d}">${d}</button>`).join('')}</div>`;
   }
   if (step.askBalls && st.total == null) {
     st.pendingBalls = st.pendingBalls || step.askBalls;
-    return `<h2>${t('ui.chooseBalls')}</h2><div class="stepper"><button data-act="balls" data-d="-4">−</button><output>${st.pendingBalls}</output><button data-act="balls" data-d="4">+</button></div>
+    return `<h2 class="h-sec">${t('ui.chooseBalls')}</h2><div class="stepper"><button data-act="balls" data-d="-4">−</button><output>${st.pendingBalls}</output><button data-act="balls" data-d="4">+</button></div>
       <button class="btn primary huge" data-act="ballsOk">${t('ui.startSeries')}</button>`;
   }
   const len = g.len || D.settings.seriesLen;
@@ -703,7 +763,7 @@ function seriesHTML(step) {
   const nSeries = Math.ceil(total / len);
   st.n = st.n || 0;
   if (st.n >= nSeries) {   // registrering i slutet (myntövningen)
-    return `<h2>${t('ui.regEnd', { label: t('reg.' + step.regEnd) })}</h2><div class="numgrid">${Array.from({ length: 11 }, (_, i) => `<button data-act="regEnd" data-v="${i}">${i}</button>`).join('')}</div>`;
+    return `<h2 class="h-sec">${t('ui.regEnd', { label: t('reg.' + step.regEnd) })}</h2><div class="numgrid">${Array.from({ length: 11 }, (_, i) => `<button data-act="regEnd" data-v="${i}">${i}</button>`).join('')}</div>`;
   }
   if (!st.cur) {
     const thisLen = Math.min(len, total - st.n * len);
@@ -741,7 +801,7 @@ function seriesAdvance(step) {
 // ----- Leapfrog -----
 function streakHTML() {
   const st = D.cur.st; st.now = st.now || 0; st.tries = st.tries || [];
-  return `<div class="box"><h3>${t('ui.streakNow')}</h3><div class="stepper"><button data-act="streak" data-d="-1">−</button><output>${st.now}</output><button data-act="streak" data-d="1">+</button></div>
+  return `<div class="card"><h3>${t('ui.streakNow')}</h3><div class="stepper"><button data-act="streak" data-d="-1">−</button><output>${st.now}</output><button data-act="streak" data-d="1">+</button></div>
     <button class="btn dark" data-act="streakSave">${t('ui.saveTry')}</button>
     ${st.tries.length ? `<p class="small">${t('ui.tries', { list: st.tries.join(', ') })} · ${t('ui.best')} ${Math.max(...st.tries)}</p>` : ''}</div>
     <button class="btn primary huge" data-act="streakDone">${t('ui.done')}</button>`;
@@ -753,7 +813,7 @@ function yardageHTML() {
   const st = D.cur.st, place = runPlace(), ws = clubsAt(place, WEDGES);
   st.w = st.w || ws[0]; st.sign = st.sign || {};
   const rows = SWINGS.map(sw => { const v = D.yardage[st.w]?.[sw] || {}, sg = st.sign[sw] || (v.side < 0 ? 'L' : 'R');
-    return `<div class="box"><h3>${t('swing.' + sw)}</h3><div class="row">
+    return `<div class="card"><h3>${t('swing.' + sw)}</h3><div class="row">
       <input type="number" inputmode="decimal" id="c-${sw}" placeholder="${t('ui.carry')}" value="${v.carry ?? ''}" class="grow" style="flex:1 1 40%">
       <input type="number" inputmode="decimal" id="s-${sw}" placeholder="${t('ui.side')}" value="${v.side != null ? Math.abs(v.side) : ''}" style="flex:1 1 25%">
       <button class="chip" data-act="ySign" data-sw="${sw}" aria-pressed="true">${sg === 'L' ? t('ui.left') : t('ui.right')}</button></div>
@@ -765,7 +825,7 @@ function yardageHTML() {
 // ----- Spökhål -----
 function ghostHTML() {
   const X = L.ghost;
-  return `<div class="box soft"><p>${X.setup}</p><p>${X.rule}</p></div><h2>${X.ask}</h2>
+  return `<div class="card soft"><p>${X.setup}</p><p>${X.rule}</p></div><h2 class="h-sec">${X.ask}</h2>
     <div class="numgrid">${Array.from({ length: 11 }, (_, i) => `<button data-act="ghostReg" data-v="${i}">${i}</button>`).join('')}</div>`;
 }
 
@@ -795,7 +855,7 @@ function gc2RandHTML() {
   const st = D.cur.st, X = L.test.gc2Rand;
   if (st.total == null) {
     st.pendingBalls = st.pendingBalls || 20;
-    return `<h2>${t('ui.chooseBalls')}</h2><div class="stepper"><button data-act="balls" data-d="-4">−</button><output>${st.pendingBalls}</output><button data-act="balls" data-d="4">+</button></div>
+    return `<h2 class="h-sec">${t('ui.chooseBalls')}</h2><div class="stepper"><button data-act="balls" data-d="-4">−</button><output>${st.pendingBalls}</output><button data-act="balls" data-d="4">+</button></div>
       <button class="btn primary huge" data-act="ballsOk">${t('ui.startSeries')}</button>`;
   }
   st.shots = st.shots || [];
@@ -803,7 +863,7 @@ function gc2RandHTML() {
   const list = n ? `<table class="t"><tr><th>#</th><th>${t('ui.target')}</th><th>${t('ui.carry')}</th><th>±</th></tr>${st.shots.map((s, i) =>
     `<tr><td>${i + 1}</td><td>${s.d}</td><td>${fmtN(s.c)}</td><td><b>${fmtS(s.c - s.d) || '0'}</b></td></tr>`).reverse().join('')}</table>` : '';
   const undo = n ? `<button class="btn" data-act="g2Undo">${t('ui.undo')}</button>` : '';
-  if (n >= st.total) return `<div class="box">${gc2StatsHTML(r)}</div><button class="btn primary huge" data-act="g2Save">${t('ui.saveResult')}</button>${undo}${list}`;
+  if (n >= st.total) return `<div class="card">${gc2StatsHTML(r)}</div><button class="btn primary huge" data-act="g2Save">${t('ui.saveResult')}</button>${undo}${list}`;
   if (st.target == null) { st.target = gc2Target(runPlace(), n ? st.shots[n - 1].d : null); save(); }
   return `<div class="shotcard"><div class="no">${t('ui.shotNo', { i: n + 1, n: st.total })}</div><div class="big">${st.target} m</div><div class="sub">${st.target < 100 ? X.wedge : X.irons}</div>
     <label class="f" for="carry">${t('ui.enterCarry')}</label><input type="number" inputmode="decimal" id="carry">
@@ -828,17 +888,17 @@ function aimHTML() {
   const st = D.cur.st, X = L.test.aimPoint;
   st.pts = st.pts || [];
   const i = st.pts.length;
-  const list = i ? `<div class="box small">${st.pts.map(aimRow).join('<br>')}</div>` : '';
+  const list = i ? `<div class="card small">${st.pts.map(aimRow).join('<br>')}</div>` : '';
   const undo = i ? `<button class="btn" data-act="aimUndo">${t('ui.undo')}</button>` : '';
   if (i >= 10) {
     const r = aimResult(st.pts);
-    return `<div class="box"><div class="series"><div class="head">${fmtN(r.v, 2)} %</div><div class="sub">${esc(r.text)}</div></div></div>
+    return `<div class="card"><div class="series"><div class="head">${fmtN(r.v, 2)} %</div><div class="sub">${esc(r.text)}</div></div></div>
       <button class="btn primary huge" data-act="aimFinal">${t('ui.saveResult')}</button>${undo}${list}`;
   }
   let meas = '';
   if (st.read != null) {
     const status = st.meas != null ? t('test.aimPoint.measured', { v: fmtN(st.meas) }) : st.msg ? X[st.msg] : '';
-    meas = `<div class="box soft"><p class="small">${X.measHint}</p><button class="btn dark huge" data-act="aimMeasure" id="aimBtn" ${aimBusy ? 'disabled' : ''}>${X.measure}</button>
+    meas = `<div class="card soft"><p class="small">${X.measHint}</p><button class="btn dark huge" data-act="aimMeasure" id="aimBtn" ${aimBusy ? 'disabled' : ''}>${X.measure}</button>
       <div class="series"><div class="sub" id="aimLive" aria-live="polite">${status}</div></div>
       ${st.manual ? `<label class="f" for="aimMan">${X.manual}</label><div class="row"><input type="number" inputmode="decimal" id="aimMan" style="flex:1"><button class="btn small dark" data-act="aimManual">${X.useManual}</button></div>` : ''}</div>
       ${st.meas != null ? `<button class="btn primary huge" data-act="aimSave">${X.savePoint}</button>` : ''}`;
@@ -879,7 +939,7 @@ async function aimMeasure() {
 function testInfoHTML(id) {
   const ts = tstate(id), lt = lastTest(id), b = bestOf(id), T = TESTS[id];
   const ref = L.test[id].ref ? `<div class="ref"><b>${t('ui.reference')}:</b> ${L.test[id].ref}<span class="src">${t('ui.source')}: ${L.test[id].src}</span></div>` : '';
-  return `<div class="box soft"><p>${L.test[id].desc}</p>
+  return `<div class="card soft"><p>${L.test[id].desc}</p>
     <div class="stats"><div class="stat"><span>${t('ui.latest')}</span><b>${lt ? fmtVal(id, lt) : t('ui.none')}</b></div>
     <div class="stat"><span>${t('ui.best')}</span><b>${b ? fmtVal(id, b) : t('ui.none')}</b></div>
     ${T.level ? `<div class="stat" style="grid-column:1/-1"><span>${t('ui.level')}</span><b>${lvlText(id, ts.level)}</b><span>${L.test[id].rule}</span></div>` : ''}</div>${ref}</div>`;
@@ -889,8 +949,8 @@ function testHTML(id) {
   if (st.result) return resultHTML(id, st.result);
   let h = testInfoHTML(id);
   if (T.kind === 'count') {
-    h += `<h2>${L.test[id].ask}</h2>`;
-    if (id === 'nine') { st.order = st.order || shuffle(SHAPES.flatMap(s => HEIGHTS.map(x => L.gen.shapes[s] + ' · ' + L.gen.heights[x]))); h += `<div class="box">${st.order.map((x, i) => `${i + 1}. ${x}`).join('<br>')}</div>`; }
+    h += `<h2 class="h-sec">${L.test[id].ask}</h2>`;
+    if (id === 'nine') { st.order = st.order || shuffle(SHAPES.flatMap(s => HEIGHTS.map(x => L.gen.shapes[s] + ' · ' + L.gen.heights[x]))); h += `<div class="card">${st.order.map((x, i) => `${i + 1}. ${x}`).join('<br>')}</div>`; }
     h += `<div class="numgrid">${Array.from({ length: T.n + 1 }, (_, i) => `<button data-act="cntPick" data-v="${i}" aria-pressed="${st.pick === i}">${i}</button>`).join('')}</div>
       <button class="btn primary huge" data-act="cntSave" ${st.pick == null ? 'disabled' : ''}>${t('ui.saveResult')}</button>`;
   } else if (T.kind === 'shots') h += shotsTestHTML(id);
@@ -904,7 +964,7 @@ function resultHTML(id, r) {
   const T = TESTS[id];
   let lvl = '';
   if (T.level) lvl = `<p><b>${r.nextLvl !== r.lvl ? t('ui.nextLevel', { lvl: lvlText(id, r.nextLvl) }) : t('ui.levelSame', { lvl: lvlText(id, r.nextLvl) })}</b></p>`;
-  return `<div class="box alert"><h3>${t('ui.result')}</h3><div class="series"><div class="head">${fmtVal(id, r)}</div><div class="sub">${esc(r.text || '')}</div></div>${lvl}</div>
+  return `<div class="card alert"><h3>${t('ui.result')}</h3><div class="series"><div class="head">${fmtVal(id, r)}</div><div class="sub">${esc(r.text || '')}</div></div>${lvl}</div>
     ${testInfoHTML(id)}<button class="btn primary huge" data-act="testDone">${t('ui.next')}</button>`;
 }
 
@@ -915,7 +975,7 @@ function shotsTestHTML(id) {
   const dots = `<div class="dots">${shots.map((_, k) => `<i class="${k < i ? 'on' : ''}"></i>`).join('')}</div>`;
   if (i >= shots.length) {
     const r = shotsResult(id, st.picks);
-    return `${dots}<div class="box"><div class="series"><div class="head">${r.label}</div><div class="sub">${esc(r.text)}</div></div></div>
+    return `${dots}<div class="card"><div class="series"><div class="head">${r.label}</div><div class="sub">${esc(r.text)}</div></div></div>
       <button class="btn primary huge" data-act="shotsSave">${t('ui.saveResult')}</button><button class="btn" data-act="shotsUndo">${t('ui.undo')}</button>`;
   }
   const [big, sub] = shots[i];
@@ -951,7 +1011,7 @@ function twoSixHTML() {
   st.line = st.line || 0; st.c = st.c || {}; st.x = st.x || {};
   if (st.line >= 4) {
     const r = twoSixResult(st);
-    return `<div class="box"><div class="series"><div class="head">${r.v}/${r.of}</div><div class="sub">${r.text}</div></div></div>
+    return `<div class="card"><div class="series"><div class="head">${r.v}/${r.of}</div><div class="sub">${r.text}</div></div></div>
       <button class="btn primary huge" data-act="tsSave">${t('ui.saveResult')}</button><button class="btn" data-act="tsBack">${t('ui.back')}</button>`;
   }
   const li = st.line, c = st.c[li] = st.c[li] || {}, x = st.x[li] = st.x[li] || {};
@@ -959,7 +1019,7 @@ function twoSixHTML() {
   const rows = TS_ORDER.map(d => `<h3>${t('test.twoSix.holedAt', { d, n: reps })}</h3><div class="numgrid ${reps === 3 ? '' : 'c3'}">${Array.from({ length: reps + 1 }, (_, i) =>
     `<button data-act="tsSet" data-d="${d}" data-v="${i}" aria-pressed="${c[d] === i}">${i}</button>`).join('')}</div>`).join('');
   const exKeys = ['short', 'long', ...(li % 2 === 0 ? ['left', 'right'] : ['low', 'high'])];
-  const extras = `<details class="box"><summary><b>${X.extras}</b></summary>${exKeys.map(k => `<div class="row" style="margin:8px 0"><span class="grow"><b>${X.ex[k]}</b></span>
+  const extras = `<details class="card"><summary><b>${X.extras}</b></summary>${exKeys.map(k => `<div class="row" style="margin:8px 0"><span class="grow"><b>${X.ex[k]}</b></span>
     <button class="chip" data-act="tsEx" data-k="${k}" data-d="-1">−</button><b style="min-width:36px;text-align:center">${x[k] || 0}</b><button class="chip" data-act="tsEx" data-k="${k}" data-d="1">+</button></div>`).join('')}</details>`;
   const done = TS_ORDER.every(d => c[d] != null);
   return `<div class="series"><div class="head">${t('test.twoSix.lineHead', { i: li + 1, name: X.lines[li] })}</div><div class="sub">${t('test.twoSix.order', { o: order })}</div></div>
@@ -982,7 +1042,7 @@ function driverHTML() {
   const list = st.drives.length ? `<table class="t"><tr><th>#</th><th>${X.len}</th><th>${X.side}</th></tr>${st.drives.map((d, i) => `<tr><td>${i + 1}</td><td>${fmtN(d.len)}</td><td>${fmtS(d.side)}</td></tr>`).join('')}</table>` : '';
   if (n >= 12) {
     const r = driverResult(st.drives);
-    return `${list}<div class="box"><div class="series"><div class="head">${r.v == null ? '–' : fmtS(r.v)}</div><div class="sub">${esc(r.text)}</div></div></div>
+    return `${list}<div class="card"><div class="series"><div class="head">${r.v == null ? '–' : fmtS(r.v)}</div><div class="sub">${esc(r.text)}</div></div></div>
       <button class="btn primary huge" data-act="drvSave">${t('ui.saveResult')}</button><button class="btn" data-act="drvUndo">${t('ui.undo')}</button>`;
   }
   return `<div class="shotcard"><div class="no">${t('test.driver.drive', { i: n + 1 })}</div>
@@ -1030,7 +1090,7 @@ function sessionText(s) {
 function summaryHTML() {
   const s = lastSaved;
   if (!s) { view = 'hist'; return histHTML(); }
-  return `<h1>${t('ui.sessionSummary')}</h1><div class="box"><h3>${fmtDate(s.date)}</h3><div class="muted small">${esc(s.placeName)}</div>${itemsHTML(s.items)}</div>
+  return `<h1>${t('ui.sessionSummary')}</h1><div class="card"><h3>${fmtDate(s.date)}</h3><div class="muted small">${esc(s.placeName)}</div>${itemsHTML(s.items)}</div>
     <button class="btn dark huge" data-act="shareSession" data-id="${s.id}">${t('ui.shareResult')}</button><button class="btn" data-act="tab" data-v="home">${t('ui.newSession')}</button>`;
 }
 function chartSVG(vals, higher) {
@@ -1051,15 +1111,15 @@ function yardageTable() {
     <p class="small muted">${t('ui.carry')} (m) / ${t('ui.side')} (m, ${t('ui.left')} = −)</p>`;
 }
 function histHTML() {
-  let h = `<h1>${t('ui.tabHist')}</h1><h2>${t('ui.histTests')}</h2>`;
+  let h = `<h1>${t('ui.tabHist')}</h1><h2 class="h-sec">${t('ui.histTests')}</h2>`;
   const withRes = Object.keys(TESTS).filter(id => tstate(id).results.length);
   h += withRes.length ? withRes.map(id => { const rs = tstate(id).results, b = bestOf(id), lt = rs[rs.length - 1];
     const vals = rs.filter(r => r.v != null).map(r => id === 'twoSix' ? Math.round(r.v / r.of * 100) : r.v);
-    return `<div class="box"><h3>${testName(id)}</h3><div class="small">${t('ui.latest')} <b>${fmtVal(id, lt)}</b> (${fmtShort(lt.date)}) · ${t('ui.best')} <b>${b ? fmtVal(id, b) : '–'}</b>${tstate(id).level != null ? ' · ' + lvlText(id, tstate(id).level) : ''}</div>
+    return `<div class="card"><h3>${testName(id)}</h3><div class="small">${t('ui.latest')} <b>${fmtVal(id, lt)}</b> (${fmtShort(lt.date)}) · ${t('ui.best')} <b>${b ? fmtVal(id, b) : '–'}</b>${tstate(id).level != null ? ' · ' + lvlText(id, tstate(id).level) : ''}</div>
       ${vals.length ? chartSVG(vals, TESTS[id].higher) : ''}</div>`; }).join('') : `<p class="muted">${t('ui.never')}</p>`;
-  h += `<h2>${t('ui.histYardage')}</h2>${yardageTable()}<h2>${t('ui.histSessions')}</h2>`;
+  h += `<h2 class="h-sec">${t('ui.histYardage')}</h2>${yardageTable()}<h2 class="h-sec">${t('ui.histSessions')}</h2>`;
   if (!D.sessions.length) return h + `<p class="muted">${t('ui.noHistory')}</p>`;
-  return h + D.sessions.map(s => `<article class="box"><h3>${fmtDate(s.date)}</h3><div class="muted small">${esc(s.placeName || '')}</div>${itemsHTML(s.items)}
+  return h + D.sessions.map(s => `<article class="card"><h3>${fmtDate(s.date)}</h3><div class="muted small">${esc(s.placeName || '')}</div>${itemsHTML(s.items)}
     <div class="btnrow"><button class="btn small dark" data-act="shareSession" data-id="${s.id}">${t('ui.share')}</button>
     <button class="btn small danger" data-act="delSession" data-id="${s.id}">${t('ui.delete')}</button></div></article>`).join('');
 }
@@ -1075,14 +1135,16 @@ function settingsHTML() {
     <label class="f" for="pWeeks">${t('ui.periodWeeks')}</label><select id="pWeeks">${[1, 2, 3, 4, 5, 6, 8].map(w => `<option ${w === 3 ? 'selected' : ''}>${w}</option>`).join('')}</select>
     <button class="btn dark" data-act="periodSet">${t('ui.periodSet', { place: esc(cp.name) })}</button>`;
   return `<h1>${t('ui.tabSettings')}</h1>
-    <h2>${t('ui.settingsSeries')}</h2>
+    <h2 class="h-sec">${t('ui.theme')}</h2><div class="chips">${[[null, 'themeSystem'], ['light', 'themeLight'], ['dark', 'themeDark']].map(([v, k]) =>
+      `<button class="chip" data-act="setTheme" data-v="${v || ''}" aria-pressed="${(S.theme || null) === v}">${t('ui.' + k)}</button>`).join('')}</div>
+    <h2 class="h-sec">${t('ui.settingsSeries')}</h2>
     <label class="f">${t('ui.pile')}</label>${stepper('setPile', S.pile)}
     <label class="f">${t('ui.seriesLen')}</label>${stepper('setLen', S.seriesLen)}
     <label class="f">${t('ui.flags')}</label><div class="chips">${[1, 2].map(n => `<button class="chip" data-act="setFlags" data-v="${n}" aria-pressed="${S.flags === n}">${n}</button>`).join('')}</div>
-    <h2>${t('ui.places')}</h2><div class="list">${D.places.map(x => `<button class="item" data-act="editPlace" data-id="${x.id}"><span class="t">${esc(x.name)}<small>${STATIONS.filter(k => x.st[k]).map(k => t('stations.' + k)).join(', ')}</small></span><span class="go">›</span></button>`).join('')}</div>
+    <h2 class="h-sec">${t('ui.places')}</h2><div class="list">${D.places.map(x => `<button class="item" data-act="editPlace" data-id="${x.id}"><span class="t">${esc(x.name)}<small>${STATIONS.filter(k => x.st[k]).map(k => t('stations.' + k)).join(', ')}</small></span><span class="go">›</span></button>`).join('')}</div>
     <button class="btn" data-act="addPlace">${t('ui.addPlace')}</button>
-    <h2>${t('ui.period')}</h2><p class="small">${t('ui.periodText')}</p>${per}
-    <h2>${t('ui.backup')}</h2><button class="btn dark" data-act="export">${t('ui.exportJson')}</button><button class="btn" data-act="import">${t('ui.importJson')}</button>`;
+    <h2 class="h-sec">${t('ui.period')}</h2><p class="small">${t('ui.periodText')}</p>${per}
+    <h2 class="h-sec">${t('ui.backup')}</h2><button class="btn dark" data-act="export">${t('ui.exportJson')}</button><button class="btn" data-act="import">${t('ui.importJson')}</button>`;
 }
 function placeEditHTML() {
   const p = placeById(editPlaceId);
@@ -1144,7 +1206,7 @@ document.addEventListener('visibilitychange', syncWake);
 
 let toastT;
 function toast(msg) { const el = $('#toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2400); }
-function applyTheme() { document.documentElement.dataset.theme = D.settings.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+function applyTheme() { const th = D.settings.theme; if (th) document.documentElement.dataset.theme = th; else delete document.documentElement.dataset.theme; }   // utan val följer appen systemet
 const num = id => { const v = parseFloat(String($(id)?.value || '').replace(',', '.')); return isFinite(v) ? v : null; };
 
 // =====================================================================
@@ -1154,7 +1216,7 @@ const curStep = () => stepsOf(qItem())[D.cur.si];
 const rerender = () => { save(); render(); };
 const ACTS = {
   tab(el) { view = el.dataset.v; render(); scrollTo(0, 0); },
-  theme() { D.settings.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; applyTheme(); rerender(); },
+  setTheme(el) { D.settings.theme = el.dataset.v || null; applyTheme(); rerender(); },
   place(el) { D.placeId = el.dataset.id; rerender(); },
   startMods(el) { startItems(el.dataset.ids.split(',').map(id => ({ kind: 'module', id }))); },
   startTest(el) { startItems([{ kind: 'test', id: el.dataset.id }]); },
