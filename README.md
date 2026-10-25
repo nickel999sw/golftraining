@@ -8,3 +8,5 @@ PWA för golfträning på svenska, gjord för iPhone i stående läge. Fungerar 
 - All data sparas lokalt i webbläsaren. Backup via export/import av JSON.
 
 Öppna https://nickel999sw.github.io/golftraining/ i Safari → Dela → Lägg till på hemskärmen.
+
+Typsnitten Big Shoulders Display, Atkinson Hyperlegible Next och Atkinson Hyperlegible Mono ligger i `fonts/` och används under SIL Open Font License 1.1 (licenstexterna finns i samma mapp).

@@ -1,6 +1,7 @@
 // Höj versionen när filerna ändras så att nya versionen hämtas.
-const CACHE = 'golftraining-v5';
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
+const CACHE = 'golftraining-v6';
+const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png',
+  './fonts/BigShouldersDisplay.woff2', './fonts/AtkinsonHyperlegibleNext.woff2', './fonts/AtkinsonHyperlegibleMono.woff2'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
