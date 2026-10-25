@@ -83,6 +83,8 @@ p{margin:0 0 12px}
 .numgrid button{min-height:76px; border-radius:16px; border:3px solid var(--line); background:transparent; font-size:30px; font-weight:900}
 .numgrid button[aria-pressed=true]{background:var(--accent); color:var(--accentFg); border-color:var(--accent)}
 .numgrid.c6 button{font-size:24px; min-height:64px}
+.numgrid.aim{grid-template-columns:repeat(4,minmax(0,1fr))}
+.numgrid.aim button{font-size:26px; min-height:64px}
 
 .runhead{padding:12px 0 2px}
 .runhead .crumb{font-weight:700; color:var(--muted); font-size:17px}
@@ -178,7 +180,7 @@ const I18N = {
       station: 'Station {n}', chooseDist: 'Avstånd till flaggan för station {n}', chooseBalls: 'Hur många bollar?', startSeries: 'Starta serierna',
       seriesOf: 'Serie {i} av {n}', ballsRange: 'boll {a}–{b} av {t}', nextSeries: 'Nästa serie →', lastSeries: 'Klar med stationen →',
       regAfter: '{label} i serien:', regEnd: '{label}:',
-      lengthM: '{d} m', landPast: 'Landa 1–2 m förbi – aldrig kort',
+      lengthM: '{d} m', landPast: 'Landa 1–2 m förbi – aldrig kort', aimHole: 'Sikta på att sänka bollen',
       streakNow: 'Bollar i rad nu', saveTry: 'Spara försöket', tries: 'Försök: {list}', best: 'Bästa',
       latest: 'Senaste', level: 'Nivå', reference: 'Referens', source: 'Källa', none: '–',
       selectResult: 'Välj resultat', saveResult: 'Spara resultat', undo: 'Ångra senaste', result: 'Resultat',
@@ -198,11 +200,11 @@ const I18N = {
       yardHint: 'Slå 5 bollar per ruta och skriv in snittet från GC2. Sidled: tryck V eller H.',
       noYardage: 'Ingen längdtabell än. Kör modulen Längdtabell i garaget med GC2.',
       enterCarry: 'Carry (m)', register: 'Registrera', target: 'Mål',
-      okPast: '{n} av {t} landade 0–2 m förbi', shareTitle: 'Golfträning – resultat',
+      shareTitle: 'Golfträning – resultat',
       wakeNote: 'Skärmen hålls tänd under passet.',
       minutes: '≈ {n} min', out: 'UT', in: 'IN'
     },
-    stations: { chip: 'Närspelsyta', bunker: 'Greenbunker', putt: 'Puttinggreen', rangeGrass: 'Range gräs', rangeMat: 'Range matta', toptracer: 'Toptracer', gc2: 'GC2', matNet: 'Matta och duk', matNoNet: 'Matta utan nät' },
+    stations: { chip: 'Närspelsyta', bunker: 'Greenbunker', putt: 'Puttinggreen', puttMat: 'Puttmatta', rangeGrass: 'Range gräs', rangeMat: 'Range matta', toptracer: 'Toptracer', gc2: 'GC2', matNet: 'Matta och duk', matNoNet: 'Matta utan nät' },
     places: { brohof: 'Bro Hof', komet: 'Komethallen', garageSE: 'Garaget Sverige', garagePT: 'Garaget Portugal', portugal: 'Portugal bana (mall)' },
     clubs: { D: 'Driver', '3W': '3W', '5W': '5W', '9W': '9W', '3H': '3H', '4H': '4H', '5i': 'J5', '6i': 'J6', '7i': 'J7', '8i': 'J8', '9i': 'J9', PW: 'PW', GW: 'GW', SW: 'SW', LW: 'LW' },
     gen: {
@@ -236,8 +238,11 @@ const I18N = {
       justPast: { name: 'Precis förbi, aldrig kort', desc: 'En längd 40–100 m per serie, landa 1–2 m förbi',
         tech: 'Välj ett tydligt mål på rangen. Säg längden högt före varje slag och bestäm landningspunkten.' },
       yardage: { name: 'Längdtabell', desc: 'PW–LW × fem svinglängder med GC2' },
-      gc2Past: { name: 'Precis förbi med GC2', desc: 'Registrera carry per slag mot en längd 40–100 m',
-        tech: 'Två slag per klubba med full sving för att värma upp och kontrollera GC2.' },
+      gc2Rand: { name: 'Slumpade längder med GC2', desc: 'Ny längd varje slag, 40–140 m. Registrera carry per slag.',
+        tech: 'Två slag per klubba med full sving för att värma upp och kontrollera GC2 eller Toptracer.' },
+      ghost: { name: 'Spökhål', desc: 'Tre markeringar på rad, stanna precis förbi i tur och ordning. Fungerar på puttmatta.' },
+      aimPoint: { name: 'AimPoint-kalibrering', desc: '10 punkter: läs lutningen, mät med telefonen',
+        tech: 'Stå med fötterna på varsin sida om fallinjen och känn lutningen. Börja på en plan yta och jämför med en tydlig lutning.' },
       coins: { name: 'Myntövningen', desc: 'Träffa rätt mynt – rena träffar av 10',
         tech: 'Lägg två mynt. Variant A: på varandra, träffa bara det översta. Variant B: bredvid varandra med en fingerbredd emellan, träffa bara det främre. Inga bollar, bara mynt.' }
     },
@@ -245,8 +250,11 @@ const I18N = {
     log: {
       station: 'Station {n} ({d} m): {s} serier', series: '{s} serier', reg: '{label}: {sum} av {tot}',
       streak: 'Bästa {b} i rad ({n} försök)', coins: '{v} rena av 10',
-      yardage: '{n} rutor uppdaterade', gc2: '{ok} av {n} landade 0–2 m förbi'
+      yardage: '{n} rutor uppdaterade', ghost: '{v} lyckade av 10'
     },
+    ghost: { setup: 'Lägg tre markeringar (peg, mynt eller tee) på rad från bollen med 30–60 cm mellanrum. Inget hål behövs.',
+      rule: 'Putta mot markering 1, 2, 3, 1, 2, 3 … – 10 puttar. Lyckad putt: bollen stannar precis förbi markeringen, 0–30 cm. Kort eller längre räknas som miss.',
+      ask: 'Antal lyckade av 10' },
     test: {
       t10flag: { name: '10 mot flagg', desc: '10 chippar från 10–15 m. Räkna bollar som stannar inom zonen.', lvl: 'Zon {v} m', rule: '7/10 eller bättre ger 0,3 m mindre zon nästa gång (minst 0,9 m).', ask: 'Antal inom zonen' },
       t10bunker: { name: '10 i bunker', desc: '10 bunkerslag. Räkna bollar som stannar inom zonen.', lvl: 'Zon {v} m', rule: '7/10 eller bättre ger 0,3 m mindre zon nästa gång (minst 0,9 m).', ask: 'Antal inom zonen' },
@@ -265,7 +273,15 @@ const I18N = {
         drive: 'Drive {i} av 12', len: 'Längd (m)', side: 'Sidled (m)', avg: 'Snitt {l} m · {s} m sidled', hcp: 'Driverhcp {h}', outside: 'Utanför tabellen (170–330 m, 1–30 m sidled)',
         cats: { tb: 'Trippelbogeyhcp', db: 'Dubbelbogeyhcp', bogey: 'Bogeyhcp', single: 'Singelhcp', elite: 'Elithcp', world: 'Världselithcp', dream: 'Drömhcp' } },
       nine: { name: '9 slag', desc: 'Fade, rak och draw × låg, normal och hög mot samma zon. Räkna antal i zonen.', ask: 'Antal i zonen' },
-      sevenTen: { name: '7 av 10', desc: '10 slag mot en zon. Räkna antal i zonen.', lvl: 'Zon ±{v} m', rule: '7/10 eller bättre ger 2,5 m mindre zon nästa gång.', ask: 'Antal i zonen' }
+      sevenTen: { name: '7 av 10', desc: '10 slag mot en zon. Räkna antal i zonen.', lvl: 'Zon ±{v} m', rule: '7/10 eller bättre ger 2,5 m mindre zon nästa gång.', ask: 'Antal i zonen' },
+      gc2Rand: { name: 'Slumpade längder (GC2/Toptracer)', desc: 'Appen slumpar en ny längd per slag: 40–100 m med wedge, 100–140 m med J9–J7. Skriv in carry efter varje slag. Resultat = snittavvikelse i meter, lägre är bättre.',
+        wedge: 'Wedge', irons: 'J9–J7', avgHead: 'Snittavvikelse', shortHead: 'Andel korta', shortPct: 'Korta {p} %', bucket: '{r} m: {v} m ({n})' },
+      aimPoint: { name: 'AimPoint-kalibrering', desc: '10 punkter på puttinggreenen. Ange lutningen du läser, mät sedan med telefonen liggande på greenen. Resultat = snittavvikelse i procentenheter, lägre är bättre.',
+        point: 'Punkt {i} av 10', yourRead: 'Lutning du läser (%)', measure: 'Mät med telefonen', measHint: 'Lägg telefonen platt på greenen vid punkten, gärna med skärmen nedåt (kameran gör att baksidan lutar). Mätningen startar efter 3 sekunder och tar 2 sekunder.',
+        countdown: 'Lägg ner telefonen … mätning om {s} s', measuring: 'Mäter … {v} %', measured: 'Uppmätt: {v} %', unstable: 'Sensorn var instabil. Mät igen eller ange värdet manuellt.',
+        noSensor: 'Ingen lutningssensor eller inget tillstånd. Ange uppmätt värde manuellt.', manual: 'Uppmätt lutning (%), manuellt', useManual: 'Använd värdet',
+        savePoint: 'Spara punkten', row: '{i}. Läst {r} % · uppmätt {m} % · {d}', under: 'Du läser för lite (snitt {d} procentenheter)', over: 'Du läser för mycket (snitt {d} procentenheter)',
+        right: 'Du läser rätt i snitt ({d} procentenheter)', perPoint: 'Per punkt: {list}', manualTag: 'manuellt' }
     },
     opt: {
       btb: { W: ['Vinst', 'under 1,0 m'], D: ['Delning', '1,0–2,5 m'], L: ['Förlust', 'över 2,5 m'] },
@@ -328,7 +344,7 @@ const club = c => t('clubs.' + c);
 const clubOk = (place, c) => CLUBS.indexOf(c) >= CLUBS.indexOf(place.maxClub || 'D');
 const clubsAt = (place, list) => { const r = list.filter(c => clubOk(place, c)); return r.length ? r : [list[list.length - 1]]; };
 
-const STATIONS = ['chip', 'bunker', 'putt', 'rangeGrass', 'rangeMat', 'toptracer', 'gc2', 'matNet', 'matNoNet'];
+const STATIONS = ['chip', 'bunker', 'putt', 'puttMat', 'rangeGrass', 'rangeMat', 'toptracer', 'gc2', 'matNet', 'matNoNet'];
 const RANGE = ['rangeGrass', 'rangeMat', 'toptracer'];
 const DEFAULT_PLACES = () => [
   { id: 'brohof', name: t('places.brohof'), st: { chip: 1, bunker: 1, putt: 1, rangeGrass: 1, rangeMat: 1, toptracer: 1 }, maxClub: 'D' },
@@ -408,7 +424,9 @@ const MODULES = {
   rangeVar: { grp: 'range', needs: [RANGE], steps: [{ type: 'tech' }, { type: 'series', gen: 'range', askBalls: 40 }, { type: 'test', test: 'nine' }] },
   justPast: { grp: 'range', needs: [RANGE], steps: [{ type: 'tech' }, { type: 'series', gen: 'justPast', askBalls: 40 }, { type: 'test', test: 'sevenTen' }] },
   yardage: { grp: 'garage', needs: [['gc2']], steps: [{ type: 'yardage' }] },
-  gc2Past: { grp: 'garage', needs: [['gc2']], steps: [{ type: 'tech' }, { type: 'gc2past' }] },
+  gc2Rand: { grp: 'garage', needs: [['gc2', 'toptracer']], steps: [{ type: 'tech' }, { type: 'test', test: 'gc2Rand' }] },
+  ghost: { grp: 'putt', needs: [['putt', 'puttMat']], steps: [{ type: 'tally' }] },
+  aimPoint: { grp: 'putt', needs: [['putt']], steps: [{ type: 'tech' }, { type: 'test', test: 'aimPoint' }] },
   coins: { grp: 'garage', needs: [['matNoNet']], steps: [{ type: 'tech' },
     { type: 'series', gen: 'coins', balls: 10, regEnd: 'clean' }, { type: 'series', gen: 'coins', balls: 10, regEnd: 'clean' }, { type: 'series', gen: 'coins', balls: 10, regEnd: 'clean' }] },
 };
@@ -450,6 +468,8 @@ const TESTS = {
   driver: { needs: [['rangeGrass', 'toptracer']], club: 'D', kind: 'driver', higher: true },
   nine: { needs: [RANGE], kind: 'count', n: 9, higher: true },
   sevenTen: { needs: [RANGE], kind: 'count', n: 10, higher: true, level: { start: 17.5, step: -2.5, lim: 2.5, thr: 7 } },
+  gc2Rand: { needs: [['gc2', 'toptracer']], kind: 'gc2rand', higher: false },
+  aimPoint: { needs: [['putt']], kind: 'aim', higher: false },
 };
 const testName = id => t('test.' + id + '.name');
 const tstate = id => D.tests[id] || (D.tests[id] = { level: TESTS[id].level ? TESTS[id].level.start : null, results: [] });
@@ -463,6 +483,8 @@ function fmtVal(id, r) {
   if (id === 'btb3') return fmtN(r.v) + '/10';
   if (id === 'ball8') return `${r.v}/160`;
   if (id === 'twoSix') return `${r.v}/${r.of}`;
+  if (id === 'gc2Rand') return `${fmtN(r.v)} m`;
+  if (id === 'aimPoint') return `${fmtN(r.v, 2)} %`;
   return String(r.v);
 }
 function bestOf(id) {
@@ -498,6 +520,7 @@ function load() {
   const d = LS.get(KEY, null);
   if (!d || d.v !== 2) return migrateV1(defaults());
   const base = defaults();
+  if (d.cur) d.cur.queue.forEach((q, i) => { if (q.id === 'gc2Past') { q.id = 'gc2Rand'; if (i === d.cur.qi) { d.cur.si = 0; d.cur.st = {}; } } });   // ersatt modul
   return { ...base, ...d, settings: { ...base.settings, ...d.settings } };
 }
 let D = load();
@@ -657,7 +680,7 @@ function runHTML() {
     case 'streak': body = streakHTML(); break;
     case 'test': body = testHTML(step.test); break;
     case 'yardage': body = yardageHTML(); break;
-    case 'gc2past': body = gc2HTML(); break;
+    case 'tally': body = ghostHTML(); break;
   }
   return `<div class="runhead"><div class="crumb">${crumb}</div><h1>${title}</h1></div>${body}
     <div class="btnrow" style="margin-top:20px"><button class="btn small" data-act="skip">${t('ui.skipStep')}</button>${endBtn.replace('btn danger', 'btn small danger')}</div>`;
@@ -689,7 +712,7 @@ function seriesHTML(step) {
   }
   const a = st.n * len + 1, b = st.n * len + st.cur.length;
   let head = '';
-  if (step.station) head += `<div class="prog">${t('ui.station', { n: step.station })} · ${st.dist} m</div>`;
+  if (step.station) head += `<div class="prog">${t('ui.station', { n: step.station })} · ${st.dist} m</div><div class="sub">${t('ui.aimHole')}</div>`;
   if (step.gen === 'justPast') head += `<div class="head">${t('ui.lengthM', { d: st.pre.dist })}</div><div class="sub">${t('ui.landPast')}</div>`;
   if (step.gen === 'coins') head += `<div class="sub">${t('gen.coinVariant.' + st.pre.variant)}</div>`;
   if (step.gen === 'heights3' && st.pre.flag) head += `<div class="sub">${t('gen.flag', { f: st.pre.flag })}</div>`;
@@ -739,19 +762,117 @@ function yardageHTML() {
     ${rows}<button class="btn primary huge" data-act="yDone">${t('ui.done')}</button>`;
 }
 
-// ----- Precis förbi med GC2 -----
-function gc2HTML() {
-  const st = D.cur.st, len = D.settings.seriesLen, total = D.settings.pile, nSeries = Math.ceil(total / len);
-  st.n = st.n || 0; st.all = st.all || [];
-  if (!st.dist) { let d; do d = 40 + rnd(61); while (st.prevDist && Math.abs(d - st.prevDist) < 10); st.dist = d; st.shots = []; save(); }
-  const inS = Math.min(len, total - st.n * len);
-  const list = st.shots.map((c, i) => { const diff = c - st.dist; return `<div class="shot"><span class="n">${i + 1}</span><div><div class="big">${fmtN(c)} m</div><div class="sub">${fmtS(diff)} m ${diff >= 0 && diff <= 2 ? '✓' : ''}</div></div></div>`; }).join('');
-  const ok = st.all.filter(x => x.diff >= 0 && x.diff <= 2).length;
-  const input = st.shots.length < inS
-    ? `<label class="f" for="carry">${t('ui.enterCarry')}</label><input type="number" inputmode="decimal" id="carry"><button class="btn primary huge" data-act="gcReg">${t('ui.register')}</button>`
-    : `<button class="btn primary huge" data-act="gcNext">${st.n + 1 >= nSeries ? t('ui.lastSeries') : t('ui.nextSeries')}</button>`;
-  return `<div class="prog">${t('ui.seriesOf', { i: st.n + 1, n: nSeries })} · ${t('ui.okPast', { n: ok, t: st.all.length })}</div>
-    <div class="series"><div class="head">${t('ui.target')}: ${st.dist} m</div><div class="sub">${t('ui.landPast')}</div>${list}</div>${input}`;
+// ----- Spökhål -----
+function ghostHTML() {
+  const X = L.ghost;
+  return `<div class="box soft"><p>${X.setup}</p><p>${X.rule}</p></div><h2>${X.ask}</h2>
+    <div class="numgrid">${Array.from({ length: 11 }, (_, i) => `<button data-act="ghostReg" data-v="${i}">${i}</button>`).join('')}</div>`;
+}
+
+// ----- Slumpade längder med GC2/Toptracer -----
+const GC2_BUCKETS = [[40, 60], [60, 80], [80, 100], [100, 140]];
+const gc2Bucket = d => d < 60 ? 0 : d < 80 ? 1 : d < 100 ? 2 : 3;
+function gc2Target(place, prev) {
+  const hi = clubOk(place, '9i') ? 140 : 99;   // 100–140 m kräver J9–J7
+  let d; do d = 40 + rnd(hi - 39); while (prev != null && Math.abs(d - prev) < 5);   // aldrig samma längd två gånger i rad
+  return d;
+}
+function gc2RandResult(shots) {
+  const X = L.test.gc2Rand, mean = a => a.reduce((x, y) => x + y, 0) / a.length, ad = s => Math.abs(s.c - s.d);
+  const v = +mean(shots.map(ad)).toFixed(1);
+  const buckets = GC2_BUCKETS.map(([a, b], i) => { const inB = shots.filter(s => gc2Bucket(s.d) === i);
+    return { r: `${a}–${b}`, n: inB.length, v: inB.length ? +mean(inB.map(ad)).toFixed(1) : null }; });
+  const shortPct = Math.round(shots.filter(s => s.c < s.d).length / shots.length * 100);
+  const text = [...buckets.filter(x => x.n).map(x => t('test.gc2Rand.bucket', { r: x.r, v: fmtN(x.v), n: x.n })), t('test.gc2Rand.shortPct', { p: shortPct })].join(' · ');
+  return { v, text, buckets, shortPct };
+}
+function gc2StatsHTML(r) {
+  const X = L.test.gc2Rand;
+  return `<div class="stats"><div class="stat"><span>${t('test.gc2Rand.avgHead')}</span><b>${fmtN(r.v)} m</b></div><div class="stat"><span>${t('test.gc2Rand.shortHead')}</span><b>${r.shortPct} %</b></div>
+    ${r.buckets.map(x => `<div class="stat"><span>${x.r} m (${x.n})</span><b>${x.v == null ? t('ui.none') : fmtN(x.v) + ' m'}</b></div>`).join('')}</div>`;
+}
+function gc2RandHTML() {
+  const st = D.cur.st, X = L.test.gc2Rand;
+  if (st.total == null) {
+    st.pendingBalls = st.pendingBalls || 20;
+    return `<h2>${t('ui.chooseBalls')}</h2><div class="stepper"><button data-act="balls" data-d="-4">−</button><output>${st.pendingBalls}</output><button data-act="balls" data-d="4">+</button></div>
+      <button class="btn primary huge" data-act="ballsOk">${t('ui.startSeries')}</button>`;
+  }
+  st.shots = st.shots || [];
+  const n = st.shots.length, r = n ? gc2RandResult(st.shots) : null;
+  const list = n ? `<table class="t"><tr><th>#</th><th>${t('ui.target')}</th><th>${t('ui.carry')}</th><th>±</th></tr>${st.shots.map((s, i) =>
+    `<tr><td>${i + 1}</td><td>${s.d}</td><td>${fmtN(s.c)}</td><td><b>${fmtS(s.c - s.d) || '0'}</b></td></tr>`).reverse().join('')}</table>` : '';
+  const undo = n ? `<button class="btn" data-act="g2Undo">${t('ui.undo')}</button>` : '';
+  if (n >= st.total) return `<div class="box">${gc2StatsHTML(r)}</div><button class="btn primary huge" data-act="g2Save">${t('ui.saveResult')}</button>${undo}${list}`;
+  if (st.target == null) { st.target = gc2Target(runPlace(), n ? st.shots[n - 1].d : null); save(); }
+  return `<div class="shotcard"><div class="no">${t('ui.shotNo', { i: n + 1, n: st.total })}</div><div class="big">${st.target} m</div><div class="sub">${st.target < 100 ? X.wedge : X.irons}</div>
+    <label class="f" for="carry">${t('ui.enterCarry')}</label><input type="number" inputmode="decimal" id="carry">
+    <button class="btn primary huge" data-act="g2Reg">${t('ui.register')}</button></div>${r ? gc2StatsHTML(r) : ''}${list}${undo}`;
+}
+
+// ----- AimPoint-kalibrering -----
+const AIM_READS = Array.from({ length: 12 }, (_, i) => (i + 1) / 2);   // 0,5–6 % i halva steg
+function tiltPct(beta, gamma) {
+  // Telefonen platt: lutningen är vinkeln mellan skärmens normal och lodlinjen (fungerar med skärmen upp eller ned).
+  const r = Math.PI / 180, c = Math.min(1, Math.abs(Math.cos(beta * r) * Math.cos(gamma * r)));
+  return Math.tan(Math.acos(c)) * 100;
+}
+function aimResult(pts) {
+  const X = L.test.aimPoint, devs = pts.map(p => p.r - p.m), mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+  const v = +mean(devs.map(Math.abs)).toFixed(2), bias = +mean(devs).toFixed(2), d = fmtS(bias, 2) || '0';
+  const verdict = bias < -0.25 ? t('test.aimPoint.under', { d }) : bias > 0.25 ? t('test.aimPoint.over', { d }) : t('test.aimPoint.right', { d });
+  return { v, bias, text: verdict + ' · ' + t('test.aimPoint.perPoint', { list: devs.map(x => fmtS(x) || '0').join(' ') }) };
+}
+const aimRow = (p, k) => t('test.aimPoint.row', { i: k + 1, r: fmtN(p.r), m: fmtN(p.m), d: fmtS(p.r - p.m) || '0' }) + (p.src === 'manual' ? ` (${L.test.aimPoint.manualTag})` : '');
+function aimHTML() {
+  const st = D.cur.st, X = L.test.aimPoint;
+  st.pts = st.pts || [];
+  const i = st.pts.length;
+  const list = i ? `<div class="box small">${st.pts.map(aimRow).join('<br>')}</div>` : '';
+  const undo = i ? `<button class="btn" data-act="aimUndo">${t('ui.undo')}</button>` : '';
+  if (i >= 10) {
+    const r = aimResult(st.pts);
+    return `<div class="box"><div class="series"><div class="head">${fmtN(r.v, 2)} %</div><div class="sub">${esc(r.text)}</div></div></div>
+      <button class="btn primary huge" data-act="aimFinal">${t('ui.saveResult')}</button>${undo}${list}`;
+  }
+  let meas = '';
+  if (st.read != null) {
+    const status = st.meas != null ? t('test.aimPoint.measured', { v: fmtN(st.meas) }) : st.msg ? X[st.msg] : '';
+    meas = `<div class="box soft"><p class="small">${X.measHint}</p><button class="btn dark huge" data-act="aimMeasure" id="aimBtn" ${aimBusy ? 'disabled' : ''}>${X.measure}</button>
+      <div class="series"><div class="sub" id="aimLive" aria-live="polite">${status}</div></div>
+      ${st.manual ? `<label class="f" for="aimMan">${X.manual}</label><div class="row"><input type="number" inputmode="decimal" id="aimMan" style="flex:1"><button class="btn small dark" data-act="aimManual">${X.useManual}</button></div>` : ''}</div>
+      ${st.meas != null ? `<button class="btn primary huge" data-act="aimSave">${X.savePoint}</button>` : ''}`;
+  }
+  return `<div class="shotcard"><div class="no">${t('test.aimPoint.point', { i: i + 1 })}</div><h3>${X.yourRead}</h3>
+    <div class="numgrid aim">${AIM_READS.map(v => `<button data-act="aimRead" data-v="${v}" aria-pressed="${st.read === v}">${fmtN(v)}</button>`).join('')}</div></div>${meas}${list}${undo}`;
+}
+let aimBusy = false;
+async function aimMeasure() {
+  const st = D.cur.st, X = L.test.aimPoint, live = () => $('#aimLive');
+  const fail = msg => { aimBusy = false; if (D.cur?.st !== st) return; st.msg = msg; st.manual = true; st.meas = null; rerender(); };
+  if (aimBusy) return;
+  const DOE = window.DeviceOrientationEvent;
+  if (!DOE) return fail('noSensor');
+  if (typeof DOE.requestPermission === 'function') {   // iOS kräver tillstånd, och frågan måste komma från ett tryck
+    try { if (await DOE.requestPermission() !== 'granted') return fail('noSensor'); } catch { return fail('noSensor'); }
+  }
+  aimBusy = true; st.meas = null; st.msg = null;
+  const btn = $('#aimBtn'); if (btn) btn.disabled = true;
+  let samples = [], run = false;
+  const on = e => { if (e.beta == null || e.gamma == null) return; const p = tiltPct(e.beta, e.gamma);
+    if (run) { samples.push(p); if (live()) live().textContent = t('test.aimPoint.measuring', { v: fmtN(p) }); } };
+  addEventListener('deviceorientation', on);
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  for (let s = 3; s > 0; s--) { if (live()) live().textContent = t('test.aimPoint.countdown', { s }); await wait(1000); }
+  run = true; await wait(2000);
+  removeEventListener('deviceorientation', on);
+  if (samples.length < 5) return fail('noSensor');
+  const m = samples.reduce((a, b) => a + b, 0) / samples.length;
+  const sd = Math.sqrt(samples.reduce((a, b) => a + (b - m) ** 2, 0) / samples.length);
+  if (sd > 0.4) return fail('unstable');
+  aimBusy = false;
+  if (D.cur?.st !== st) return;
+  st.meas = +m.toFixed(1); st.src = 'sensor'; rerender();
 }
 
 // ----- Tester -----
@@ -775,6 +896,8 @@ function testHTML(id) {
   } else if (T.kind === 'shots') h += shotsTestHTML(id);
   else if (T.kind === 'twoSix') h += twoSixHTML();
   else if (T.kind === 'driver') h += driverHTML();
+  else if (T.kind === 'gc2rand') h += gc2RandHTML();
+  else if (T.kind === 'aim') h += aimHTML();
   return h;
 }
 function resultHTML(id, r) {
@@ -1060,10 +1183,20 @@ const ACTS = {
     (D.yardage[st.w] = D.yardage[st.w] || {})[sw] = { carry: c, side: s == null ? 0 : sign * Math.abs(s), date: new Date().toISOString() };
     st.count = (st.count || 0) + 1; save(); toast(`${club(st.w)} ${t('swing.' + sw)}: ${fmtN(c)} m`); },
   yDone() { const n = D.cur.st.count || 0; if (n) modLog(t('log.yardage', { n })); nextStep(); },
-  // GC2 precis förbi
-  gcReg() { const st = D.cur.st, c = num('#carry'); if (c == null) return; st.shots.push(c); st.all.push({ dist: st.dist, carry: c, diff: c - st.dist }); rerender(); setTimeout(() => $('#carry')?.focus(), 0); },
-  gcNext() { const st = D.cur.st, nS = Math.ceil(D.settings.pile / D.settings.seriesLen); st.n++; st.prevDist = st.dist; st.dist = null;
-    if (st.n >= nS) { modLog(t('log.gc2', { ok: st.all.filter(x => x.diff >= 0 && x.diff <= 2).length, n: st.all.length })); nextStep(); } else { rerender(); scrollTo(0, 0); } },
+  // spökhål
+  ghostReg(el) { modLog(t('log.ghost', { v: el.dataset.v })); nextStep(); },
+  // slumpade längder
+  g2Reg() { const st = D.cur.st, c = num('#carry'); if (c == null || st.target == null) return; st.shots.push({ d: st.target, c }); st.target = null; rerender(); setTimeout(() => $('#carry')?.focus(), 0); },
+  g2Undo() { const st = D.cur.st, s = st.shots.pop(); if (s) st.target = s.d; rerender(); },
+  g2Save() { const st = D.cur.st, r = gc2RandResult(st.shots); st.result = recordTest('gc2Rand', r.v, r.text, { buckets: r.buckets, shortPct: r.shortPct, shots: st.shots.slice() }); rerender(); scrollTo(0, 0); },
+  // AimPoint
+  aimRead(el) { const st = D.cur.st; st.read = +el.dataset.v; rerender(); },
+  aimMeasure() { aimMeasure(); },
+  aimManual() { const st = D.cur.st, v = num('#aimMan'); if (v == null || v < 0 || v > 20) return; st.meas = +v.toFixed(1); st.src = 'manual'; rerender(); },
+  aimSave() { const st = D.cur.st; if (st.read == null || st.meas == null) return; st.pts.push({ r: st.read, m: st.meas, src: st.src });
+    st.read = st.meas = st.msg = null; st.manual = false; rerender(); scrollTo(0, 0); },
+  aimUndo() { D.cur.st.pts.pop(); rerender(); },
+  aimFinal() { const st = D.cur.st, r = aimResult(st.pts); st.result = recordTest('aimPoint', r.v, r.text, { bias: r.bias, pts: st.pts.slice() }); rerender(); scrollTo(0, 0); },
   // tester
   cntPick(el) { D.cur.st.pick = +el.dataset.v; rerender(); },
   cntSave() { const st = D.cur.st, id = curStep().test; if (st.pick == null) return; st.result = recordTest(id, st.pick, ''); rerender(); scrollTo(0, 0); },
