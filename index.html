@@ -29,463 +29,1087 @@ body{
   margin:0; background:var(--bg); color:var(--fg);
   font:20px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
   font-variant-numeric:tabular-nums; touch-action:manipulation;
-  padding:0 max(12px,env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
+  padding:0 max(12px,env(safe-area-inset-right)) calc(40px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
 }
-button,input{font:inherit;color:inherit;touch-action:manipulation}
+button,input,select{font:inherit;color:inherit;touch-action:manipulation}
 button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 header.top{
   position:sticky; top:0; z-index:10; background:var(--bg);
   margin:0 -12px; padding:calc(env(safe-area-inset-top) + 8px) 12px 8px;
-  border-bottom:3px solid var(--line); display:flex; gap:8px; align-items:center;
+  border-bottom:3px solid var(--line); display:flex; gap:6px; align-items:center;
 }
 .tabs{display:flex; flex:1; gap:6px}
-.tab{flex:1; min-height:52px; border:3px solid var(--line); background:var(--bg); border-radius:12px; font-weight:800; font-size:20px}
+.tab{flex:1; min-height:52px; border:3px solid var(--line); background:var(--bg); border-radius:12px; font-weight:800; font-size:17px; padding:0 4px}
 .tab[aria-selected=true]{background:var(--btn); color:var(--btnFg)}
-.theme{width:56px; min-height:52px; border:3px solid var(--line); background:var(--bg); border-radius:12px; font-size:24px}
+.tab.icon{flex:none; width:52px; font-size:24px}
+.theme{width:52px; min-height:52px; border:3px solid var(--line); background:var(--bg); border-radius:12px; font-size:22px; flex:none}
 
-.passhead{padding:16px 2px 8px}
-h1{font-size:28px; line-height:1.15; margin:0 0 4px; font-weight:900}
-.sub{font-weight:600; color:var(--muted)}
-.toggle{display:flex; align-items:center; gap:12px; margin-top:12px; padding:12px 14px; border:3px solid var(--line); border-radius:14px; font-weight:700; min-height:60px}
-.toggle input{width:32px; height:32px; accent-color:var(--accent); flex:none}
+h1{font-size:28px; line-height:1.15; margin:16px 0 8px; font-weight:900}
+h2{font-size:22px; margin:22px 0 8px; font-weight:900}
+h3{font-size:20px; margin:0 0 4px; font-weight:800}
+p{margin:0 0 12px}
+.muted{color:var(--muted); font-weight:600}
+.small{font-size:17px}
+.box{border:3px solid var(--line); border-radius:18px; padding:14px; margin:12px 0; background:var(--bg)}
+.box.soft{background:var(--card)}
+.box.alert{border-color:var(--accent); background:var(--hl)}
+.row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.grow{flex:1}
 
-.card{border:3px solid var(--line); border-radius:18px; margin:12px 0; background:var(--card); overflow:hidden; scroll-margin-top:84px}
-.card.open{background:var(--bg)}
-.card.running .chead{background:var(--hl)}
-.chead{width:100%; display:flex; align-items:center; gap:12px; text-align:left; padding:14px; border:0; background:transparent; min-height:72px}
-.num{flex:none; width:40px; height:40px; border-radius:50%; background:var(--btn); color:var(--btnFg); display:grid; place-items:center; font-weight:900}
-.card.open .num{background:var(--accent); color:var(--accentFg)}
-.ctitle{flex:1; font-weight:800; font-size:21px; line-height:1.2}
-.ctitle small{display:block; font-size:16px; font-weight:600; color:var(--muted)}
-.sum{flex:none; text-align:right; font-weight:800; font-size:18px}
-.sum .t{display:block; font-size:15px; font-weight:600; color:var(--muted)}
-.cbody{padding:0 14px 16px}
-.instr{margin:0 0 14px; font-size:19px; font-weight:500}
+.btn{display:block; width:100%; min-height:68px; border-radius:16px; border:3px solid var(--line); background:transparent; font-weight:900; font-size:21px; padding:8px 12px; margin:8px 0}
+.btn.primary{background:var(--accent); color:var(--accentFg); border-color:var(--accent)}
+.btn.dark{background:var(--btn); color:var(--btnFg)}
+.btn.danger{color:var(--warn); border-color:var(--warn)}
+.btn.small{min-height:52px; font-size:18px}
+.btn.huge{min-height:96px; font-size:26px}
+.btn:disabled{opacity:.4}
+.btn .sub{display:block; font-size:16px; font-weight:600; opacity:.85}
+.inline{display:inline-block; width:auto; margin:0}
+.btnrow{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.btnrow .btn{margin:0}
 
-.timer{display:flex; align-items:center; gap:10px; margin-bottom:16px}
-.tval{flex:1; min-width:0; font-size:44px; font-weight:900; letter-spacing:-1px; font-family:ui-monospace,"SF Mono",Menlo,monospace}
-.tval.over{color:var(--warn)}
-.go,.pause{min-width:96px; padding:0 10px; min-height:72px; border-radius:16px; border:3px solid var(--line); font-weight:900; font-size:22px}
-.go{background:var(--accent); color:var(--accentFg); border-color:var(--accent)}
-.pause{background:var(--btn); color:var(--btnFg)}
-.ghost{min-width:56px; flex:none; min-height:72px; border-radius:16px; border:3px solid var(--line); background:transparent; font-size:26px; font-weight:800}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin:8px 0}
+.chip{min-height:56px; padding:0 16px; border-radius:28px; border:3px solid var(--line); background:transparent; font-weight:800; font-size:19px}
+.chip[aria-pressed=true]{background:var(--btn); color:var(--btnFg)}
 
-.gen{border:3px dashed var(--line); border-radius:16px; padding:14px; margin-bottom:16px}
-.gen .ball{font-weight:800; color:var(--muted); font-size:17px; text-transform:uppercase; letter-spacing:.5px}
-.gen .big{font-size:36px; font-weight:900; line-height:1.15; margin:2px 0 6px}
-.gen .line{font-size:20px; font-weight:600}
-.gen .line b{font-weight:900}
-.dl{margin-top:10px; background:var(--dl); color:var(--dlFg); border-radius:10px; padding:10px 12px; font-weight:900; font-size:21px}
-.genbtn{width:100%; min-height:72px; margin-top:12px; border-radius:14px; border:3px solid var(--line); background:var(--btn); color:var(--btnFg); font-weight:900; font-size:22px}
+.list .item{display:flex; align-items:center; gap:12px; width:100%; text-align:left; min-height:72px; border:3px solid var(--line); border-radius:16px; background:transparent; padding:10px 14px; margin:8px 0}
+.item .t{flex:1; font-weight:800}
+.item .t small{display:block; font-weight:600; font-size:16px; color:var(--muted)}
+.item .go{font-size:26px; font-weight:900}
 
-.ctr{margin-bottom:14px}
-.clabel{font-weight:800; margin-bottom:6px}
-.clabel span{font-weight:600; color:var(--muted)}
-.cgrid{display:grid; grid-template-columns:84px 1fr 84px; gap:10px; align-items:center}
-.cgrid button{min-height:84px; border-radius:18px; font-size:46px; font-weight:900; line-height:1; border:3px solid var(--line)}
-.minus{background:transparent}
-.plus{background:var(--btn); color:var(--btnFg)}
-.cgrid output{text-align:center; font-size:48px; font-weight:900; white-space:nowrap}
-.cgrid output small{font-size:22px; color:var(--muted); font-weight:700}
-.stat{font-weight:800; font-size:20px; padding:10px 12px; border-radius:12px; background:var(--card); margin-bottom:8px}
-.stat span{font-weight:600; color:var(--muted)}
-.nextblk{width:100%; min-height:60px; margin-top:6px; border-radius:14px; border:3px solid var(--line); background:transparent; font-weight:800}
+.numgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:10px 0}
+.numgrid.c3{grid-template-columns:repeat(3,1fr)}
+.numgrid.c6{grid-template-columns:repeat(6,1fr)}
+.numgrid button{min-height:76px; border-radius:16px; border:3px solid var(--line); background:transparent; font-size:30px; font-weight:900}
+.numgrid button[aria-pressed=true]{background:var(--accent); color:var(--accentFg); border-color:var(--accent)}
+.numgrid.c6 button{font-size:24px; min-height:64px}
 
-.actions{display:grid; gap:10px; margin:20px 0}
-.actions button,.hbtns button{min-height:68px; border-radius:16px; border:3px solid var(--line); font-weight:900; font-size:21px; background:transparent}
-.actions .primary{background:var(--accent); color:var(--accentFg); border-color:var(--accent)}
-.actions .share{background:var(--btn); color:var(--btnFg)}
-.actions .danger{color:var(--warn); border-color:var(--warn)}
+.runhead{padding:12px 0 2px}
+.runhead .crumb{font-weight:700; color:var(--muted); font-size:17px}
+.series{border:3px solid var(--line); border-radius:18px; padding:12px 14px; margin:12px 0}
+.series .shot{display:flex; gap:12px; padding:10px 0; border-bottom:2px solid var(--card)}
+.series .shot:last-child{border-bottom:0}
+.series .n{flex:none; width:40px; height:40px; border-radius:50%; background:var(--btn); color:var(--btnFg); display:grid; place-items:center; font-weight:900}
+.series .big{font-size:30px; font-weight:900; line-height:1.15}
+.series .sub{font-size:21px; font-weight:700}
+.series .head{font-size:34px; font-weight:900; margin-bottom:4px}
+.dl{display:inline-block; margin-top:6px; background:var(--dl); color:var(--dlFg); border-radius:10px; padding:4px 10px; font-weight:900; font-size:19px}
+.explain{background:var(--card); border-radius:14px; padding:10px 12px; font-weight:700; font-size:18px; margin:8px 0}
+.prog{font-weight:800; font-size:18px; color:var(--muted)}
 
-.hist h1{margin-top:16px}
-.hcard{border:3px solid var(--line); border-radius:18px; padding:14px; margin:12px 0}
-.hcard h2{font-size:21px; margin:0 0 2px}
-.hcard .meta{color:var(--muted); font-weight:600; font-size:17px; margin-bottom:8px}
-.hcard ul{margin:0 0 12px; padding-left:20px}
-.hcard li{margin:3px 0; font-weight:600}
-.hbtns{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-.hbtns button{min-height:58px; font-size:19px}
-.hbtns .share{background:var(--btn); color:var(--btnFg)}
-.hbtns .danger{color:var(--warn); border-color:var(--warn)}
-.empty{padding:24px 4px; font-weight:600; color:var(--muted)}
-.trend{border:3px solid var(--line); border-radius:18px; padding:14px; margin:12px 0; background:var(--card)}
-.trend h2{font-size:20px; margin:0 0 6px}
-.trend div{font-weight:700}
+.stats{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:8px 0}
+.stat{background:var(--card); border-radius:12px; padding:8px 12px}
+.stat b{display:block; font-size:24px}
+.stat span{font-size:15px; font-weight:700; color:var(--muted)}
+.ref{font-size:17px; font-weight:600; margin-top:6px}
+.ref .src{display:block; color:var(--muted); font-size:15px}
 
-.toast{position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom)); transform:translateX(-50%) translateY(150%);
+.shotcard{border:3px solid var(--line); border-radius:18px; padding:14px; margin:12px 0}
+.shotcard .no{font-weight:800; color:var(--muted)}
+.shotcard .big{font-size:34px; font-weight:900; line-height:1.15}
+.opts{display:grid; gap:10px}
+.opts.c2{grid-template-columns:1fr 1fr}
+.opts.c3{grid-template-columns:1fr 1fr 1fr}
+.opts .btn{margin:0; min-height:80px}
+.dots{display:flex; flex-wrap:wrap; gap:4px; margin:10px 0}
+.dots i{width:14px; height:14px; border-radius:50%; border:2px solid var(--line)}
+.dots i.on{background:var(--fg)}
+
+label.f{display:block; font-weight:800; margin:12px 0 4px}
+input[type=text],input[type=number],input[type=date],select{
+  width:100%; min-height:60px; border:3px solid var(--line); border-radius:14px; background:var(--bg); padding:0 12px; font-size:22px; font-weight:700
+}
+.check{display:flex; align-items:center; gap:12px; min-height:56px; font-weight:700}
+.check input{width:30px; height:30px; accent-color:var(--accent); flex:none}
+.stepper{display:grid; grid-template-columns:76px 1fr 76px; gap:10px; align-items:center}
+.stepper button{min-height:68px; border-radius:16px; border:3px solid var(--line); background:transparent; font-size:34px; font-weight:900}
+.stepper output{text-align:center; font-size:36px; font-weight:900}
+
+table.t{border-collapse:collapse; width:100%; font-size:16px}
+table.t th,table.t td{border:2px solid var(--line); padding:6px 4px; text-align:center}
+table.t th{background:var(--card)}
+.scroll{overflow-x:auto}
+svg.chart{width:100%; height:110px; display:block}
+svg.chart polyline{fill:none; stroke:var(--accent); stroke-width:3}
+svg.chart circle{fill:var(--accent)}
+svg.chart text{fill:var(--fg); font-size:12px; font-weight:700}
+svg.chart line{stroke:var(--muted); stroke-width:1; stroke-dasharray:3 3}
+
+.toast{position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom)); transform:translateX(-50%) translateY(200%);
   background:var(--btn); color:var(--btnFg); padding:14px 20px; border-radius:14px; font-weight:800; transition:transform .25s; max-width:90vw; text-align:center; z-index:20}
 .toast.show{transform:translateX(-50%) translateY(0)}
-@keyframes flash{0%,100%{box-shadow:none}50%{box-shadow:0 0 0 8px var(--warn)}}
-.card.ding{animation:flash .6s 4}
 </style>
 </head>
 <body>
 <header class="top">
-  <nav class="tabs" role="tablist">
-    <button class="tab" role="tab" data-act="tab" data-v="pass">Pass</button>
-    <button class="tab" role="tab" data-act="tab" data-v="hist">Historik</button>
-  </nav>
-  <button class="theme" data-act="theme" aria-label="Byt ljust/mörkt läge"></button>
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+  <button class="theme" data-act="theme" id="themeBtn"></button>
 </header>
 <main id="view"></main>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
 'use strict';
+// =====================================================================
+// Texter. Allt som visas i gränssnittet ligger här, så att fler språk
+// kan läggas till som I18N.en med samma struktur.
+// =====================================================================
+const I18N = {
+  sv: {
+    ui: {
+      appName: 'Golfträning', tabHome: 'Start', tabRun: 'Pass', tabHist: 'Historik', tabSettings: 'Inställningar',
+      themeLabel: 'Byt ljust/mörkt läge',
+      choosePlace: 'Var tränar du?', editPlace: 'Ändra platsen', stationsHere: 'Stationer: {list}', maxClub: 'Längsta klubba: {club}',
+      ongoing: 'Pågående pass', ongoingText: '{n} moment hittills. Fortsätt eller avsluta och spara.', resume: 'Fortsätt passet',
+      suggest: 'Förslag idag', suggestBoth: 'Kör båda (≈ 60 min)', suggestOne: 'Bara {name} (≈ 30 min)',
+      noModules: 'Inga moduler passar platsens stationer. Ändra stationerna under Inställningar.',
+      modulesHere: 'Alla moduler här', testsHere: 'Tester här',
+      lastDone: 'Senast {when}', never: 'Inte gjord än', daysAgo: 'för {n} dagar sedan', today: 'i dag', yesterday: 'i går',
+      reminders: 'Påminnelser', periodBaseline: 'Testvecka – baslinje (vecka 1)', periodRetest: 'Testvecka – upprepa (sista veckan)',
+      dueTest: 'Dags för {name}', monthly8: '8-bollsövningen – månadens test',
+      module: 'Modul', step: 'Steg {i} av {n}', item: '{i} av {n}',
+      skipStep: 'Hoppa över', endSession: 'Avsluta och spara pass', next: 'Nästa →', done: 'Klar →', back: '← Tillbaka',
+      techOptional: 'Teknik (valfritt)', allDone: 'Klart!', allDoneText: 'Allt i kön är gjort. Lägg till fler moduler eller tester från Start, eller avsluta passet.',
+      moreFromHome: 'Lägg till mer', nothingToSave: 'Inget att spara – passet avslutades.',
+      confirmEnd: 'Avsluta och spara passet?', confirmDiscard: 'Passet har inga resultat. Avsluta ändå?',
+      saved: 'Passet sparat', shareResult: 'Dela resultat', copied: 'Resultat kopierat', copyFail: 'Kunde inte kopiera',
+      sessionSummary: 'Passet klart', newSession: 'Till start',
+      station: 'Station {n}', chooseDist: 'Avstånd till flaggan för station {n}', chooseBalls: 'Hur många bollar?', startSeries: 'Starta serierna',
+      seriesOf: 'Serie {i} av {n}', ballsRange: 'boll {a}–{b} av {t}', nextSeries: 'Nästa serie →', lastSeries: 'Klar med stationen →',
+      regAfter: '{label} i serien:', regEnd: '{label}:',
+      lengthM: '{d} m', landPast: 'Landa 1–2 m förbi – aldrig kort',
+      streakNow: 'Bollar i rad nu', saveTry: 'Spara försöket', tries: 'Försök: {list}', best: 'Bästa',
+      latest: 'Senaste', level: 'Nivå', reference: 'Referens', source: 'Källa', none: '–',
+      selectResult: 'Välj resultat', saveResult: 'Spara resultat', undo: 'Ångra senaste', result: 'Resultat',
+      nextLevel: 'Nästa gång: {lvl}', levelSame: 'Nivån är kvar: {lvl}',
+      shotNo: 'Slag {i} av {n}', puttNo: 'Putt {i} av {n}',
+      settingsSeries: 'Serier', pile: 'Bollar per hög/rör', seriesLen: 'Slag per serie', flags: 'Antal flaggor',
+      places: 'Platser', addPlace: 'Lägg till plats', placeName: 'Namn', stations: 'Stationer', longest: 'Längsta tillåtna klubba',
+      savePlace: 'Spara platsen', deletePlace: 'Ta bort platsen', confirmDeletePlace: 'Ta bort platsen {name}?', newPlace: 'Ny plats',
+      period: 'Träningsperiod', periodText: 'Närspels- och puttesterna görs första veckan som baslinje och upprepas sista veckan. Appen påminner på startsidan.',
+      periodStart: 'Startdatum', periodWeeks: 'Antal veckor', periodSet: 'Starta period på {place}', periodEnd: 'Avsluta perioden',
+      periodNow: 'Pågår: {place}, {from} – {to}',
+      backup: 'Backup', exportJson: 'Exportera backup (JSON)', importJson: 'Importera backup (JSON)',
+      importConfirm: 'Ersätta all data i appen med backupen ({n} pass)?', importOk: 'Backupen är importerad', importBad: 'Filen är inte en giltig backup',
+      histSessions: 'Pass', histTests: 'Tester över tid', histYardage: 'Längdtabell', noHistory: 'Inga sparade pass ännu.',
+      delete: 'Ta bort', confirmDelete: 'Ta bort passet från historiken?', share: 'Dela', place: 'Plats',
+      v1Place: 'Version 1', carry: 'Carry', side: 'Sidled', left: 'V', right: 'H', saveRow: 'Spara',
+      yardHint: 'Slå 5 bollar per ruta och skriv in snittet från GC2. Sidled: tryck V eller H.',
+      noYardage: 'Ingen längdtabell än. Kör modulen Längdtabell i garaget med GC2.',
+      enterCarry: 'Carry (m)', register: 'Registrera', target: 'Mål',
+      okPast: '{n} av {t} landade 0–2 m förbi', shareTitle: 'Golfträning – resultat',
+      wakeNote: 'Skärmen hålls tänd under passet.',
+      minutes: '≈ {n} min', out: 'UT', in: 'IN'
+    },
+    stations: { chip: 'Närspelsyta', bunker: 'Greenbunker', putt: 'Puttinggreen', rangeGrass: 'Range gräs', rangeMat: 'Range matta', toptracer: 'Toptracer', gc2: 'GC2', matNet: 'Matta och duk', matNoNet: 'Matta utan nät' },
+    places: { brohof: 'Bro Hof', komet: 'Komethallen', garageSE: 'Garaget Sverige', garagePT: 'Garaget Portugal', portugal: 'Portugal bana (mall)' },
+    clubs: { D: 'Driver', '3W': '3W', '5W': '5W', '9W': '9W', '3H': '3H', '4H': '4H', '5i': 'J5', '6i': 'J6', '7i': 'J7', '8i': 'J8', '9i': 'J9', PW: 'PW', GW: 'GW', SW: 'SW', LW: 'LW' },
+    gen: {
+      flag: 'Flagga {f}',
+      targets: { pin: 'mot flaggan', short: 'kort', long: 'lång', left: 'vänster', right: 'höger', shortLeft: 'kort vänster', shortRight: 'kort höger', longLeft: 'lång vänster', longRight: 'lång höger' },
+      heights: { low: 'låg', normal: 'normal höjd', high: 'hög' },
+      shapes: { fade: 'fade', straight: 'rak', draw: 'draw' },
+      dl: { narrow: 'Smal stance', wide: 'Bred stance', ballFwd: 'Boll fram', ballBack: 'Boll bak', shortGrip: 'Kort grepp', feetTogether: 'Fötterna ihop', open: 'Öppen stance', closed: 'Stängd stance' },
+      bunkerLies: { good: 'bra läge', up: 'uppförslut', down: 'nedförslut', buried: 'lite nedsjunken', edge: 'nära kanten' },
+      ballPos: { fwd: 'boll fram', mid: 'boll mitt', back: 'boll bak' },
+      stances: { narrow: 'smal stance', normal: 'normal stance', wide: 'bred stance', open: 'öppen stance', closed: 'stängd stance' },
+      coinVariant: { A: 'Variant A: två mynt på varandra – träffa bara det översta', B: 'Variant B: två mynt bredvid varandra, en fingerbredd emellan – träffa bara det främre' },
+      explain: 'Kort/lång = ca 3 m före/efter flaggan. Vänster/höger = ca 2 m bredvid.',
+      clock: 'från klockan {c}', newHole: 'nytt hål', dlPrefix: 'DL: '
+    },
+    mod: {
+      chipVar: { name: 'Chip med variation', desc: '2 stationer, variationsserier, test 10 mot flagg',
+        tech: 'Välj en landningspunkt 1 m in på green. 5 bollar med samma klubba och fokus på att träffa punkten. Känn hur bollen rullar ut.' },
+      heights: { name: 'Tre höjder', desc: 'Serier om 3: låg, normal, hög mot samma flagga',
+        tech: 'Samma klubba, tre höjder: låg (boll bak, händer fram), normal, hög (boll fram, öppet blad). 3 bollar av varje.' },
+      leapfrog: { name: 'Leapfrog', desc: 'Zon 5–15 m, varje boll strax förbi föregående',
+        tech: 'Lägg ut en zon från 5 till 15 m. Första bollen strax över 5 m, varje ny boll ska stanna strax förbi den förra utan att lämna zonen. Räkna hur många i rad du klarar.' },
+      bunkerVar: { name: 'Bunker med variation', desc: 'Linjen i sanden, serier, test 10 i bunker',
+        tech: 'Linjen i sanden: rita en linje vinkelrätt mot mållinjen. Slå 10 slag där klubban tar sanden på linjen – växla grunt och djupt. Ingen boll.' },
+      shortPutts: { name: 'Korta puttar', desc: 'Serier om 4 puttar 1–3 m, nytt hål och ny vinkel',
+        tech: 'Två peggar som port strax bredvid bollen. 10 puttar på 1 m där putterhuvudet går genom porten.' },
+      lagPutt: { name: 'Lagputt', desc: 'Serier om 4 puttar 6–15 m i slumpvis ordning',
+        tech: 'Rulla 5 puttar mot greenkanten och försök stanna så nära kanten som möjligt. Känn längden på baksvingen.' },
+      rangeVar: { name: 'Wedge och järn med variation', desc: 'Klubba, mål, höjd och form varje slag',
+        tech: 'Fem slag med halv sving och fokus på träffen. Lägg en klubba på marken som riktlinje.' },
+      justPast: { name: 'Precis förbi, aldrig kort', desc: 'En längd 40–100 m per serie, landa 1–2 m förbi',
+        tech: 'Välj ett tydligt mål på rangen. Säg längden högt före varje slag och bestäm landningspunkten.' },
+      yardage: { name: 'Längdtabell', desc: 'PW–LW × fem svinglängder med GC2' },
+      gc2Past: { name: 'Precis förbi med GC2', desc: 'Registrera carry per slag mot en längd 40–100 m',
+        tech: 'Två slag per klubba med full sving för att värma upp och kontrollera GC2.' },
+      coins: { name: 'Myntövningen', desc: 'Träffa rätt mynt – rena träffar av 10',
+        tech: 'Lägg två mynt. Variant A: på varandra, träffa bara det översta. Variant B: bredvid varandra med en fingerbredd emellan, träffa bara det främre. Inga bollar, bara mynt.' }
+    },
+    reg: { holed: 'I hål', withinClub: 'Inom en klubblängd', clean: 'Rena träffar av 10' },
+    log: {
+      station: 'Station {n} ({d} m): {s} serier', series: '{s} serier', reg: '{label}: {sum} av {tot}',
+      streak: 'Bästa {b} i rad ({n} försök)', coins: '{v} rena av 10',
+      yardage: '{n} rutor uppdaterade', gc2: '{ok} av {n} landade 0–2 m förbi'
+    },
+    test: {
+      t10flag: { name: '10 mot flagg', desc: '10 chippar från 10–15 m. Räkna bollar som stannar inom zonen.', lvl: 'Zon {v} m', rule: '7/10 eller bättre ger 0,3 m mindre zon nästa gång (minst 0,9 m).', ask: 'Antal inom zonen' },
+      t10bunker: { name: '10 i bunker', desc: '10 bunkerslag. Räkna bollar som stannar inom zonen.', lvl: 'Zon {v} m', rule: '7/10 eller bättre ger 0,3 m mindre zon nästa gång (minst 0,9 m).', ask: 'Antal inom zonen' },
+      puttPin: { name: 'Putt mot pinne', desc: '10 puttar från olika håll runt en pinne. Räkna träffar på pinnen.', lvl: 'Avstånd {v} m', rule: '8/10 eller bättre ger 0,3 m längre avstånd nästa gång.', ask: 'Antal träffar' },
+      btb3: { name: 'Beat the Best – match 3', desc: 'Närspel 0–30 m mot Justin Rose, 10 slag. Vinst under 1,0 m, delning 1,0–2,5 m, förlust över 2,5 m.',
+        ref: 'Vinst = 1 p, delning = ½ p. Max 10.', src: 'Beat the Best, match 3 – SWGT Performance Team 2014 (ShotLink, PGA Tour 2013)' },
+      ball8: { name: '8-bollsövningen', desc: '8 stationer, 5 varv, en boll per station. Poäng per slag.', ref: 'Max 160 poäng.', src: '8-bollsövningen – Jon Karlsen, SWGT Performance Team 2015' },
+      ball50: { name: '50-bollsövningen', desc: '50 puttar 1–5 m, nytt hål varje gång, alla puttar hålas. Par 72.', ref: 'Herrar: hcp 5 79,1 · hcp 10 81,3 (par 72).', src: '50-bollsövningen – Jon Karlsen, SWGT Performance Team 2011' },
+      twoSix: { name: '2–6:an', desc: 'Pinnar på 2, 3, 4, 5 och 6 m på fyra linjer. Ordning 6-5-4-3-2 upprepas.', ref: 'Svenska ET-spelare (herrar): 2 m 70 % · 3 m 54 % · 4 m 42 % · 5 m 27 % · 6 m 23 %.', src: '2–6 m-övningen – SWGT Performance Team 2015',
+        full: 'Hela (15 per linje, 60 puttar)', short: 'Förenklad (10 per linje, 40 puttar)', lines: ['Rak uppför', 'Höger–vänster-break', 'Rak nedför', 'Vänster–höger-break'],
+        lineHead: 'Linje {i} av 4: {name}', order: 'Ordning: {o}', holedAt: 'I hål på {d} m (av {n})', extras: 'Valfria räknare',
+        ex: { short: 'Kort', long: 'Lång (> 90 cm förbi)', left: 'Vänster', right: 'Höger', low: 'Låg', high: 'Hög' }, nextLine: 'Nästa linje →', perDist: '{d} m: {p} % (ET {e} %)' },
+      lagSGF: { name: 'Lagputt (SGF)', desc: '18 puttar i fast ordning 8–22 m. Poäng per putt, lägst vinner.', ref: 'Herrar: hcp 5 +6,3 · hcp 10 +10,7. På banan blir snittet 4,5 poäng sämre.', src: 'Lagputtest – SWGT Performance Team 2015' },
+      driver: { name: 'Drivertest', desc: '12 drivar. Registrera längd och sidledsmiss. Driverhcp läses av i tabellen, avrundat till det sämre värdet.',
+        ref: 'Bogeyhcp −18 till −10 · Singelhcp −9 till −1 · Elithcp 0 till +3.', src: 'Drivertest herrar – SWGT Performance Team 2012',
+        drive: 'Drive {i} av 12', len: 'Längd (m)', side: 'Sidled (m)', avg: 'Snitt {l} m · {s} m sidled', hcp: 'Driverhcp {h}', outside: 'Utanför tabellen (170–330 m, 1–30 m sidled)',
+        cats: { tb: 'Trippelbogeyhcp', db: 'Dubbelbogeyhcp', bogey: 'Bogeyhcp', single: 'Singelhcp', elite: 'Elithcp', world: 'Världselithcp', dream: 'Drömhcp' } },
+      nine: { name: '9 slag', desc: 'Fade, rak och draw × låg, normal och hög mot samma zon. Räkna antal i zonen.', ask: 'Antal i zonen' },
+      sevenTen: { name: '7 av 10', desc: '10 slag mot en zon. Räkna antal i zonen.', lvl: 'Zon ±{v} m', rule: '7/10 eller bättre ger 2,5 m mindre zon nästa gång.', ask: 'Antal i zonen' }
+    },
+    opt: {
+      btb: { W: ['Vinst', 'under 1,0 m'], D: ['Delning', '1,0–2,5 m'], L: ['Förlust', 'över 2,5 m'] },
+      ball8: ['I hål', 'Inom 1 m', 'Inom 2 m', 'Inom 3 m', 'Annars'],
+      ball50: ['1 slag', '2 slag', '3 slag'],
+      lagSGF: ['I hål', '0–0,5 m', '0,5–1 m', '1–2 m', '2–3 m', 'Över 3 m'],
+      points: '{p} p'
+    },
+    btbLie: { rough: 'ruff', fairway: 'fairway', bunker: 'bunker' }, btbRoll: { easy: 'lätt rullutrymme', medium: 'medium rullutrymme', hard: 'svårt rullutrymme' },
+    btbSlope: { down: 'nedför', flat: 'plant', up: 'uppför' }, btbExtra: { ballHigh: 'boll högt', ballLow: 'boll lågt' },
+    ball8St: { chip: 'Chip', pitch: 'Pitch', lob: 'Lobb', bunker: 'Bunker' }, ball8Round: 'Varv {r} av 5',
+    swing: { hip: 'Höft', chest: 'Bröst', shoulder: 'Axel', threeQ: '3/4', full: 'Full' },
+    share: { head: '⛳ Golfträning – {date}', place: 'Plats: {p}' },
+    v1: {
+      name: 'Närspel med variation (v1)',
+      lines: { chip: 'Chip: {h}/{a} inom 1,5 m ({p})', base: ' · baslinje {b}/{n}', bunker: 'Greenbunker: {h}/{a} inom 2 m ({p})', putt: 'Puttar 2–3 m: {h}/{a} i hål ({p})',
+        lag: 'Lagputt: {h}/{a} inom en klubblängd ({p})', updown: 'Upp-och-ner: {h}/{a} ({p})', inspel: 'Inspel: kort {k} · lång {l} · på längd {pl} ({p})' }
+    }
+  }
+};
+const L = I18N.sv;
+function t(path, params) {
+  let s = path.split('.').reduce((o, k) => (o == null ? o : o[k]), L);
+  if (s == null) return path;
+  if (params && typeof s === 'string') s = s.replace(/\{(\w+)\}/g, (_, k) => (params[k] ?? ''));
+  return s;
+}
+
+// =====================================================================
+// Hjälpare
+// =====================================================================
 const $ = s => document.querySelector(s);
 const LS = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } },
 };
-const K_CUR = 'narspel.cur', K_HIST = 'narspel.hist', K_THEME = 'narspel.theme';
-
-// ---------- Slumpgeneratorer ----------
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const rnd = n => Math.floor(Math.random() * n);
-const pick = (arr, prev) => { let v; do v = arr[rnd(arr.length)]; while (arr.length > 1 && v === prev); return v; };
-const pickNum = (min, max, prev, gap) => { let v; do v = min + rnd(max - min + 1); while (prev != null && Math.abs(v - prev) < gap); return v; };
+const pick = (a, prev) => { let v, i = 0; do v = a[rnd(a.length)]; while (a.length > 1 && v === prev && ++i < 50); return v; };
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const clamp = (v, lo, hi) => Math.min(hi ?? Infinity, Math.max(lo ?? -Infinity, v));
+const fmtN = (x, d = 1) => Number(x).toLocaleString('sv-SE', { maximumFractionDigits: d });
+const fmtS = (x, d = 1) => (x > 0 ? '+' : x < 0 ? '−' : '') + fmtN(Math.abs(x), d);
+const DAY = 86400000;
+const fmtDate = iso => new Date(iso).toLocaleDateString('sv-SE', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+const fmtShort = iso => new Date(iso).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
+const daysSince = iso => Math.floor((Date.now() - new Date(iso).getTime()) / DAY);
+const when = iso => { const d = daysSince(iso); return d <= 0 ? t('ui.today') : d === 1 ? t('ui.yesterday') : t('ui.daysAgo', { n: d }); };
+const uid = () => Date.now().toString(36) + rnd(1e6).toString(36);
 
-const CLUBS = ['J7', 'PW', 'GW', 'SW'];
-const LIES = ['Fairway, bra läge', 'Tight lie', 'Semiruff', 'Ruff', 'Uppförslut', 'Nedförslut', 'Sidlutning'];
-const LANDING = ['1 m in på green', '2–3 m in på green', 'Halvvägs till flaggan', 'Nära flaggan, liten rull'];
-const DL = ['Smal stance', 'Bred stance', 'Bollen långt fram', 'Bollen långt bak', 'Kort grepp', 'Fötterna ihop'];
+// =====================================================================
+// Klubbor, stationer, platser
+// =====================================================================
+const CLUBS = ['D', '3W', '5W', '9W', '3H', '4H', '5i', '6i', '7i', '8i', '9i', 'PW', 'GW', 'SW', 'LW'];
+const CHIP_CLUBS = ['7i', '8i', '9i', 'PW', 'GW', 'SW', 'LW', '9W', '5W'];
+const IRON_WEDGES = ['5i', '6i', '7i', '8i', '9i', 'PW', 'GW', 'SW', 'LW'];
+const WEDGES = ['PW', 'GW', 'SW', 'LW'];
+const BUNKER_CLUBS = ['GW', 'SW', 'LW'];
+const club = c => t('clubs.' + c);
+const clubOk = (place, c) => CLUBS.indexOf(c) >= CLUBS.indexOf(place.maxClub || 'D');
+const clubsAt = (place, list) => { const r = list.filter(c => clubOk(place, c)); return r.length ? r : [list[list.length - 1]]; };
+
+const STATIONS = ['chip', 'bunker', 'putt', 'rangeGrass', 'rangeMat', 'toptracer', 'gc2', 'matNet', 'matNoNet'];
+const RANGE = ['rangeGrass', 'rangeMat', 'toptracer'];
+const DEFAULT_PLACES = () => [
+  { id: 'brohof', name: t('places.brohof'), st: { chip: 1, bunker: 1, putt: 1, rangeGrass: 1, rangeMat: 1, toptracer: 1 }, maxClub: 'D' },
+  { id: 'komet', name: t('places.komet'), st: { toptracer: 1, rangeMat: 1, putt: 1 }, maxClub: 'D' },
+  { id: 'garageSE', name: t('places.garageSE'), st: { matNet: 1, gc2: 1 }, maxClub: '7i' },
+  { id: 'garagePT', name: t('places.garagePT'), st: { matNoNet: 1 }, maxClub: 'D' },
+  { id: 'portugal', name: t('places.portugal'), st: { chip: 1, bunker: 1, putt: 1, rangeGrass: 1, rangeMat: 1 }, maxClub: 'D' },
+];
+const fits = (place, def) => !!place && (def.needs || []).every(g => g.some(k => place.st[k])) && (!def.club || clubOk(place, def.club));
+
+// =====================================================================
+// Seriegeneratorn
+// =====================================================================
+const TARGETS = ['pin', 'short', 'long', 'left', 'right', 'shortLeft', 'shortRight', 'longLeft', 'longRight'];
+const HEIGHTS = ['low', 'normal', 'high'];
+const SHAPES = ['fade', 'straight', 'draw'];
+const DLS = ['narrow', 'wide', 'ballFwd', 'ballBack', 'shortGrip', 'feetTogether', 'open', 'closed'];
+const flagOf = () => D.settings.flags === 2 ? pick(['A', 'B']) : null;
 
 const GENS = {
-  chip: {
-    label: 'Nästa boll',
-    next(p = {}, n, g) {
-      const r = { club: pick(CLUBS, p.club), lie: pick(LIES, p.lie), dist: pickNum(10, 25, p.dist, 3), land: pick(LANDING, p.land) };
-      if (n % 5 === 0) { r.dl = pick(DL, g.lastDL); g.lastDL = r.dl; }
-      return r;
-    },
-    view: r => ({ big: `${r.club} · ${r.dist} m`, lines: [`Läge: <b>${r.lie}</b>`, `Landa: <b>${r.land}</b>`], dl: r.dl }),
-  },
-  bunker: {
-    label: 'Nästa boll',
-    next: (p = {}) => ({ dist: pickNum(8, 20, p.dist, 3), lie: pick(['Bra läge', 'Uppförslut', 'Nedförslut', 'Lite nedsjunken', 'Mycket green att jobba med', 'Kort till flagg'], p.lie) }),
-    view: r => ({ big: `${r.dist} m`, lines: [`Läge: <b>${r.lie}</b>`] }),
-  },
-  putt: {
-    label: 'Ny vinkel',
-    next: (p = {}) => ({ clock: pickNum(1, 12, p.clock, 2), dist: pick(['2 m', '2,5 m', '3 m'], p.dist) }),
-    view: r => ({ big: `${r.dist}`, lines: [`Från <b>klockan ${r.clock}</b> runt hålet`] }),
-  },
-  lag: {
-    label: 'Nästa putt',
-    next: (p = {}) => ({ dist: pick([6, 9, 12, 15], p.dist) }),
-    view: r => ({ big: `${r.dist} m`, lines: ['Fart först – stanna inom en klubblängd'] }),
-  },
-  updown: {
-    label: 'Nästa läge',
-    next: (p = {}) => ({ spot: pick(['Kort sida, ruff', 'Lång sida, fairway', 'Semiruff, nedförslut', 'Greenbunker', 'Tight lie, uppförslut', 'Djup ruff', 'Fransen', 'Bakom green', 'Över en kulle'], p.spot) }),
-    view: r => ({ big: r.spot, lines: ['Spela ut – max 2 slag = upp-och-ner'] }),
-  },
+  chip: { dl: true, explain: true, shot: c => ({ flag: flagOf(), target: pick(TARGETS), club: pick(clubsAt(c.place, CHIP_CLUBS)), height: pick(HEIGHTS) }) },
+  heights3: { dl: true, len: 3,
+    pre: () => ({ flag: flagOf(), order: shuffle(HEIGHTS) }),
+    shot: (c, p, i) => ({ flag: p.flag, target: 'pin', club: pick(clubsAt(c.place, CHIP_CLUBS)), height: p.order[i] }) },
+  bunker: { dl: true, explain: true, shot: c => ({ flag: flagOf(), target: pick(TARGETS), club: pick(clubsAt(c.place, BUNKER_CLUBS)), height: pick(HEIGHTS), lie: pick(Object.keys(L.gen.bunkerLies)) }) },
+  range: { dl: true, explain: true, shot: c => ({ flag: flagOf(), target: pick(TARGETS), club: pick(clubsAt(c.place, IRON_WEDGES)), height: pick(HEIGHTS), shape: pick(SHAPES) }) },
+  justPast: { pre: c => ({ dist: (() => { let d; do d = 40 + rnd(61); while (c.prevPre && Math.abs(d - c.prevPre.dist) < 10); return d; })() }),
+    shot: () => ({ height: pick(HEIGHTS) }) },
+  shortPutt: { len: 4, shot: () => ({ dist: pick([1, 1.5, 2, 2.5, 3]), clock: 1 + rnd(12) }) },
+  lagPutt: { len: 4, pre: () => ({ d: shuffle([6, 7, 8, 9, 10, 11, 12, 13, 14, 15]) }), shot: (c, p, i) => ({ dist: p.d[i] }) },
+  coins: { pre: c => ({ variant: c.seriesNo % 2 ? 'B' : 'A' }),
+    shot: c => ({ club: pick(clubsAt(c.place, WEDGES)), pos: pick(Object.keys(L.gen.ballPos)), stance: pick(Object.keys(L.gen.stances)) }) },
 };
 
-// ---------- Passet ----------
-const BLOCKS = [
-  { id: 'warmup', title: 'Uppvärmning', min: 10, type: 'none',
-    text: 'Rörlighet, några lugna svingar och korta chippar och puttar. Ingen räkning – känn in underlaget och greenens fart.' },
-  { id: 'chip', title: 'Chip med variation', min: 25, type: 'hits', target: 30, hit: 'Inom 1,5 m', unit: 'inom 1,5 m', share: 'Chip',
-    text: '30 bollar, 10–25 m. Byt klubba, läge, avstånd och landningspunkt varje boll – tryck ”Nästa boll”. Var 5:e boll har ett DL-inslag. De första 10 bollarna blir din baslinje.' },
-  { id: 'bunker', title: 'Greenbunker', min: 10, type: 'hits', target: 15, hit: 'Inom 2 m', unit: 'inom 2 m', share: 'Greenbunker',
-    text: '15 bollar, 8–20 m. Nytt avstånd och läge varje boll. Räkna bollar som stannar inom 2 m.' },
-  { id: 'putt', title: 'Puttar 2–3 m', min: 10, type: 'hits', target: 20, hit: 'I hål', unit: 'i hål', share: 'Puttar 2–3 m',
-    text: '20 puttar från 2–3 m. Ny vinkel runt hålet varje gång – gå runt som en klocka. Räkna i hål.' },
-  { id: 'lag', title: 'Lagputt', min: 10, type: 'hits', target: null, hit: 'Inom en klubblängd', unit: 'inom en klubblängd', share: 'Lagputt',
-    text: 'Slumpa 6, 9, 12 eller 15 m. Fokus på fart. Räkna puttar som stannar inom en klubblängd från hålet.' },
-  { id: 'updown', title: 'Test upp-och-ner', min: 10, type: 'hits', target: 9, hit: 'Upp-och-ner', unit: 'upp-och-ner', share: 'Upp-och-ner',
-    text: '9 bollar på olika platser runt green. Spela ut varje boll. Räkna upp-och-ner (max 2 slag) av 9.' },
-  { id: 'inspel', title: 'Inspel', min: 15, type: 'three', optional: true, share: 'Inspel',
-    text: 'Inspel mot flagga. Registrera varje slag som kort, lång eller på längd.' },
-];
-const blocks = () => BLOCKS.filter(b => !b.optional || cur.long).map((b, i) => ({ ...b, n: i + 1 }));
-const blockById = id => BLOCKS.find(b => b.id === id);
-
-const newSession = () => ({ start: new Date().toISOString(), long: false, open: 'warmup', b: {} });
-let cur = LS.get(K_CUR, null) || newSession();
-let hist = LS.get(K_HIST, []);
-let view = 'pass';
-const st = id => cur.b[id] || (cur.b[id] = { h: 0, a: 0, base: null, k: 0, l: 0, p: 0, el: 0, run: null, done: false, g: { n: 0, last: null } });
-const saveCur = () => LS.set(K_CUR, cur);
-
-// ---------- Hjälpare ----------
-const elapsed = s => s.el + (s.run ? Date.now() - s.run : 0);
-const fmt = ms => { const neg = ms < 0, t = Math.round(Math.abs(ms) / 1000); return (neg ? '+' : '') + Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
-const remaining = (b, s) => b.min * 60000 - elapsed(s);
-const pct = (h, a) => a ? Math.round(h / a * 100) + ' %' : '–';
-const fmtDate = iso => new Date(iso).toLocaleDateString('sv-SE', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-const fmtTime = iso => new Date(iso).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
-
-function sumShort(b, s) {
-  const t = `<span class="t">${s.run || s.el ? fmt(remaining(b, s)) : b.min + ' min'}</span>`;
-  if (b.type === 'hits') return `${s.h}/${s.a}${t}`;
-  if (b.type === 'three') return `${s.k}·${s.l}·${s.p}${t}`;
-  return t;
-}
-
-// ---------- Rendering ----------
-function render() {
-  document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', t.dataset.v === view));
-  $('.theme').textContent = document.documentElement.dataset.theme === 'dark' ? '☀︎' : '☾';
-  $('#view').innerHTML = view === 'pass' ? passHTML() : histHTML();
-}
-
-function passHTML() {
-  return `
-  <div class="passhead">
-    <h1>Närspel med variation</h1>
-    <div class="sub">${fmtDate(cur.start)} · ${cur.long ? 90 : 75} min</div>
-    <label class="toggle"><input type="checkbox" data-act="long" ${cur.long ? 'checked' : ''}> Ta med inspel (90 min)</label>
-  </div>
-  ${blocks().map(cardHTML).join('')}
-  <div class="actions">
-    <button class="primary" data-act="save">Spara pass</button>
-    <button class="share" data-act="share">Dela resultat</button>
-    <button class="danger" data-act="reset">Nollställ pass</button>
-  </div>`;
-}
-
-const ctrRow = (id, k, label, val, extra = '') => `
-  <div class="ctr"><div class="clabel">${label}</div>
-    <div class="cgrid">
-      <button class="minus" data-act="inc" data-id="${id}" data-k="${k}" data-d="-1" aria-label="Minska ${label}">−</button>
-      <output>${val}${extra}</output>
-      <button class="plus" data-act="inc" data-id="${id}" data-k="${k}" data-d="1" aria-label="Öka ${label}">+</button>
-    </div></div>`;
-
-function cardHTML(b) {
-  const s = st(b.id), open = cur.open === b.id, rem = remaining(b, s);
-  let body = '';
-  if (open) {
-    body += `<p class="instr">${b.text}</p>
-      <div class="timer">
-        <div class="tval ${rem < 0 ? 'over' : ''}" data-timer="${b.id}">${fmt(rem)}</div>
-        <button class="${s.run ? 'pause' : 'go'}" data-act="timer" data-id="${b.id}">${s.run ? 'Paus' : 'Start'}</button>
-        <button class="ghost" data-act="treset" data-id="${b.id}" aria-label="Nollställ timer">↺</button>
-      </div>`;
-    const gen = GENS[b.id];
-    if (gen) {
-      let inner = '<div class="line">Tryck för första ' + (b.id === 'chip' || b.id === 'bunker' ? 'bollen' : 'slaget') + '.</div>';
-      if (s.g.last) {
-        const v = gen.view(s.g.last);
-        inner = `<div class="ball">${b.id === 'chip' || b.id === 'bunker' ? 'Boll' : 'Nr'} ${s.g.n}${b.target ? ' av ' + b.target : ''}</div>
-          <div class="big">${v.big}</div>${v.lines.map(l => `<div class="line">${l}</div>`).join('')}
-          ${v.dl ? `<div class="dl">DL: ${v.dl}</div>` : ''}`;
-      }
-      body += `<div class="gen">${inner}<button class="genbtn" data-act="gen" data-id="${b.id}">${gen.label} →</button></div>`;
-    }
-    if (b.type === 'hits') {
-      body += ctrRow(b.id, 'h', b.hit, s.h);
-      body += ctrRow(b.id, 'a', 'Försök', s.a, b.target ? `<small>/${b.target}</small>` : '');
-      body += `<div class="stat">Träff: ${pct(s.h, s.a)} <span>(${s.h} av ${s.a})</span></div>`;
-      if (b.id === 'chip' && s.a > 0) {
-        body += `<div class="stat">Baslinje första 10: ${s.base ?? 0}/${Math.min(s.a, 10)} <span>${s.a > 10 ? '· låst' : '· pågår'}</span></div>`;
-      }
-    } else if (b.type === 'three') {
-      const tot = s.k + s.l + s.p;
-      body += `<div class="three">${ctrRow(b.id, 'k', 'Kort', s.k)}${ctrRow(b.id, 'l', 'Lång', s.l)}${ctrRow(b.id, 'p', 'På längd', s.p)}</div>
-        <div class="stat">På längd: ${pct(s.p, tot)} <span>(${tot} slag)</span></div>`;
-    }
-    const list = blocks(), i = list.findIndex(x => x.id === b.id);
-    if (list[i + 1]) body += `<button class="nextblk" data-act="open" data-id="${list[i + 1].id}">Nästa block: ${list[i + 1].title} →</button>`;
-    body = `<div class="cbody">${body}</div>`;
+function makeSeries(kind, ctx) {
+  const g = GENS[kind], pre = g.pre ? g.pre(ctx) : {}, shots = [];
+  let prev = ctx.prevKey;
+  for (let i = 0; i < ctx.len; i++) {
+    let s, k, n = 0;
+    do { s = g.shot(ctx, pre, i); k = JSON.stringify(s); } while (k === prev && ++n < 50);   // aldrig två likadana slag i rad
+    shots.push(s); prev = k;
   }
-  return `<section class="card ${open ? 'open' : ''} ${s.run ? 'running' : ''}" id="c-${b.id}">
-    <button class="chead" data-act="open" data-id="${b.id}" aria-expanded="${open}">
-      <span class="num">${b.n}</span>
-      <span class="ctitle">${b.title}<small>${b.min} min</small></span>
-      <span class="sum" data-sum="${b.id}">${sumShort(b, s)}</span>
-    </button>${body}</section>`;
+  if (g.dl && Math.random() < 0.5) shots[rnd(shots.length)].dl = pick(DLS);              // högst ett DL-inslag per serie
+  return { shots, pre, lastKey: prev };
 }
 
-// ---------- Resultat & delning ----------
-function snapshot() {
-  const res = {};
-  let total = 0;
-  for (const b of blocks()) {
-    const s = st(b.id), el = elapsed(s);
-    total += el;
-    res[b.id] = { h: s.h, a: s.a, base: s.base, k: s.k, l: s.l, p: s.p, el };
+function shotHTML(kind, s) {
+  const G = L.gen;
+  let big = '', sub = [];
+  if (kind === 'shortPutt') { big = t('ui.lengthM', { d: fmtN(s.dist) }); sub = [t('gen.clock', { c: s.clock }), G.newHole]; }
+  else if (kind === 'lagPutt') big = t('ui.lengthM', { d: s.dist });
+  else if (kind === 'justPast') big = G.heights[s.height];
+  else if (kind === 'coins') { big = club(s.club); sub = [G.ballPos[s.pos], G.stances[s.stance]]; }
+  else {
+    big = (s.flag ? s.flag + ' · ' : '') + G.targets[s.target];
+    sub = [club(s.club), G.heights[s.height]];
+    if (s.shape) sub.push(G.shapes[s.shape]);
+    if (s.lie) sub.push(G.bunkerLies[s.lie]);
   }
-  return { id: Date.now(), start: cur.start, end: new Date().toISOString(), long: cur.long, total, b: res };
+  return `<div class="big">${big}</div>${sub.length ? `<div class="sub">${sub.join(' · ')}</div>` : ''}${s.dl ? `<span class="dl">${G.dlPrefix}${G.dl[s.dl]}</span>` : ''}`;
 }
 
-function lines(rec) {
+// =====================================================================
+// Moduler (steg: teknik → variationsserier → test)
+// =====================================================================
+const MODULES = {
+  chipVar: { grp: 'short', needs: [['chip']], steps: [
+    { type: 'tech' },
+    { type: 'series', gen: 'chip', station: 1, askDist: [5, 25] },
+    { type: 'series', gen: 'chip', station: 2, askDist: [5, 25] },
+    { type: 'test', test: 't10flag' }] },
+  heights: { grp: 'short', needs: [['chip']], steps: [{ type: 'tech' }, { type: 'series', gen: 'heights3' }, { type: 'test', test: 't10flag' }] },
+  leapfrog: { grp: 'short', needs: [['chip']], steps: [{ type: 'tech' }, { type: 'streak' }, { type: 'test', test: 't10flag' }] },
+  bunkerVar: { grp: 'short', needs: [['bunker']], steps: [{ type: 'tech' }, { type: 'series', gen: 'bunker' }, { type: 'test', test: 't10bunker' }] },
+  shortPutts: { grp: 'putt', needs: [['putt']], steps: [{ type: 'tech' }, { type: 'series', gen: 'shortPutt', reg: 'holed', balls: 20 }, { type: 'test', test: 'puttPin' }] },
+  lagPutt: { grp: 'putt', needs: [['putt']], steps: [{ type: 'tech' }, { type: 'series', gen: 'lagPutt', reg: 'withinClub', balls: 20 }, { type: 'test', test: 'lagSGF' }] },
+  rangeVar: { grp: 'range', needs: [RANGE], steps: [{ type: 'tech' }, { type: 'series', gen: 'range', askBalls: 40 }, { type: 'test', test: 'nine' }] },
+  justPast: { grp: 'range', needs: [RANGE], steps: [{ type: 'tech' }, { type: 'series', gen: 'justPast', askBalls: 40 }, { type: 'test', test: 'sevenTen' }] },
+  yardage: { grp: 'garage', needs: [['gc2']], steps: [{ type: 'yardage' }] },
+  gc2Past: { grp: 'garage', needs: [['gc2']], steps: [{ type: 'tech' }, { type: 'gc2past' }] },
+  coins: { grp: 'garage', needs: [['matNoNet']], steps: [{ type: 'tech' },
+    { type: 'series', gen: 'coins', balls: 10, regEnd: 'clean' }, { type: 'series', gen: 'coins', balls: 10, regEnd: 'clean' }, { type: 'series', gen: 'coins', balls: 10, regEnd: 'clean' }] },
+};
+const GROUP_ORDER = ['short', 'putt', 'range', 'garage'];   // närspel först, sedan putt, sedan range
+
+// =====================================================================
+// Tester
+// =====================================================================
+const BTB3 = [
+  { d: 18, lie: 'rough', roll: 'hard', slope: 'down', extra: 'ballHigh' }, { d: 14, lie: 'fairway', roll: 'easy', slope: 'flat' },
+  { d: 24, lie: 'bunker', roll: 'easy', slope: 'up' }, { d: 5, lie: 'rough', roll: 'medium', slope: 'flat' },
+  { d: 20, lie: 'fairway', roll: 'medium', slope: 'flat' }, { d: 10, lie: 'bunker', roll: 'hard', slope: 'up', extra: 'ballLow' },
+  { d: 28, lie: 'rough', roll: 'medium', slope: 'up' }, { d: 8, lie: 'fairway', roll: 'easy', slope: 'up' },
+  { d: 16, lie: 'bunker', roll: 'medium', slope: 'flat' }, { d: 12, lie: 'rough', roll: 'hard', slope: 'up' }];
+const BALL8 = [['chip', 10], ['chip', 30], ['pitch', 20], ['pitch', 40], ['lob', 15], ['lob', 25], ['bunker', 10], ['bunker', 20]];
+const LAG_SGF = [22, 12, 18, 10, 14, 8, 22, 12, 18, 10, 14, 8, 22, 12, 18, 10, 14, 8];
+const ET26 = { 2: 70, 3: 54, 4: 42, 5: 27, 6: 23 };
+// Driverhcp herrar: rader = genomsnittlig slaglängd (m), kolumner = sidledsmiss 1–30 m. Källa: Drivertest herrar, SWGT 2012, sista sidan.
+const DRIVER_LENS=[170, 175, 180, 185, 190, 195, 200, 205, 210, 215, 220, 225, 230, 235, 240, 245, 250, 255, 260, 265, 270, 275, 280, 285, 290, 295, 300, 310, 315, 320, 325, 330];
+const DRIVER_HCP=[[-17.1,-17.3,-17.6,-17.9,-18.2,-18.5,-18.7,-19.0,-19.3,-19.6,-19.9,-20.1,-20.4,-20.7,-21.0,-21.3,-21.5,-21.8,-22.1,-22.4,-22.7,-22.9,-23.2,-23.5,-23.8,-24.1,-24.3,-24.6,-24.9,-25.2],[-14.7,-15.0,-15.3,-15.6,-15.9,-16.1,-16.4,-16.7,-17.0,-17.3,-17.5,-17.8,-18.1,-18.4,-18.7,-18.9,-19.2,-19.5,-19.8,-20.1,-20.3,-20.6,-20.9,-21.2,-21.5,-21.7,-22.0,-22.3,-22.6,-22.9],[-12.5,-12.8,-13.1,-13.3,-13.6,-13.9,-14.2,-14.5,-14.7,-15.0,-15.3,-15.6,-15.9,-16.1,-16.4,-16.7,-17.0,-17.3,-17.5,-17.8,-18.1,-18.4,-18.7,-18.9,-19.2,-19.5,-19.8,-20.1,-20.3,-20.6],[-10.3,-10.6,-10.9,-11.2,-11.4,-11.7,-12.0,-12.3,-12.6,-12.8,-13.1,-13.4,-13.7,-14.0,-14.2,-14.5,-14.8,-15.1,-15.4,-15.6,-15.9,-16.2,-16.5,-16.8,-17.0,-17.3,-17.6,-17.9,-18.2,-18.4],[-8.2,-8.5,-8.8,-9.0,-9.3,-9.6,-9.9,-10.2,-10.4,-10.7,-11.0,-11.3,-11.6,-11.8,-12.1,-12.4,-12.7,-13.0,-13.2,-13.5,-13.8,-14.1,-14.4,-14.6,-14.9,-15.2,-15.5,-15.8,-16.0,-16.3],[-6.1,-6.4,-6.7,-7.0,-7.3,-7.5,-7.8,-8.1,-8.4,-8.7,-8.9,-9.2,-9.5,-9.8,-10.1,-10.3,-10.6,-10.9,-11.2,-11.5,-11.7,-12.0,-12.3,-12.6,-12.9,-13.1,-13.4,-13.7,-14.0,-14.3],[-4.1,-4.4,-4.7,-5.0,-5.3,-5.5,-5.8,-6.1,-6.4,-6.7,-6.9,-7.2,-7.5,-7.8,-8.1,-8.3,-8.6,-8.9,-9.2,-9.5,-9.7,-10.0,-10.3,-10.6,-10.9,-11.1,-11.4,-11.7,-12.0,-12.3],[-2.2,-2.5,-2.7,-3.0,-3.3,-3.6,-3.9,-4.1,-4.4,-4.7,-5.0,-5.3,-5.5,-5.8,-6.1,-6.4,-6.7,-6.9,-7.2,-7.5,-7.8,-8.1,-8.3,-8.6,-8.9,-9.2,-9.5,-9.7,-10.0,-10.3],[-0.3,-0.6,-0.8,-1.1,-1.4,-1.7,-2.0,-2.2,-2.5,-2.8,-3.1,-3.4,-3.6,-3.9,-4.2,-4.5,-4.8,-5.0,-5.3,-5.6,-5.9,-6.2,-6.4,-6.7,-7.0,-7.3,-7.6,-7.8,-8.1,-8.4],[1.1,0.8,0.5,0.3,0,-0.3,-0.6,-0.9,-1.1,-1.4,-1.7,-2.0,-2.3,-2.5,-2.8,-3.1,-3.4,-3.7,-3.9,-4.2,-4.5,-4.8,-5.1,-5.3,-5.6,-5.9,-6.2,-6.5,-6.7,-7.0],[1.9,1.6,1.4,1.1,0.8,0.5,0.2,0,-0.3,-0.6,-0.9,-1.2,-1.4,-1.7,-2.0,-2.3,-2.6,-2.8,-3.1,-3.4,-3.7,-4.0,-4.2,-4.5,-4.8,-5.1,-5.4,-5.6,-5.9,-6.2],[2.7,2.4,2.2,1.9,1.6,1.3,1.0,0.8,0.5,0.2,-0.1,-0.4,-0.6,-0.9,-1.2,-1.5,-1.8,-2.0,-2.3,-2.6,-2.9,-3.2,-3.4,-3.7,-4.0,-4.3,-4.6,-4.8,-5.1,-5.4],[3.5,3.2,2.9,2.6,2.4,2.1,1.8,1.5,1.2,1.0,0.7,0.4,0.1,-0.2,-0.4,-0.7,-1.0,-1.3,-1.6,-1.8,-2.1,-2.4,-2.7,-3.0,-3.2,-3.5,-3.8,-4.1,-4.4,-4.6],[4.2,3.9,3.6,3.4,3.1,2.8,2.5,2.2,2.0,1.7,1.4,1.1,0.8,0.6,0.3,0,-0.3,-0.6,-0.8,-1.1,-1.4,-1.7,-2.0,-2.2,-2.5,-2.8,-3.1,-3.4,-3.6,-3.9],[4.9,4.6,4.3,4.1,3.8,3.5,3.2,2.9,2.7,2.4,2.1,1.8,1.5,1.3,1.0,0.7,0.4,0.1,-0.1,-0.4,-0.7,-1.0,-1.3,-1.5,-1.8,-2.1,-2.4,-2.7,-2.9,-3.2],[5.6,5.3,5.0,4.7,4.4,4.2,3.9,3.6,3.3,3.0,2.8,2.5,2.2,1.9,1.6,1.4,1.1,0.8,0.5,0.2,0,-0.3,-0.6,-0.9,-1.2,-1.4,-1.7,-2.0,-2.3,-2.6],[6.2,5.9,5.6,5.4,5.1,4.8,4.5,4.2,4.0,3.7,3.4,3.1,2.8,2.6,2.3,2.0,1.7,1.4,1.2,0.9,0.6,0.3,0,-0.2,-0.5,-0.8,-1.1,-1.4,-1.6,-1.9],[6.8,6.5,6.3,6.0,5.7,5.4,5.1,4.9,4.6,4.3,4.0,3.7,3.5,3.2,2.9,2.6,2.3,2.1,1.8,1.5,1.2,0.9,0.7,0.4,0.1,-0.2,-0.5,-0.7,-1.0,-1.3],[7.4,7.1,6.8,6.6,6.3,6.0,5.7,5.4,5.2,4.9,4.6,4.3,4.0,3.8,3.5,3.2,2.9,2.6,2.4,2.1,1.8,1.5,1.2,1.0,0.7,0.4,0.1,-0.2,-0.4,-0.7],[8.0,7.7,7.4,7.1,6.9,6.6,6.3,6.0,5.7,5.5,5.2,4.9,4.6,4.3,4.1,3.8,3.5,3.2,2.9,2.7,2.4,2.1,1.8,1.5,1.3,1.0,0.7,0.4,0.1,-0.1],[8.5,8.2,8.0,7.7,7.4,7.1,6.8,6.6,6.3,6.0,5.7,5.4,5.2,4.9,4.6,4.3,4.0,3.8,3.5,3.2,2.9,2.6,2.4,2.1,1.8,1.5,1.2,1.0,0.7,0.4],[9.0,8.8,8.5,8.2,7.9,7.6,7.4,7.1,6.8,6.5,6.2,6.0,5.7,5.4,5.1,4.8,4.6,4.3,4.0,3.7,3.4,3.2,2.9,2.6,2.3,2.0,1.8,1.5,1.2,0.9],[9.6,9.3,9.0,8.7,8.4,8.2,7.9,7.6,7.3,7.0,6.8,6.5,6.2,5.9,5.6,5.4,5.1,4.8,4.5,4.2,4.0,3.7,3.4,3.1,2.8,2.6,2.3,2.0,1.7,1.4],[10.0,9.8,9.5,9.2,8.9,8.6,8.4,8.1,7.8,7.5,7.2,7.0,6.7,6.4,6.1,5.8,5.6,5.3,5.0,4.7,4.4,4.2,3.9,3.6,3.3,3.0,2.8,2.5,2.2,1.9],[10.5,10.2,10.0,9.7,9.4,9.1,8.8,8.6,8.3,8.0,7.7,7.4,7.2,6.9,6.6,6.3,6.0,5.8,5.5,5.2,4.9,4.6,4.4,4.1,3.8,3.5,3.2,3.0,2.7,2.4],[11.0,10.7,10.4,10.1,9.9,9.6,9.3,9.0,8.7,8.5,8.2,7.9,7.6,7.3,7.1,6.8,6.5,6.2,5.9,5.7,5.4,5.1,4.8,4.5,4.3,4.0,3.7,3.4,3.1,2.9],[11.4,11.1,10.9,10.6,10.3,10.0,9.7,9.5,9.2,8.9,8.6,8.3,8.1,7.8,7.5,7.2,6.9,6.7,6.4,6.1,5.8,5.5,5.3,5.0,4.7,4.4,4.1,3.9,3.6,3.3],[12.3,12.0,11.7,11.4,11.1,10.9,10.6,10.3,10.0,9.7,9.5,9.2,8.9,8.6,8.3,8.1,7.8,7.5,7.2,6.9,6.7,6.4,6.1,5.8,5.5,5.3,5.0,4.7,4.4,4.1],[12.7,12.4,12.1,11.8,11.5,11.3,11.0,10.7,10.4,10.1,9.9,9.6,9.3,9.0,8.7,8.5,8.2,7.9,7.6,7.3,7.1,6.8,6.5,6.2,5.9,5.7,5.4,5.1,4.8,4.5],[13.1,12.8,12.5,12.2,11.9,11.7,11.4,11.1,10.8,10.5,10.3,10.0,9.7,9.4,9.1,8.9,8.6,8.3,8.0,7.7,7.5,7.2,6.9,6.6,6.3,6.1,5.8,5.5,5.2,4.9],[13.4,13.2,12.9,12.6,12.3,12.0,11.8,11.5,11.2,10.9,10.6,10.4,10.1,9.8,9.5,9.2,9.0,8.7,8.4,8.1,7.8,7.6,7.3,7.0,6.7,6.4,6.2,5.9,5.6,5.3],[13.8,13.5,13.2,13.0,12.7,12.4,12.1,11.8,11.6,11.3,11.0,10.7,10.4,10.2,9.9,9.6,9.3,9.0,8.8,8.5,8.2,7.9,7.6,7.4,7.1,6.8,6.5,6.2,6.0,5.7]];
+
+const TESTS = {
+  t10flag: { needs: [['chip']], kind: 'count', n: 10, higher: true, baseline: true, level: { start: 1.8, step: -0.3, lim: 0.9, thr: 7 } },
+  t10bunker: { needs: [['bunker']], kind: 'count', n: 10, higher: true, baseline: true, level: { start: 3.0, step: -0.3, lim: 0.9, thr: 7 } },
+  puttPin: { needs: [['putt']], kind: 'count', n: 10, higher: true, baseline: true, level: { start: 1.0, step: 0.3, lim: null, thr: 8 } },
+  btb3: { needs: [['chip'], ['bunker']], kind: 'shots', higher: true, baseline: true,
+    shots: () => BTB3.map(s => [`${s.d} m · ${t('btbLie.' + s.lie)}`, [t('btbRoll.' + s.roll), t('btbSlope.' + s.slope), s.extra ? t('btbExtra.' + s.extra) : null].filter(Boolean).join(' · ')]),
+    opts: () => ['W', 'D', 'L'].map(k => ({ key: k, pts: { W: 1, D: 0.5, L: 0 }[k], label: L.opt.btb[k][0], sub: L.opt.btb[k][1] })), cols: 3 },
+  ball8: { needs: [['chip'], ['bunker']], kind: 'shots', higher: true, monthly: true, max: 160,
+    shots: () => { const r = []; for (let v = 1; v <= 5; v++) BALL8.forEach(([k, d], i) => r.push([`${i + 1}. ${t('ball8St.' + k)} ${d} m`, t('ball8Round', { r: v })])); return r; },
+    opts: () => [4, 3, 2, 1, 0].map((p, i) => ({ key: p, pts: p, label: L.opt.ball8[i], sub: t('opt.points', { p }) })), cols: 2 },
+  ball50: { needs: [['putt']], kind: 'shots', higher: false, baseline: true, puttLabel: true,
+    shots: () => Array.from({ length: 50 }, (_, i) => [`${(i % 5) + 1} m`, t('ui.seriesOf', { i: Math.floor(i / 5) + 1, n: 10 }) + ' · ' + t('gen.newHole')]),
+    opts: () => [1, 2, 3].map((p, i) => ({ key: p, pts: p, label: L.opt.ball50[i] })), cols: 3 },
+  twoSix: { needs: [['putt']], kind: 'twoSix', higher: true, baseline: true },
+  lagSGF: { needs: [['putt']], kind: 'shots', higher: false, baseline: true, puttLabel: true,
+    shots: () => LAG_SGF.map((d, i) => [`${d} m`, (i < 9 ? t('ui.out') : t('ui.in')) + ' · ' + t('gen.newHole')]),
+    opts: () => [-2, -1, 0, 1, 2, 3].map((p, i) => ({ key: p, pts: p, label: L.opt.lagSGF[i], sub: fmtS(p, 0) || '0' })), cols: 2 },
+  driver: { needs: [['rangeGrass', 'toptracer']], club: 'D', kind: 'driver', higher: true },
+  nine: { needs: [RANGE], kind: 'count', n: 9, higher: true },
+  sevenTen: { needs: [RANGE], kind: 'count', n: 10, higher: true, level: { start: 17.5, step: -2.5, lim: 2.5, thr: 7 } },
+};
+const testName = id => t('test.' + id + '.name');
+const tstate = id => D.tests[id] || (D.tests[id] = { level: TESTS[id].level ? TESTS[id].level.start : null, results: [] });
+const lvlText = (id, v) => v == null ? '' : t('test.' + id + '.lvl', { v: fmtN(v) });
+function fmtVal(id, r) {
+  const T = TESTS[id];
+  if (T.kind === 'count') return `${r.v}/${T.n}`;
+  if (id === 'ball50') return `${r.v}`;
+  if (id === 'lagSGF') return fmtS(r.v, 0) || '0';
+  if (id === 'driver') return r.v == null ? '–' : fmtS(r.v);
+  if (id === 'btb3') return fmtN(r.v) + '/10';
+  if (id === 'ball8') return `${r.v}/160`;
+  if (id === 'twoSix') return `${r.v}/${r.of}`;
+  return String(r.v);
+}
+function bestOf(id) {
+  const rs = tstate(id).results.filter(r => r.v != null && (id !== 'twoSix' || r.of));
+  if (!rs.length) return null;
+  const score = r => id === 'twoSix' ? r.v / r.of : r.v;
+  return rs.reduce((b, r) => (TESTS[id].higher ? score(r) > score(b) : score(r) < score(b)) ? r : b);
+}
+
+// =====================================================================
+// Data och migrering från version 1
+// =====================================================================
+const KEY = 'golftraning.v2';
+const defaults = () => ({ v: 2, settings: { pile: 16, seriesLen: 4, flags: 2, theme: null }, places: DEFAULT_PLACES(), placeId: 'brohof',
+  sessions: [], tests: {}, yardage: {}, period: null, cur: null });
+
+function v1Lines(r) {
+  const pct = (h, a) => a ? Math.round(h / a * 100) + ' %' : '–', out = [], b = r.b || {}, V = 'v1.lines.';
+  const hit = (id, key) => { const x = b[id]; if (x && (x.a || x.h)) out.push(t(V + key, { h: x.h, a: x.a, p: pct(x.h, x.a) }) + (id === 'chip' && x.a ? t(V + 'base', { b: x.base ?? 0, n: Math.min(x.a, 10) }) : '')); };
+  hit('chip', 'chip'); hit('bunker', 'bunker'); hit('putt', 'putt'); hit('lag', 'lag'); hit('updown', 'updown');
+  const i = b.inspel; if (i && (i.k + i.l + i.p)) out.push(t(V + 'inspel', { k: i.k, l: i.l, pl: i.p, p: pct(i.p, i.k + i.l + i.p) }));
+  return out;
+}
+function migrateV1(d) {
+  const hist = LS.get('narspel.hist', []);
+  if (Array.isArray(hist)) hist.forEach(r => d.sessions.push({ id: 'v1-' + r.id, date: r.start, placeName: t('ui.v1Place'), v1: true,
+    items: [{ kind: 'module', id: 'v1', name: t('v1.name'), lines: v1Lines(r) }] }));
+  const th = LS.get('narspel.theme', null); if (th) d.settings.theme = th;
+  d.sessions.sort((a, b) => b.date.localeCompare(a.date));
+  return d;   // de gamla nycklarna lämnas orörda
+}
+function load() {
+  const d = LS.get(KEY, null);
+  if (!d || d.v !== 2) return migrateV1(defaults());
+  const base = defaults();
+  return { ...base, ...d, settings: { ...base.settings, ...d.settings } };
+}
+let D = load();
+const save = () => LS.set(KEY, D);
+const placeById = id => D.places.find(p => p.id === id);
+const curPlace = () => placeById(D.placeId) || D.places[0];
+
+// =====================================================================
+// Pass: kö av moduler/tester, steg och resultat
+// =====================================================================
+let view = D.cur ? 'run' : 'home', editPlaceId = null, lastSaved = null;
+const qItem = () => D.cur && D.cur.queue[D.cur.qi];
+const runPlace = () => placeById(D.cur?.placeId) || curPlace();
+const stepsOf = q => q.kind === 'module' ? MODULES[q.id].steps : [{ type: 'test', test: q.id }];
+
+function startItems(items) {
+  if (!D.cur) D.cur = { id: uid(), date: new Date().toISOString(), placeId: D.placeId, queue: [], qi: 0, si: 0, st: {}, items: [] };
+  const was = D.cur.queue.length;
+  D.cur.queue.push(...items);
+  if (D.cur.qi >= was) { D.cur.qi = was; D.cur.si = 0; D.cur.st = {}; beginItem(); }
+  view = 'run'; save(); render(); scrollTo(0, 0); syncWake();
+}
+function beginItem() {
+  const q = qItem();
+  if (q && q.kind === 'module') D.cur.items.push({ kind: 'module', id: q.id, name: t('mod.' + q.id + '.name'), lines: [] });
+}
+function modLog(line) {
+  const it = [...D.cur.items].reverse().find(i => i.kind === 'module');
+  if (it && qItem()?.kind === 'module') it.lines.push(line);
+}
+function nextStep() {
+  const c = D.cur; c.si++; c.st = {};
+  if (c.si >= stepsOf(qItem()).length) { c.qi++; c.si = 0; if (c.qi < c.queue.length) beginItem(); }
+  save(); render(); scrollTo(0, 0); syncWake();
+}
+function endSession() {
+  const c = D.cur;
+  const hasData = c.items.some(i => i.kind === 'test' || i.lines.length);
+  if (!confirm(hasData ? t('ui.confirmEnd') : t('ui.confirmDiscard'))) return;
+  if (hasData) {
+    const p = placeById(c.placeId);
+    const s = { id: c.id, date: c.date, placeId: c.placeId, placeName: p ? p.name : '', items: c.items.filter(i => i.kind === 'test' || i.lines.length) };
+    D.sessions.unshift(s); lastSaved = s; view = 'summary'; toast(t('ui.saved'));
+  } else { view = 'home'; toast(t('ui.nothingToSave')); }
+  D.cur = null; save(); render(); scrollTo(0, 0); syncWake();
+}
+function recordTest(id, v, text, extra = {}) {
+  const ts = tstate(id), T = TESTS[id];
+  const r = { date: new Date().toISOString(), v, text, sid: D.cur?.id, ...extra };
+  if (T.level) {
+    r.lvl = ts.level;
+    const next = v >= T.level.thr ? +(clamp(ts.level + T.level.step, T.level.step < 0 ? T.level.lim : null, T.level.step > 0 ? T.level.lim : null)).toFixed(2) : ts.level;
+    r.nextLvl = next; ts.level = next;
+  }
+  ts.results.push(r);
+  if (D.cur) D.cur.items.push({ kind: 'test', id, name: testName(id), v, text: fmtVal(id, r) + (text ? ' · ' + text : ''), lvl: r.lvl ?? null });
+  return r;
+}
+
+// =====================================================================
+// Förslag, påminnelser och schema
+// =====================================================================
+function lastDoneModule(id) {
+  for (const s of D.sessions) if (s.items.some(i => i.kind === 'module' && i.id === id)) return s.date;
+  return null;
+}
+function lastTest(id) { const r = tstate(id).results; return r.length ? r[r.length - 1] : null; }
+function suggestions(place) {
   const out = [];
-  for (const b of BLOCKS) {
-    const r = rec.b[b.id];
-    if (!r) continue;
-    if (b.type === 'hits' && (r.a || r.h)) {
-      let l = `${b.share}: ${r.h}/${r.a} ${b.unit} (${pct(r.h, r.a)})`;
-      if (b.id === 'chip' && r.a) l += ` · baslinje ${r.base ?? 0}/${Math.min(r.a, 10)}`;
-      out.push(l);
-    } else if (b.type === 'three' && (r.k + r.l + r.p)) {
-      out.push(`${b.share}: kort ${r.k} · lång ${r.l} · på längd ${r.p} (${pct(r.p, r.k + r.l + r.p)})`);
+  for (const g of GROUP_ORDER) {
+    const mods = Object.keys(MODULES).filter(id => MODULES[id].grp === g && fits(place, MODULES[id]));
+    if (!mods.length) continue;
+    mods.sort((a, b) => (lastDoneModule(a) || '').localeCompare(lastDoneModule(b) || ''));   // minst nyligen gjord först
+    out.push(mods[0]);
+    if (out.length === 2) break;
+  }
+  return out;
+}
+function reminders(place) {
+  const out = [], now = Date.now(), p = D.period;
+  if (p && p.placeId === place.id) {
+    const start = new Date(p.start).getTime(), end = start + p.weeks * 7 * DAY;
+    if (now >= start && now < end) {
+      const week1 = now < start + 7 * DAY, last = now >= end - 7 * DAY;
+      if (week1 || last) {
+        const since = week1 ? start : end - 7 * DAY;
+        const due = Object.keys(TESTS).filter(id => TESTS[id].baseline && fits(place, TESTS[id]) &&
+          !tstate(id).results.some(r => new Date(r.date).getTime() >= since));
+        if (due.length) out.push({ head: week1 ? t('ui.periodBaseline') : t('ui.periodRetest'), tests: due });
+      }
     }
+  }
+  if (fits(place, TESTS.ball8)) {
+    const lt = lastTest('ball8');
+    if (!lt || daysSince(lt.date) >= 30) out.push({ head: t('ui.monthly8'), tests: ['ball8'] });
   }
   return out;
 }
 
-function shareText(rec) {
-  const l = lines(rec);
-  return [`⛳ Närspel med variation – ${fmtDate(rec.start)}`, `${rec.long ? 90 : 75} min-pass · tränad tid ${Math.round(rec.total / 60000)} min`, '',
-    ...(l.length ? l : ['Inga resultat registrerade'])].join('\n');
+// =====================================================================
+// Rendering
+// =====================================================================
+function render() {
+  const tabs = [['home', 'ui.tabHome'], ...(D.cur ? [['run', 'ui.tabRun']] : []), ['hist', 'ui.tabHist'], ['settings', 'ui.tabSettings']];
+  const active = view === 'placeEdit' ? 'settings' : view === 'summary' ? 'hist' : view;
+  $('#tabs').innerHTML = tabs.map(([v, k]) => `<button class="tab ${v === 'settings' ? 'icon' : ''}" role="tab" data-act="tab" data-v="${v}" aria-selected="${active === v}" aria-label="${t(k)}">${v === 'settings' ? '⚙︎' : t(k)}</button>`).join('');
+  $('#themeBtn').textContent = document.documentElement.dataset.theme === 'dark' ? '☀︎' : '☾';
+  $('#themeBtn').setAttribute('aria-label', t('ui.themeLabel'));
+  const V = { home: homeHTML, run: runHTML, hist: histHTML, settings: settingsHTML, placeEdit: placeEditHTML, summary: summaryHTML }[view] || homeHTML;
+  $('#view').innerHTML = V();
 }
 
-async function share(rec) {
-  const text = shareText(rec);
-  if (navigator.share) {
-    try { await navigator.share({ title: 'Närspel – resultat', text }); return; }
-    catch (e) { if (e.name === 'AbortError') return; }
+function homeHTML() {
+  const p = curPlace();
+  const stList = STATIONS.filter(k => p.st[k]).map(k => t('stations.' + k)).join(', ');
+  let h = `<h1>${t('ui.choosePlace')}</h1><div class="chips">${D.places.map(x =>
+    `<button class="chip" data-act="place" data-id="${x.id}" aria-pressed="${x.id === p.id}">${esc(x.name)}</button>`).join('')}</div>
+    <div class="box soft"><div class="small">${t('ui.stationsHere', { list: stList || t('ui.none') })}</div>
+    <div class="small">${t('ui.maxClub', { club: club(p.maxClub || 'D') })}</div>
+    <button class="btn small" data-act="editPlace" data-id="${p.id}">${t('ui.editPlace')}</button></div>`;
+  if (D.cur) h += `<div class="box alert"><h3>${t('ui.ongoing')}</h3><p class="small">${t('ui.ongoingText', { n: D.cur.items.length })}</p>
+    <button class="btn primary" data-act="tab" data-v="run">${t('ui.resume')}</button></div>`;
+  const rem = reminders(p);
+  if (rem.length) h += `<h2>${t('ui.reminders')}</h2>` + rem.map(r => `<div class="box alert"><h3>${r.head}</h3>
+    ${r.tests.map(id => `<button class="btn dark small" data-act="startTest" data-id="${id}">${t('ui.dueTest', { name: testName(id) })}</button>`).join('')}</div>`).join('');
+  const sug = suggestions(p);
+  if (sug.length) {
+    h += `<h2>${t('ui.suggest')}</h2><div class="box">${sug.map(id => `<h3>${t('mod.' + id + '.name')}</h3><p class="small muted">${t('mod.' + id + '.desc')}</p>`).join('')}
+      ${sug.length === 2 ? `<button class="btn primary huge" data-act="startMods" data-ids="${sug.join(',')}">${t('ui.suggestBoth')}</button>` : ''}
+      <button class="btn ${sug.length === 2 ? '' : 'primary huge'}" data-act="startMods" data-ids="${sug[0]}">${t('ui.suggestOne', { name: t('mod.' + sug[0] + '.name') })}</button></div>`;
+  } else h += `<p class="box">${t('ui.noModules')}</p>`;
+  const mods = Object.keys(MODULES).filter(id => fits(p, MODULES[id]));
+  if (mods.length) h += `<h2>${t('ui.modulesHere')}</h2><div class="list">${mods.map(id => { const ld = lastDoneModule(id);
+    return `<button class="item" data-act="startMods" data-ids="${id}"><span class="t">${t('mod.' + id + '.name')}<small>${t('mod.' + id + '.desc')}<br>${ld ? t('ui.lastDone', { when: when(ld) }) : t('ui.never')}</small></span><span class="go">›</span></button>`; }).join('')}</div>`;
+  const tests = Object.keys(TESTS).filter(id => fits(p, TESTS[id]));
+  if (tests.length) h += `<h2>${t('ui.testsHere')}</h2><div class="list">${tests.map(id => { const lt = lastTest(id), b = bestOf(id), lv = tstate(id).level;
+    const meta = [lt ? `${t('ui.latest')} ${fmtVal(id, lt)} (${when(lt.date)})` : t('ui.never'), b ? `${t('ui.best')} ${fmtVal(id, b)}` : '', lv != null ? lvlText(id, lv) : ''].filter(Boolean).join(' · ');
+    return `<button class="item" data-act="startTest" data-id="${id}"><span class="t">${testName(id)}<small>${meta}</small></span><span class="go">›</span></button>`; }).join('')}</div>`;
+  return h;
+}
+
+function runHTML() {
+  const c = D.cur;
+  if (!c) { view = 'home'; return homeHTML(); }
+  const q = qItem();
+  const endBtn = `<button class="btn danger" data-act="endSession">${t('ui.endSession')}</button>`;
+  if (!q) return `<h1>${t('ui.allDone')}</h1><p>${t('ui.allDoneText')}</p>${itemsHTML(c.items)}
+    <button class="btn" data-act="tab" data-v="home">${t('ui.moreFromHome')}</button><button class="btn primary huge" data-act="endSessionNow">${t('ui.endSession')}</button>`;
+  const steps = stepsOf(q), step = steps[c.si];
+  const title = q.kind === 'module' ? t('mod.' + q.id + '.name') : testName(q.id);
+  const crumb = [c.queue.length > 1 ? t('ui.item', { i: c.qi + 1, n: c.queue.length }) : '', steps.length > 1 ? t('ui.step', { i: c.si + 1, n: steps.length }) : ''].filter(Boolean).join(' · ');
+  let body = '';
+  switch (step.type) {
+    case 'tech': body = `<div class="box soft"><h3>${t('ui.techOptional')}</h3><p>${t('mod.' + q.id + '.tech')}</p></div>
+      <button class="btn primary huge" data-act="techDone">${t('ui.done')}</button>`; break;
+    case 'series': body = seriesHTML(step); break;
+    case 'streak': body = streakHTML(); break;
+    case 'test': body = testHTML(step.test); break;
+    case 'yardage': body = yardageHTML(); break;
+    case 'gc2past': body = gc2HTML(); break;
   }
-  try { await navigator.clipboard.writeText(text); toast('Resultat kopierat'); }
+  return `<div class="runhead"><div class="crumb">${crumb}</div><h1>${title}</h1></div>${body}
+    <div class="btnrow" style="margin-top:20px"><button class="btn small" data-act="skip">${t('ui.skipStep')}</button>${endBtn.replace('btn danger', 'btn small danger')}</div>`;
+}
+
+// ----- Variationsserier -----
+function seriesHTML(step) {
+  const st = D.cur.st, place = runPlace(), g = GENS[step.gen];
+  if (step.askDist && st.dist == null) {
+    const [a, b] = step.askDist, nums = []; for (let d = a; d <= b; d++) nums.push(d);
+    return `<h2>${t('ui.chooseDist', { n: step.station })}</h2><div class="numgrid">${nums.map(d => `<button data-act="setDist" data-v="${d}">${d}</button>`).join('')}</div>`;
+  }
+  if (step.askBalls && st.total == null) {
+    st.pendingBalls = st.pendingBalls || step.askBalls;
+    return `<h2>${t('ui.chooseBalls')}</h2><div class="stepper"><button data-act="balls" data-d="-4">−</button><output>${st.pendingBalls}</output><button data-act="balls" data-d="4">+</button></div>
+      <button class="btn primary huge" data-act="ballsOk">${t('ui.startSeries')}</button>`;
+  }
+  const len = g.len || D.settings.seriesLen;
+  const total = st.total ?? step.balls ?? D.settings.pile;
+  const nSeries = Math.ceil(total / len);
+  st.n = st.n || 0;
+  if (st.n >= nSeries) {   // registrering i slutet (myntövningen)
+    return `<h2>${t('ui.regEnd', { label: t('reg.' + step.regEnd) })}</h2><div class="numgrid">${Array.from({ length: 11 }, (_, i) => `<button data-act="regEnd" data-v="${i}">${i}</button>`).join('')}</div>`;
+  }
+  if (!st.cur) {
+    const thisLen = Math.min(len, total - st.n * len);
+    const s = makeSeries(step.gen, { len: thisLen, place, prevKey: st.lastKey, prevPre: st.lastPre, seriesNo: st.n });
+    st.cur = s.shots; st.pre = s.pre; st.lastKey = s.lastKey; save();
+  }
+  const a = st.n * len + 1, b = st.n * len + st.cur.length;
+  let head = '';
+  if (step.station) head += `<div class="prog">${t('ui.station', { n: step.station })} · ${st.dist} m</div>`;
+  if (step.gen === 'justPast') head += `<div class="head">${t('ui.lengthM', { d: st.pre.dist })}</div><div class="sub">${t('ui.landPast')}</div>`;
+  if (step.gen === 'coins') head += `<div class="sub">${t('gen.coinVariant.' + st.pre.variant)}</div>`;
+  if (step.gen === 'heights3' && st.pre.flag) head += `<div class="sub">${t('gen.flag', { f: st.pre.flag })}</div>`;
+  const explain = g.explain && st.n === 0 ? `<div class="explain">${t('gen.explain')}</div>` : '';
+  const shots = st.cur.map((s, i) => `<div class="shot"><span class="n">${a + i}</span><div>${shotHTML(step.gen, s)}</div></div>`).join('');
+  const last = st.n + 1 >= nSeries;
+  const action = step.reg
+    ? `<h3>${t('ui.regAfter', { label: t('reg.' + step.reg) })}</h3><div class="numgrid ${st.cur.length === 3 ? 'c3' : ''}">${Array.from({ length: st.cur.length + 1 }, (_, i) => `<button data-act="regSeries" data-v="${i}">${i}</button>`).join('')}</div>`
+    : `<button class="btn primary huge" data-act="nextSeries">${last && !step.regEnd ? t('ui.lastSeries') : t('ui.nextSeries')}</button>`;
+  return `${explain}<div class="prog">${t('ui.seriesOf', { i: st.n + 1, n: nSeries })} · ${t('ui.ballsRange', { a, b, t: total })}</div>
+    <div class="series">${head}${shots}</div>${action}`;
+}
+function seriesAdvance(step) {
+  const st = D.cur.st, g = GENS[step.gen], len = g.len || D.settings.seriesLen;
+  const total = st.total ?? step.balls ?? D.settings.pile, nSeries = Math.ceil(total / len);
+  st.lastPre = st.pre; st.cur = null; st.n = (st.n || 0) + 1;
+  if (st.n >= nSeries && !step.regEnd) {
+    if (step.reg) modLog(t('log.reg', { label: t('reg.' + step.reg), sum: (st.regs || []).reduce((x, y) => x + y, 0), tot: total }));
+    else if (step.station) modLog(t('log.station', { n: step.station, d: st.dist, s: nSeries }));
+    else modLog(t('log.series', { s: nSeries }));
+    nextStep(); return;
+  }
+  save(); render(); scrollTo(0, 0);
+}
+
+// ----- Leapfrog -----
+function streakHTML() {
+  const st = D.cur.st; st.now = st.now || 0; st.tries = st.tries || [];
+  return `<div class="box"><h3>${t('ui.streakNow')}</h3><div class="stepper"><button data-act="streak" data-d="-1">−</button><output>${st.now}</output><button data-act="streak" data-d="1">+</button></div>
+    <button class="btn dark" data-act="streakSave">${t('ui.saveTry')}</button>
+    ${st.tries.length ? `<p class="small">${t('ui.tries', { list: st.tries.join(', ') })} · ${t('ui.best')} ${Math.max(...st.tries)}</p>` : ''}</div>
+    <button class="btn primary huge" data-act="streakDone">${t('ui.done')}</button>`;
+}
+
+// ----- Längdtabell (GC2) -----
+const SWINGS = ['hip', 'chest', 'shoulder', 'threeQ', 'full'];
+function yardageHTML() {
+  const st = D.cur.st, place = runPlace(), ws = clubsAt(place, WEDGES);
+  st.w = st.w || ws[0]; st.sign = st.sign || {};
+  const rows = SWINGS.map(sw => { const v = D.yardage[st.w]?.[sw] || {}, sg = st.sign[sw] || (v.side < 0 ? 'L' : 'R');
+    return `<div class="box"><h3>${t('swing.' + sw)}</h3><div class="row">
+      <input type="number" inputmode="decimal" id="c-${sw}" placeholder="${t('ui.carry')}" value="${v.carry ?? ''}" class="grow" style="flex:1 1 40%">
+      <input type="number" inputmode="decimal" id="s-${sw}" placeholder="${t('ui.side')}" value="${v.side != null ? Math.abs(v.side) : ''}" style="flex:1 1 25%">
+      <button class="chip" data-act="ySign" data-sw="${sw}" aria-pressed="true">${sg === 'L' ? t('ui.left') : t('ui.right')}</button></div>
+      <button class="btn small dark" data-act="ySave" data-sw="${sw}">${t('ui.saveRow')}</button></div>`; }).join('');
+  return `<p class="small">${t('ui.yardHint')}</p><div class="chips">${ws.map(w => `<button class="chip" data-act="yW" data-w="${w}" aria-pressed="${w === st.w}">${club(w)}</button>`).join('')}</div>
+    ${rows}<button class="btn primary huge" data-act="yDone">${t('ui.done')}</button>`;
+}
+
+// ----- Precis förbi med GC2 -----
+function gc2HTML() {
+  const st = D.cur.st, len = D.settings.seriesLen, total = D.settings.pile, nSeries = Math.ceil(total / len);
+  st.n = st.n || 0; st.all = st.all || [];
+  if (!st.dist) { let d; do d = 40 + rnd(61); while (st.prevDist && Math.abs(d - st.prevDist) < 10); st.dist = d; st.shots = []; save(); }
+  const inS = Math.min(len, total - st.n * len);
+  const list = st.shots.map((c, i) => { const diff = c - st.dist; return `<div class="shot"><span class="n">${i + 1}</span><div><div class="big">${fmtN(c)} m</div><div class="sub">${fmtS(diff)} m ${diff >= 0 && diff <= 2 ? '✓' : ''}</div></div></div>`; }).join('');
+  const ok = st.all.filter(x => x.diff >= 0 && x.diff <= 2).length;
+  const input = st.shots.length < inS
+    ? `<label class="f" for="carry">${t('ui.enterCarry')}</label><input type="number" inputmode="decimal" id="carry"><button class="btn primary huge" data-act="gcReg">${t('ui.register')}</button>`
+    : `<button class="btn primary huge" data-act="gcNext">${st.n + 1 >= nSeries ? t('ui.lastSeries') : t('ui.nextSeries')}</button>`;
+  return `<div class="prog">${t('ui.seriesOf', { i: st.n + 1, n: nSeries })} · ${t('ui.okPast', { n: ok, t: st.all.length })}</div>
+    <div class="series"><div class="head">${t('ui.target')}: ${st.dist} m</div><div class="sub">${t('ui.landPast')}</div>${list}</div>${input}`;
+}
+
+// ----- Tester -----
+function testInfoHTML(id) {
+  const ts = tstate(id), lt = lastTest(id), b = bestOf(id), T = TESTS[id];
+  const ref = L.test[id].ref ? `<div class="ref"><b>${t('ui.reference')}:</b> ${L.test[id].ref}<span class="src">${t('ui.source')}: ${L.test[id].src}</span></div>` : '';
+  return `<div class="box soft"><p>${L.test[id].desc}</p>
+    <div class="stats"><div class="stat"><span>${t('ui.latest')}</span><b>${lt ? fmtVal(id, lt) : t('ui.none')}</b></div>
+    <div class="stat"><span>${t('ui.best')}</span><b>${b ? fmtVal(id, b) : t('ui.none')}</b></div>
+    ${T.level ? `<div class="stat" style="grid-column:1/-1"><span>${t('ui.level')}</span><b>${lvlText(id, ts.level)}</b><span>${L.test[id].rule}</span></div>` : ''}</div>${ref}</div>`;
+}
+function testHTML(id) {
+  const T = TESTS[id], st = D.cur.st;
+  if (st.result) return resultHTML(id, st.result);
+  let h = testInfoHTML(id);
+  if (T.kind === 'count') {
+    h += `<h2>${L.test[id].ask}</h2>`;
+    if (id === 'nine') { st.order = st.order || shuffle(SHAPES.flatMap(s => HEIGHTS.map(x => L.gen.shapes[s] + ' · ' + L.gen.heights[x]))); h += `<div class="box">${st.order.map((x, i) => `${i + 1}. ${x}`).join('<br>')}</div>`; }
+    h += `<div class="numgrid">${Array.from({ length: T.n + 1 }, (_, i) => `<button data-act="cntPick" data-v="${i}" aria-pressed="${st.pick === i}">${i}</button>`).join('')}</div>
+      <button class="btn primary huge" data-act="cntSave" ${st.pick == null ? 'disabled' : ''}>${t('ui.saveResult')}</button>`;
+  } else if (T.kind === 'shots') h += shotsTestHTML(id);
+  else if (T.kind === 'twoSix') h += twoSixHTML();
+  else if (T.kind === 'driver') h += driverHTML();
+  return h;
+}
+function resultHTML(id, r) {
+  const T = TESTS[id];
+  let lvl = '';
+  if (T.level) lvl = `<p><b>${r.nextLvl !== r.lvl ? t('ui.nextLevel', { lvl: lvlText(id, r.nextLvl) }) : t('ui.levelSame', { lvl: lvlText(id, r.nextLvl) })}</b></p>`;
+  return `<div class="box alert"><h3>${t('ui.result')}</h3><div class="series"><div class="head">${fmtVal(id, r)}</div><div class="sub">${esc(r.text || '')}</div></div>${lvl}</div>
+    ${testInfoHTML(id)}<button class="btn primary huge" data-act="testDone">${t('ui.next')}</button>`;
+}
+
+function shotsTestHTML(id) {
+  const T = TESTS[id], st = D.cur.st, shots = T.shots(), opts = T.opts();
+  st.picks = st.picks || [];
+  const i = st.picks.length;
+  const dots = `<div class="dots">${shots.map((_, k) => `<i class="${k < i ? 'on' : ''}"></i>`).join('')}</div>`;
+  if (i >= shots.length) {
+    const r = shotsResult(id, st.picks);
+    return `${dots}<div class="box"><div class="series"><div class="head">${r.label}</div><div class="sub">${esc(r.text)}</div></div></div>
+      <button class="btn primary huge" data-act="shotsSave">${t('ui.saveResult')}</button><button class="btn" data-act="shotsUndo">${t('ui.undo')}</button>`;
+  }
+  const [big, sub] = shots[i];
+  return `<div class="shotcard"><div class="no">${t(T.puttLabel ? 'ui.puttNo' : 'ui.shotNo', { i: i + 1, n: shots.length })}</div><div class="big">${big}</div><div class="sub">${sub || ''}</div></div>
+    <div class="opts ${T.cols === 3 ? 'c3' : 'c2'}">${opts.map(o => `<button class="btn dark" data-act="shotPick" data-k="${o.key}">${o.label}${o.sub ? `<span class="sub">${o.sub}</span>` : ''}</button>`).join('')}</div>
+    ${dots}${i ? `<button class="btn" data-act="shotsUndo">${t('ui.undo')}</button>` : ''}`;
+}
+function shotsResult(id, picks) {
+  const opts = TESTS[id].opts(), pts = picks.map(k => opts.find(o => String(o.key) === String(k)).pts);
+  const sum = pts.reduce((a, b) => a + b, 0);
+  if (id === 'btb3') {
+    const c = k => picks.filter(p => p === k).length;
+    const text = `${L.opt.btb.W[0]} ${c('W')} · ${L.opt.btb.D[0]} ${c('D')} · ${L.opt.btb.L[0]} ${c('L')}`;
+    return { v: sum, text, label: fmtN(sum) + '/10' };
+  }
+  if (id === 'ball50') {
+    const per = [1, 2, 3, 4, 5].map(d => pts.filter((_, i) => i % 5 === d - 1).reduce((a, b) => a + b, 0));
+    return { v: sum, text: per.map((s, i) => `${i + 1} m: ${s}`).join(' · ') + ' (par 72)', label: String(sum) };
+  }
+  if (id === 'lagSGF') return { v: sum, text: `${t('ui.out')} ${fmtS(pts.slice(0, 9).reduce((a, b) => a + b, 0), 0) || '0'} · ${t('ui.in')} ${fmtS(pts.slice(9).reduce((a, b) => a + b, 0), 0) || '0'}`, label: fmtS(sum, 0) || '0' };
+  if (id === 'ball8') {
+    const per = BALL8.map(([k, d], s) => `${t('ball8St.' + k)} ${d}: ${pts.filter((_, i) => i % 8 === s).reduce((a, b) => a + b, 0)}`);
+    return { v: sum, text: per.join(' · '), label: `${sum}/160` };
+  }
+  return { v: sum, text: '', label: String(sum) };
+}
+
+const TS_ORDER = [6, 5, 4, 3, 2];
+function twoSixHTML() {
+  const st = D.cur.st, X = L.test.twoSix;
+  if (!st.variant) return `<button class="btn primary huge" data-act="tsVar" data-v="full">${X.full}</button><button class="btn" data-act="tsVar" data-v="short">${X.short}</button>`;
+  const reps = st.variant === 'full' ? 3 : 2;
+  st.line = st.line || 0; st.c = st.c || {}; st.x = st.x || {};
+  if (st.line >= 4) {
+    const r = twoSixResult(st);
+    return `<div class="box"><div class="series"><div class="head">${r.v}/${r.of}</div><div class="sub">${r.text}</div></div></div>
+      <button class="btn primary huge" data-act="tsSave">${t('ui.saveResult')}</button><button class="btn" data-act="tsBack">${t('ui.back')}</button>`;
+  }
+  const li = st.line, c = st.c[li] = st.c[li] || {}, x = st.x[li] = st.x[li] || {};
+  const order = Array.from({ length: reps }, () => TS_ORDER.join('-')).join('-');
+  const rows = TS_ORDER.map(d => `<h3>${t('test.twoSix.holedAt', { d, n: reps })}</h3><div class="numgrid ${reps === 3 ? '' : 'c3'}">${Array.from({ length: reps + 1 }, (_, i) =>
+    `<button data-act="tsSet" data-d="${d}" data-v="${i}" aria-pressed="${c[d] === i}">${i}</button>`).join('')}</div>`).join('');
+  const exKeys = ['short', 'long', ...(li % 2 === 0 ? ['left', 'right'] : ['low', 'high'])];
+  const extras = `<details class="box"><summary><b>${X.extras}</b></summary>${exKeys.map(k => `<div class="row" style="margin:8px 0"><span class="grow"><b>${X.ex[k]}</b></span>
+    <button class="chip" data-act="tsEx" data-k="${k}" data-d="-1">−</button><b style="min-width:36px;text-align:center">${x[k] || 0}</b><button class="chip" data-act="tsEx" data-k="${k}" data-d="1">+</button></div>`).join('')}</details>`;
+  const done = TS_ORDER.every(d => c[d] != null);
+  return `<div class="series"><div class="head">${t('test.twoSix.lineHead', { i: li + 1, name: X.lines[li] })}</div><div class="sub">${t('test.twoSix.order', { o: order })}</div></div>
+    ${rows}${extras}<button class="btn primary huge" data-act="tsNext" ${done ? '' : 'disabled'}>${X.nextLine}</button>${li ? `<button class="btn" data-act="tsBack">${t('ui.back')}</button>` : ''}`;
+}
+function twoSixResult(st) {
+  const reps = st.variant === 'full' ? 3 : 2, X = L.test.twoSix;
+  const per = {}; TS_ORDER.forEach(d => per[d] = [0, 1, 2, 3].reduce((a, li) => a + (st.c[li]?.[d] || 0), 0));
+  const v = Object.values(per).reduce((a, b) => a + b, 0), of = reps * 5 * 4;
+  const ex = {}; Object.values(st.x).forEach(o => Object.entries(o).forEach(([k, n]) => ex[k] = (ex[k] || 0) + n));
+  const exTxt = Object.entries(ex).filter(([, n]) => n).map(([k, n]) => `${X.ex[k].split(' (')[0]} ${n}`).join(' · ');
+  const text = [2, 3, 4, 5, 6].map(d => t('test.twoSix.perDist', { d, p: Math.round(per[d] / (reps * 4) * 100), e: ET26[d] })).join(' · ') + (exTxt ? ' · ' + exTxt : '');
+  return { v, of, text, per };
+}
+
+function driverHTML() {
+  const st = D.cur.st, X = L.test.driver;
+  st.drives = st.drives || []; st.dir = st.dir || 'R';
+  const n = st.drives.length;
+  const list = st.drives.length ? `<table class="t"><tr><th>#</th><th>${X.len}</th><th>${X.side}</th></tr>${st.drives.map((d, i) => `<tr><td>${i + 1}</td><td>${fmtN(d.len)}</td><td>${fmtS(d.side)}</td></tr>`).join('')}</table>` : '';
+  if (n >= 12) {
+    const r = driverResult(st.drives);
+    return `${list}<div class="box"><div class="series"><div class="head">${r.v == null ? '–' : fmtS(r.v)}</div><div class="sub">${esc(r.text)}</div></div></div>
+      <button class="btn primary huge" data-act="drvSave">${t('ui.saveResult')}</button><button class="btn" data-act="drvUndo">${t('ui.undo')}</button>`;
+  }
+  return `<div class="shotcard"><div class="no">${t('test.driver.drive', { i: n + 1 })}</div>
+    <label class="f" for="dLen">${X.len}</label><input type="number" inputmode="decimal" id="dLen">
+    <label class="f" for="dSide">${X.side}</label><div class="row"><input type="number" inputmode="decimal" id="dSide" style="flex:1">
+    <button class="chip" data-act="drvDir" data-v="L" aria-pressed="${st.dir === 'L'}">${t('ui.left')}</button><button class="chip" data-act="drvDir" data-v="R" aria-pressed="${st.dir === 'R'}">${t('ui.right')}</button></div>
+    <button class="btn primary huge" data-act="drvReg">${t('ui.register')}</button></div>${list}${n ? `<button class="btn" data-act="drvUndo">${t('ui.undo')}</button>` : ''}`;
+}
+function driverHcp(avgLen, avgSide) {
+  // Avrunda till det sämre värdet: kortare längd (rad nedåt), större sidledsmiss (kolumn uppåt).
+  if (avgLen < DRIVER_LENS[0]) return null;
+  let ri = 0; DRIVER_LENS.forEach((l, i) => { if (l <= avgLen) ri = i; });
+  const col = Math.max(1, Math.ceil(avgSide - 1e-9));
+  if (col > 30) return null;
+  return DRIVER_HCP[ri][col - 1];
+}
+function driverCat(h) {
+  const r = Math.round(h), C = L.test.driver.cats;
+  return r <= -37 ? C.tb : r <= -19 ? C.db : r <= -10 ? C.bogey : r <= -1 ? C.single : r <= 3 ? C.elite : r <= 9 ? C.world : C.dream;
+}
+function driverResult(drives) {
+  const X = L.test.driver;
+  const al = drives.reduce((a, d) => a + d.len, 0) / drives.length, as = drives.reduce((a, d) => a + Math.abs(d.side), 0) / drives.length;
+  const h = driverHcp(al, as);
+  const text = t('test.driver.avg', { l: fmtN(al), s: fmtN(as) }) + ' · ' + (h == null ? X.outside : t('test.driver.hcp', { h: fmtS(h) }) + ' (' + driverCat(h) + ')');
+  return { v: h, text, avgLen: al, avgSide: as };
+}
+
+// ----- Historik -----
+function itemsHTML(items) {
+  return items.length ? `<ul>${items.map(i => i.kind === 'test'
+    ? `<li><b>${esc(i.name)}:</b> ${esc(i.text)}${i.lvl != null ? ` (${lvlText(i.id, i.lvl)})` : ''}</li>`
+    : `<li><b>${esc(i.name)}</b>${i.lines.length ? '<br>' + i.lines.map(esc).join('<br>') : ''}</li>`).join('')}</ul>` : '';
+}
+function sessionText(s) {
+  const lines = [t('share.head', { date: fmtDate(s.date) })];
+  if (s.placeName) lines.push(t('share.place', { p: s.placeName }));
+  lines.push('');
+  s.items.forEach(i => {
+    if (i.kind === 'test') lines.push(`${i.name}: ${i.text}${i.lvl != null ? ` (${lvlText(i.id, i.lvl)})` : ''}`);
+    else { lines.push(i.name); i.lines.forEach(l => lines.push('  ' + l)); }
+  });
+  return lines.join('\n');
+}
+function summaryHTML() {
+  const s = lastSaved;
+  if (!s) { view = 'hist'; return histHTML(); }
+  return `<h1>${t('ui.sessionSummary')}</h1><div class="box"><h3>${fmtDate(s.date)}</h3><div class="muted small">${esc(s.placeName)}</div>${itemsHTML(s.items)}</div>
+    <button class="btn dark huge" data-act="shareSession" data-id="${s.id}">${t('ui.shareResult')}</button><button class="btn" data-act="tab" data-v="home">${t('ui.newSession')}</button>`;
+}
+function chartSVG(vals, higher) {
+  const W = 300, H = 100, P = 16;
+  if (vals.length === 1) vals = [vals[0], vals[0]];
+  const mn = Math.min(...vals), mx = Math.max(...vals), span = mx - mn || 1;
+  const x = i => P + i * (W - 2 * P) / (vals.length - 1), y = v => H - P - (v - mn) / span * (H - 2 * P);
+  const pts = vals.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img"><line x1="${P}" y1="${y(mx)}" x2="${W - P}" y2="${y(mx)}"/><line x1="${P}" y1="${y(mn)}" x2="${W - P}" y2="${y(mn)}"/>
+    <polyline points="${pts}"/>${vals.map((v, i) => `<circle cx="${x(i)}" cy="${y(v)}" r="4"/>`).join('')}
+    <text x="2" y="${y(mx) - 3}">${fmtN(mx)}</text><text x="2" y="${y(mn) + 13}">${fmtN(mn)}</text></svg>`;
+}
+function yardageTable() {
+  const ws = WEDGES.filter(w => D.yardage[w]);
+  if (!ws.length) return `<p class="muted">${t('ui.noYardage')}</p>`;
+  return `<div class="scroll"><table class="t"><tr><th></th>${SWINGS.map(s => `<th>${t('swing.' + s)}</th>`).join('')}</tr>
+    ${ws.map(w => `<tr><th>${club(w)}</th>${SWINGS.map(s => { const v = D.yardage[w][s]; return `<td>${v ? `<b>${fmtN(v.carry)}</b><br><span class="muted">${v.side ? fmtS(v.side) : '0'}</span>` : '–'}</td>`; }).join('')}</tr>`).join('')}</table></div>
+    <p class="small muted">${t('ui.carry')} (m) / ${t('ui.side')} (m, ${t('ui.left')} = −)</p>`;
+}
+function histHTML() {
+  let h = `<h1>${t('ui.tabHist')}</h1><h2>${t('ui.histTests')}</h2>`;
+  const withRes = Object.keys(TESTS).filter(id => tstate(id).results.length);
+  h += withRes.length ? withRes.map(id => { const rs = tstate(id).results, b = bestOf(id), lt = rs[rs.length - 1];
+    const vals = rs.filter(r => r.v != null).map(r => id === 'twoSix' ? Math.round(r.v / r.of * 100) : r.v);
+    return `<div class="box"><h3>${testName(id)}</h3><div class="small">${t('ui.latest')} <b>${fmtVal(id, lt)}</b> (${fmtShort(lt.date)}) · ${t('ui.best')} <b>${b ? fmtVal(id, b) : '–'}</b>${tstate(id).level != null ? ' · ' + lvlText(id, tstate(id).level) : ''}</div>
+      ${vals.length ? chartSVG(vals, TESTS[id].higher) : ''}</div>`; }).join('') : `<p class="muted">${t('ui.never')}</p>`;
+  h += `<h2>${t('ui.histYardage')}</h2>${yardageTable()}<h2>${t('ui.histSessions')}</h2>`;
+  if (!D.sessions.length) return h + `<p class="muted">${t('ui.noHistory')}</p>`;
+  return h + D.sessions.map(s => `<article class="box"><h3>${fmtDate(s.date)}</h3><div class="muted small">${esc(s.placeName || '')}</div>${itemsHTML(s.items)}
+    <div class="btnrow"><button class="btn small dark" data-act="shareSession" data-id="${s.id}">${t('ui.share')}</button>
+    <button class="btn small danger" data-act="delSession" data-id="${s.id}">${t('ui.delete')}</button></div></article>`).join('');
+}
+
+// ----- Inställningar -----
+function stepper(act, val) { return `<div class="stepper"><button data-act="${act}" data-d="-1">−</button><output>${val}</output><button data-act="${act}" data-d="1">+</button></div>`; }
+function settingsHTML() {
+  const S = D.settings, p = D.period, cp = curPlace();
+  let per = '';
+  if (p) { const pl = placeById(p.placeId), end = new Date(new Date(p.start).getTime() + p.weeks * 7 * DAY - DAY);
+    per = `<p><b>${t('ui.periodNow', { place: esc(pl ? pl.name : '?'), from: fmtShort(p.start), to: fmtShort(end.toISOString()) })}</b></p><button class="btn danger small" data-act="periodEnd">${t('ui.periodEnd')}</button>`; }
+  else per = `<label class="f" for="pStart">${t('ui.periodStart')}</label><input type="date" id="pStart" value="${new Date().toISOString().slice(0, 10)}">
+    <label class="f" for="pWeeks">${t('ui.periodWeeks')}</label><select id="pWeeks">${[1, 2, 3, 4, 5, 6, 8].map(w => `<option ${w === 3 ? 'selected' : ''}>${w}</option>`).join('')}</select>
+    <button class="btn dark" data-act="periodSet">${t('ui.periodSet', { place: esc(cp.name) })}</button>`;
+  return `<h1>${t('ui.tabSettings')}</h1>
+    <h2>${t('ui.settingsSeries')}</h2>
+    <label class="f">${t('ui.pile')}</label>${stepper('setPile', S.pile)}
+    <label class="f">${t('ui.seriesLen')}</label>${stepper('setLen', S.seriesLen)}
+    <label class="f">${t('ui.flags')}</label><div class="chips">${[1, 2].map(n => `<button class="chip" data-act="setFlags" data-v="${n}" aria-pressed="${S.flags === n}">${n}</button>`).join('')}</div>
+    <h2>${t('ui.places')}</h2><div class="list">${D.places.map(x => `<button class="item" data-act="editPlace" data-id="${x.id}"><span class="t">${esc(x.name)}<small>${STATIONS.filter(k => x.st[k]).map(k => t('stations.' + k)).join(', ')}</small></span><span class="go">›</span></button>`).join('')}</div>
+    <button class="btn" data-act="addPlace">${t('ui.addPlace')}</button>
+    <h2>${t('ui.period')}</h2><p class="small">${t('ui.periodText')}</p>${per}
+    <h2>${t('ui.backup')}</h2><button class="btn dark" data-act="export">${t('ui.exportJson')}</button><button class="btn" data-act="import">${t('ui.importJson')}</button>`;
+}
+function placeEditHTML() {
+  const p = placeById(editPlaceId);
+  if (!p) { view = 'settings'; return settingsHTML(); }
+  return `<h1>${esc(p.name)}</h1><label class="f" for="pName">${t('ui.placeName')}</label><input type="text" id="pName" value="${esc(p.name)}">
+    <label class="f">${t('ui.stations')}</label>${STATIONS.map(k => `<label class="check"><input type="checkbox" data-st="${k}" ${p.st[k] ? 'checked' : ''}> ${t('stations.' + k)}</label>`).join('')}
+    <label class="f" for="pMax">${t('ui.longest')}</label><select id="pMax">${CLUBS.map(c => `<option value="${c}" ${c === (p.maxClub || 'D') ? 'selected' : ''}>${club(c)}</option>`).join('')}</select>
+    <button class="btn primary huge" data-act="savePlace">${t('ui.savePlace')}</button>
+    <button class="btn danger" data-act="delPlace" ${D.places.length < 2 ? 'disabled' : ''}>${t('ui.deletePlace')}</button>
+    <button class="btn" data-act="tab" data-v="settings">${t('ui.back')}</button>`;
+}
+
+// =====================================================================
+// Delning, backup, skärmlås, toast
+// =====================================================================
+async function shareText(text) {
+  if (navigator.share) { try { await navigator.share({ title: t('ui.shareTitle'), text }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+  try { await navigator.clipboard.writeText(text); toast(t('ui.copied')); }
   catch {
-    const ta = document.createElement('textarea');
-    ta.value = text; document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); toast('Resultat kopierat'); } catch { toast('Kunde inte kopiera'); }
+    const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); toast(t('ui.copied')); } catch { toast(t('ui.copyFail')); }
     ta.remove();
   }
 }
-
-function histHTML() {
-  if (!hist.length) return `<div class="hist"><h1>Historik</h1><p class="empty">Inga sparade pass ännu. Kör ett pass och tryck ”Spara pass”.</p></div>`;
-  const last = hist.slice(0, 5), avg = id => {
-    let h = 0, a = 0;
-    last.forEach(r => { if (r.b[id]) { h += r.b[id].h; a += r.b[id].a; } });
-    return pct(h, a);
-  };
-  const trend = BLOCKS.filter(b => b.type === 'hits').map(b => `<div>${b.share}: ${avg(b.id)}</div>`).join('');
-  return `<div class="hist"><h1>Historik</h1>
-    <div class="trend"><h2>Snitt senaste ${last.length} pass</h2>${trend}</div>
-    ${hist.map((r, i) => `<article class="hcard">
-      <h2>${fmtDate(r.start)}</h2>
-      <div class="meta">${fmtTime(r.start)} · ${r.long ? 90 : 75} min-pass · ${Math.round(r.total / 60000)} min tränat</div>
-      <ul>${(lines(r).map(l => `<li>${l}</li>`).join('')) || '<li>Inga resultat</li>'}</ul>
-      <div class="hbtns"><button class="share" data-act="hshare" data-i="${i}">Dela</button>
-      <button class="danger" data-act="hdel" data-i="${i}">Ta bort</button></div>
-    </article>`).join('')}</div>`;
-}
-
-// ---------- Timer, ljud, skärmlås ----------
-let ac = null, wl = null;
-function unlockAudio() {
-  try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch {}
-}
-function beep() {
-  if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
-  if (!ac) return;
-  [0, 0.4, 0.8].forEach(t => {
-    const o = ac.createOscillator(), g = ac.createGain(), at = ac.currentTime + t;
-    o.frequency.value = 880; o.connect(g); g.connect(ac.destination);
-    g.gain.setValueAtTime(0.4, at); g.gain.exponentialRampToValueAtTime(0.001, at + 0.3);
-    o.start(at); o.stop(at + 0.3);
-  });
-}
-async function syncWake() {
-  const any = Object.values(cur.b).some(s => s.run);
+async function exportData() {
+  const name = `golftraning-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  const blob = new Blob([JSON.stringify(D, null, 1)], { type: 'application/json' });
   try {
-    if (any && !wl && 'wakeLock' in navigator && document.visibilityState === 'visible') {
-      wl = await navigator.wakeLock.request('screen');
-      wl.addEventListener('release', () => { wl = null; });
-    } else if (!any && wl) { await wl.release(); wl = null; }
-  } catch {}
+    const file = new File([blob], name, { type: 'application/json' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); return; }
+  } catch (e) { if (e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
-function pause(s) { if (s.run) { s.el = elapsed(s); s.run = null; } }
+$('#importFile').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const d = JSON.parse(r.result);
+      if (d.v !== 2 || !Array.isArray(d.sessions) || !Array.isArray(d.places)) throw new Error('bad');
+      if (!confirm(t('ui.importConfirm', { n: d.sessions.length }))) return;
+      const base = defaults(); D = { ...base, ...d, settings: { ...base.settings, ...d.settings } };
+      save(); applyTheme(); view = D.cur ? 'run' : 'home'; render(); toast(t('ui.importOk'));
+    } catch { toast(t('ui.importBad')); }
+  };
+  r.readAsText(f); e.target.value = '';
+});
 
-setInterval(() => {
-  for (const b of blocks()) {
-    const s = st(b.id);
-    if (!s.run) continue;
-    const rem = remaining(b, s);
-    const tv = document.querySelector(`[data-timer="${b.id}"]`);
-    if (tv) { tv.textContent = fmt(rem); tv.classList.toggle('over', rem < 0); }
-    const sm = document.querySelector(`[data-sum="${b.id}"]`);
-    if (sm) sm.innerHTML = sumShort(b, s);
-    if (rem <= 0 && !s.done) {
-      s.done = true; saveCur(); beep();
-      const c = document.getElementById('c-' + b.id);
-      if (c) { c.classList.remove('ding'); void c.offsetWidth; c.classList.add('ding'); }
-      toast(`Tiden är slut: ${b.title}`);
-    }
-  }
-}, 250);
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { syncWake(); render(); } });
+let wl = null;
+async function syncWake() {
+  const want = !!D.cur && document.visibilityState === 'visible';
+  try {
+    if (want && !wl && 'wakeLock' in navigator) { wl = await navigator.wakeLock.request('screen'); wl.addEventListener('release', () => { wl = null; }); }
+    else if (!want && wl) { await wl.release(); wl = null; }
+  } catch { wl = null; }
+}
+document.addEventListener('visibilitychange', syncWake);
 
 let toastT;
-function toast(msg) {
-  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2200);
-}
+function toast(msg) { const el = $('#toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2400); }
+function applyTheme() { document.documentElement.dataset.theme = D.settings.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+const num = id => { const v = parseFloat(String($(id)?.value || '').replace(',', '.')); return isFinite(v) ? v : null; };
 
-// ---------- Händelser ----------
+// =====================================================================
+// Händelser
+// =====================================================================
+const curStep = () => stepsOf(qItem())[D.cur.si];
+const rerender = () => { save(); render(); };
 const ACTS = {
   tab(el) { view = el.dataset.v; render(); scrollTo(0, 0); },
-  theme() {
-    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-    document.documentElement.dataset.theme = next; LS.set(K_THEME, next); render();
-  },
-  open(el) {
-    const id = el.dataset.id;
-    cur.open = cur.open === id && el.classList.contains('chead') ? null : id;
-    saveCur(); render();
-    if (cur.open) document.getElementById('c-' + cur.open)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  },
-  timer(el) {
-    const s = st(el.dataset.id);
-    if (s.run) pause(s);
-    else { Object.values(cur.b).forEach(pause); s.run = Date.now(); unlockAudio(); }
-    saveCur(); render(); syncWake();
-  },
-  treset(el) {
-    const s = st(el.dataset.id);
-    if ((s.el || s.run) && !confirm('Nollställa timern?')) return;
-    s.el = 0; s.run = null; s.done = false; saveCur(); render(); syncWake();
-  },
-  inc(el) {
-    const id = el.dataset.id, s = st(id), k = el.dataset.k;
-    s[k] = Math.max(0, s[k] + Number(el.dataset.d));
-    if (id === 'chip' && s.a <= 10) s.base = s.h;   // baslinjen låses när försök passerar 10
-    saveCur(); render();
-  },
-  gen(el) {
-    const id = el.dataset.id, s = st(id), g = s.g;
-    g.n += 1; g.last = GENS[id].next(g.last || undefined, g.n, g);
-    saveCur(); render();
-  },
-  save() {
-    const rec = snapshot();
-    if (!lines(rec).length && rec.total < 60000) { toast('Inget att spara ännu'); return; }
-    if (!confirm('Spara passet och starta ett nytt?')) return;
-    hist.unshift(rec); LS.set(K_HIST, hist);
-    cur = newSession(); saveCur(); syncWake();
-    view = 'hist'; render(); scrollTo(0, 0); toast('Passet sparat');
-  },
-  share() { share(snapshot()); },
-  reset() {
-    if (!confirm('Nollställa passet? Osparade resultat försvinner.')) return;
-    cur = newSession(); saveCur(); syncWake(); render(); scrollTo(0, 0);
-  },
-  hshare(el) { share(hist[+el.dataset.i]); },
-  hdel(el) {
-    if (!confirm('Ta bort passet från historiken?')) return;
-    hist.splice(+el.dataset.i, 1); LS.set(K_HIST, hist); render();
-  },
+  theme() { D.settings.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; applyTheme(); rerender(); },
+  place(el) { D.placeId = el.dataset.id; rerender(); },
+  startMods(el) { startItems(el.dataset.ids.split(',').map(id => ({ kind: 'module', id }))); },
+  startTest(el) { startItems([{ kind: 'test', id: el.dataset.id }]); },
+  techDone() { nextStep(); },
+  skip() { nextStep(); },
+  endSession() { endSession(); },
+  endSessionNow() { endSession(); },
+  // serier
+  setDist(el) { D.cur.st.dist = +el.dataset.v; rerender(); },
+  balls(el) { const st = D.cur.st; st.pendingBalls = clamp(st.pendingBalls + +el.dataset.d, 4, 200); rerender(); },
+  ballsOk() { const st = D.cur.st; st.total = st.pendingBalls; rerender(); },
+  nextSeries() { seriesAdvance(curStep()); },
+  regSeries(el) { const st = D.cur.st; (st.regs = st.regs || []).push(+el.dataset.v); seriesAdvance(curStep()); },
+  regEnd(el) { modLog(t('log.coins', { v: el.dataset.v })); nextStep(); },
+  // leapfrog
+  streak(el) { const st = D.cur.st; st.now = Math.max(0, (st.now || 0) + +el.dataset.d); rerender(); },
+  streakSave() { const st = D.cur.st; if (!st.now) return; st.tries.push(st.now); st.now = 0; rerender(); },
+  streakDone() { const st = D.cur.st; if (st.now) st.tries.push(st.now); if (st.tries.length) modLog(t('log.streak', { b: Math.max(...st.tries), n: st.tries.length })); nextStep(); },
+  // längdtabell
+  yW(el) { D.cur.st.w = el.dataset.w; rerender(); },
+  ySign(el) { const st = D.cur.st, sw = el.dataset.sw, v = D.yardage[st.w]?.[sw]; const curS = st.sign[sw] || (v && v.side < 0 ? 'L' : 'R');
+    st.sign[sw] = curS === 'L' ? 'R' : 'L'; el.textContent = st.sign[sw] === 'L' ? t('ui.left') : t('ui.right'); save(); },
+  ySave(el) { const st = D.cur.st, sw = el.dataset.sw, c = num('#c-' + sw), s = num('#s-' + sw);
+    if (c == null) return; const old = D.yardage[st.w]?.[sw];
+    const sign = (st.sign[sw] || (old && old.side < 0 ? 'L' : 'R')) === 'L' ? -1 : 1;
+    (D.yardage[st.w] = D.yardage[st.w] || {})[sw] = { carry: c, side: s == null ? 0 : sign * Math.abs(s), date: new Date().toISOString() };
+    st.count = (st.count || 0) + 1; save(); toast(`${club(st.w)} ${t('swing.' + sw)}: ${fmtN(c)} m`); },
+  yDone() { const n = D.cur.st.count || 0; if (n) modLog(t('log.yardage', { n })); nextStep(); },
+  // GC2 precis förbi
+  gcReg() { const st = D.cur.st, c = num('#carry'); if (c == null) return; st.shots.push(c); st.all.push({ dist: st.dist, carry: c, diff: c - st.dist }); rerender(); setTimeout(() => $('#carry')?.focus(), 0); },
+  gcNext() { const st = D.cur.st, nS = Math.ceil(D.settings.pile / D.settings.seriesLen); st.n++; st.prevDist = st.dist; st.dist = null;
+    if (st.n >= nS) { modLog(t('log.gc2', { ok: st.all.filter(x => x.diff >= 0 && x.diff <= 2).length, n: st.all.length })); nextStep(); } else { rerender(); scrollTo(0, 0); } },
+  // tester
+  cntPick(el) { D.cur.st.pick = +el.dataset.v; rerender(); },
+  cntSave() { const st = D.cur.st, id = curStep().test; if (st.pick == null) return; st.result = recordTest(id, st.pick, ''); rerender(); scrollTo(0, 0); },
+  shotPick(el) { D.cur.st.picks.push(isNaN(+el.dataset.k) ? el.dataset.k : +el.dataset.k); rerender(); },
+  shotsUndo() { D.cur.st.picks.pop(); rerender(); },
+  shotsSave() { const st = D.cur.st, id = curStep().test, r = shotsResult(id, st.picks); st.result = recordTest(id, r.v, r.text, { picks: st.picks.slice() }); rerender(); scrollTo(0, 0); },
+  tsVar(el) { D.cur.st.variant = el.dataset.v; rerender(); },
+  tsSet(el) { const st = D.cur.st; st.c[st.line][el.dataset.d] = +el.dataset.v; rerender(); },
+  tsEx(el) { const st = D.cur.st, x = st.x[st.line]; x[el.dataset.k] = Math.max(0, (x[el.dataset.k] || 0) + +el.dataset.d); rerender(); },
+  tsNext() { D.cur.st.line++; rerender(); scrollTo(0, 0); },
+  tsBack() { D.cur.st.line--; rerender(); scrollTo(0, 0); },
+  tsSave() { const st = D.cur.st, r = twoSixResult(st); st.result = recordTest('twoSix', r.v, r.text, { of: r.of, per: r.per, variant: st.variant }); rerender(); scrollTo(0, 0); },
+  drvDir(el) { D.cur.st.dir = el.dataset.v; document.querySelectorAll('[data-act=drvDir]').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === el.dataset.v)); save(); },
+  drvReg() { const st = D.cur.st, l = num('#dLen'), s = num('#dSide'); if (l == null) return;
+    st.drives.push({ len: l, side: (s || 0) * (st.dir === 'L' ? -1 : 1) }); rerender(); setTimeout(() => $('#dLen')?.focus(), 0); },
+  drvUndo() { D.cur.st.drives.pop(); rerender(); },
+  drvSave() { const st = D.cur.st, r = driverResult(st.drives); st.result = recordTest('driver', r.v, r.text, { avgLen: r.avgLen, avgSide: r.avgSide }); rerender(); scrollTo(0, 0); },
+  testDone() { nextStep(); },
+  // historik
+  shareSession(el) { const s = D.sessions.find(x => x.id === el.dataset.id); if (s) shareText(sessionText(s)); },
+  delSession(el) { if (!confirm(t('ui.confirmDelete'))) return; D.sessions = D.sessions.filter(x => x.id !== el.dataset.id); rerender(); },
+  // inställningar
+  setPile(el) { D.settings.pile = clamp(D.settings.pile + +el.dataset.d, 10, 21); rerender(); },
+  setLen(el) { D.settings.seriesLen = clamp(D.settings.seriesLen + +el.dataset.d, 3, 5); rerender(); },
+  setFlags(el) { D.settings.flags = +el.dataset.v; rerender(); },
+  editPlace(el) { editPlaceId = el.dataset.id; view = 'placeEdit'; render(); scrollTo(0, 0); },
+  addPlace() { const p = { id: uid(), name: t('ui.newPlace'), st: {}, maxClub: 'D' }; D.places.push(p); editPlaceId = p.id; view = 'placeEdit'; rerender(); scrollTo(0, 0); },
+  savePlace() { const p = placeById(editPlaceId); p.name = $('#pName').value.trim() || p.name; p.st = {};
+    document.querySelectorAll('[data-st]').forEach(c => { if (c.checked) p.st[c.dataset.st] = 1; }); p.maxClub = $('#pMax').value;
+    view = 'settings'; rerender(); toast(p.name); },
+  delPlace() { const p = placeById(editPlaceId); if (!p || D.places.length < 2 || !confirm(t('ui.confirmDeletePlace', { name: p.name }))) return;
+    D.places = D.places.filter(x => x.id !== p.id); if (D.placeId === p.id) D.placeId = D.places[0].id; if (D.period?.placeId === p.id) D.period = null; view = 'settings'; rerender(); },
+  periodSet() { const s = $('#pStart').value; if (!s) return; D.period = { placeId: curPlace().id, start: new Date(s + 'T00:00').toISOString(), weeks: +$('#pWeeks').value }; rerender(); },
+  periodEnd() { D.period = null; rerender(); },
+  export() { exportData(); },
+  import() { $('#importFile').click(); },
 };
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-act]');
-  if (el && el.tagName !== 'INPUT' && ACTS[el.dataset.act]) ACTS[el.dataset.act](el);
-});
-document.addEventListener('change', e => {
-  if (e.target.dataset.act === 'long') {
-    cur.long = e.target.checked;
-    if (!cur.long) { pause(st('inspel')); if (cur.open === 'inspel') cur.open = null; }
-    saveCur(); render();
-  }
+  if (el && !el.disabled && ACTS[el.dataset.act]) ACTS[el.dataset.act](el);
 });
 
-// ---------- Start ----------
-document.documentElement.dataset.theme = LS.get(K_THEME, null) || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-render(); syncWake();
+// =====================================================================
+// Start
+// =====================================================================
+applyTheme(); save(); render(); syncWake();
 if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 </body>
