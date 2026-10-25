@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a5c2b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Golfträning">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<title>Golfträning</title>
+<style>
+:root{
+  --bg:#fff; --fg:#000; --muted:#222; --card:#f1f1f1; --line:#000;
+  --accent:#0a5c2b; --accentFg:#fff; --btn:#000; --btnFg:#fff;
+  --warn:#b00020; --dl:#ffd400; --dlFg:#000; --hl:#e6f2ea;
+}
+:root[data-theme=dark]{
+  --bg:#000; --fg:#fff; --muted:#e5e5e5; --card:#151515; --line:#fff;
+  --accent:#3ddc84; --accentFg:#000; --btn:#fff; --btnFg:#000;
+  --warn:#ff6b6b; --dl:#ffd400; --dlFg:#000; --hl:#0d2a19;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font:20px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
+  font-variant-numeric:tabular-nums; touch-action:manipulation;
+  padding:0 max(12px,env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
+}
+button,input{font:inherit;color:inherit;touch-action:manipulation}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+header.top{
+  position:sticky; top:0; z-index:10; background:var(--bg);
+  margin:0 -12px; padding:calc(env(safe-area-inset-top) + 8px) 12px 8px;
+  border-bottom:3px solid var(--line); display:flex; gap:8px; align-items:center;
+}
+.tabs{display:flex; flex:1; gap:6px}
+.tab{flex:1; min-height:52px; border:3px solid var(--line); background:var(--bg); border-radius:12px; font-weight:800; font-size:20px}
+.tab[aria-selected=true]{background:var(--btn); color:var(--btnFg)}
+.theme{width:56px; min-height:52px; border:3px solid var(--line); background:var(--bg); border-radius:12px; font-size:24px}
+
+.passhead{padding:16px 2px 8px}
+h1{font-size:28px; line-height:1.15; margin:0 0 4px; font-weight:900}
+.sub{font-weight:600; color:var(--muted)}
+.toggle{display:flex; align-items:center; gap:12px; margin-top:12px; padding:12px 14px; border:3px solid var(--line); border-radius:14px; font-weight:700; min-height:60px}
+.toggle input{width:32px; height:32px; accent-color:var(--accent); flex:none}
+
+.card{border:3px solid var(--line); border-radius:18px; margin:12px 0; background:var(--card); overflow:hidden; scroll-margin-top:84px}
+.card.open{background:var(--bg)}
+.card.running .chead{background:var(--hl)}
+.chead{width:100%; display:flex; align-items:center; gap:12px; text-align:left; padding:14px; border:0; background:transparent; min-height:72px}
+.num{flex:none; width:40px; height:40px; border-radius:50%; background:var(--btn); color:var(--btnFg); display:grid; place-items:center; font-weight:900}
+.card.open .num{background:var(--accent); color:var(--accentFg)}
+.ctitle{flex:1; font-weight:800; font-size:21px; line-height:1.2}
+.ctitle small{display:block; font-size:16px; font-weight:600; color:var(--muted)}
+.sum{flex:none; text-align:right; font-weight:800; font-size:18px}
+.sum .t{display:block; font-size:15px; font-weight:600; color:var(--muted)}
+.cbody{padding:0 14px 16px}
+.instr{margin:0 0 14px; font-size:19px; font-weight:500}
+
+.timer{display:flex; align-items:center; gap:10px; margin-bottom:16px}
+.tval{flex:1; min-width:0; font-size:44px; font-weight:900; letter-spacing:-1px; font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.tval.over{color:var(--warn)}
+.go,.pause{min-width:96px; padding:0 10px; min-height:72px; border-radius:16px; border:3px solid var(--line); font-weight:900; font-size:22px}
+.go{background:var(--accent); color:var(--accentFg); border-color:var(--accent)}
+.pause{background:var(--btn); color:var(--btnFg)}
+.ghost{min-width:56px; flex:none; min-height:72px; border-radius:16px; border:3px solid var(--line); background:transparent; font-size:26px; font-weight:800}
+
+.gen{border:3px dashed var(--line); border-radius:16px; padding:14px; margin-bottom:16px}
+.gen .ball{font-weight:800; color:var(--muted); font-size:17px; text-transform:uppercase; letter-spacing:.5px}
+.gen .big{font-size:36px; font-weight:900; line-height:1.15; margin:2px 0 6px}
+.gen .line{font-size:20px; font-weight:600}
+.gen .line b{font-weight:900}
+.dl{margin-top:10px; background:var(--dl); color:var(--dlFg); border-radius:10px; padding:10px 12px; font-weight:900; font-size:21px}
+.genbtn{width:100%; min-height:72px; margin-top:12px; border-radius:14px; border:3px solid var(--line); background:var(--btn); color:var(--btnFg); font-weight:900; font-size:22px}
+
+.ctr{margin-bottom:14px}
+.clabel{font-weight:800; margin-bottom:6px}
+.clabel span{font-weight:600; color:var(--muted)}
+.cgrid{display:grid; grid-template-columns:84px 1fr 84px; gap:10px; align-items:center}
+.cgrid button{min-height:84px; border-radius:18px; font-size:46px; font-weight:900; line-height:1; border:3px solid var(--line)}
+.minus{background:transparent}
+.plus{background:var(--btn); color:var(--btnFg)}
+.cgrid output{text-align:center; font-size:48px; font-weight:900; white-space:nowrap}
+.cgrid output small{font-size:22px; color:var(--muted); font-weight:700}
+.stat{font-weight:800; font-size:20px; padding:10px 12px; border-radius:12px; background:var(--card); margin-bottom:8px}
+.stat span{font-weight:600; color:var(--muted)}
+.nextblk{width:100%; min-height:60px; margin-top:6px; border-radius:14px; border:3px solid var(--line); background:transparent; font-weight:800}
+
+.actions{display:grid; gap:10px; margin:20px 0}
+.actions button,.hbtns button{min-height:68px; border-radius:16px; border:3px solid var(--line); font-weight:900; font-size:21px; background:transparent}
+.actions .primary{background:var(--accent); color:var(--accentFg); border-color:var(--accent)}
+.actions .share{background:var(--btn); color:var(--btnFg)}
+.actions .danger{color:var(--warn); border-color:var(--warn)}
+
+.hist h1{margin-top:16px}
+.hcard{border:3px solid var(--line); border-radius:18px; padding:14px; margin:12px 0}
+.hcard h2{font-size:21px; margin:0 0 2px}
+.hcard .meta{color:var(--muted); font-weight:600; font-size:17px; margin-bottom:8px}
+.hcard ul{margin:0 0 12px; padding-left:20px}
+.hcard li{margin:3px 0; font-weight:600}
+.hbtns{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.hbtns button{min-height:58px; font-size:19px}
+.hbtns .share{background:var(--btn); color:var(--btnFg)}
+.hbtns .danger{color:var(--warn); border-color:var(--warn)}
+.empty{padding:24px 4px; font-weight:600; color:var(--muted)}
+.trend{border:3px solid var(--line); border-radius:18px; padding:14px; margin:12px 0; background:var(--card)}
+.trend h2{font-size:20px; margin:0 0 6px}
+.trend div{font-weight:700}
+
+.toast{position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom)); transform:translateX(-50%) translateY(150%);
+  background:var(--btn); color:var(--btnFg); padding:14px 20px; border-radius:14px; font-weight:800; transition:transform .25s; max-width:90vw; text-align:center; z-index:20}
+.toast.show{transform:translateX(-50%) translateY(0)}
+@keyframes flash{0%,100%{box-shadow:none}50%{box-shadow:0 0 0 8px var(--warn)}}
+.card.ding{animation:flash .6s 4}
+</style>
+</head>
+<body>
+<header class="top">
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-act="tab" data-v="pass">Pass</button>
+    <button class="tab" role="tab" data-act="tab" data-v="hist">Historik</button>
+  </nav>
+  <button class="theme" data-act="theme" aria-label="Byt ljust/mörkt läge"></button>
+</header>
+<main id="view"></main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+const K_CUR = 'narspel.cur', K_HIST = 'narspel.hist', K_THEME = 'narspel.theme';
+
+// ---------- Slumpgeneratorer ----------
+const rnd = n => Math.floor(Math.random() * n);
+const pick = (arr, prev) => { let v; do v = arr[rnd(arr.length)]; while (arr.length > 1 && v === prev); return v; };
+const pickNum = (min, max, prev, gap) => { let v; do v = min + rnd(max - min + 1); while (prev != null && Math.abs(v - prev) < gap); return v; };
+
+const CLUBS = ['J7', 'PW', 'GW', 'SW'];
+const LIES = ['Fairway, bra läge', 'Tight lie', 'Semiruff', 'Ruff', 'Uppförslut', 'Nedförslut', 'Sidlutning'];
+const LANDING = ['1 m in på green', '2–3 m in på green', 'Halvvägs till flaggan', 'Nära flaggan, liten rull'];
+const DL = ['Smal stance', 'Bred stance', 'Bollen långt fram', 'Bollen långt bak', 'Kort grepp', 'Fötterna ihop'];
+
+const GENS = {
+  chip: {
+    label: 'Nästa boll',
+    next(p = {}, n, g) {
+      const r = { club: pick(CLUBS, p.club), lie: pick(LIES, p.lie), dist: pickNum(10, 25, p.dist, 3), land: pick(LANDING, p.land) };
+      if (n % 5 === 0) { r.dl = pick(DL, g.lastDL); g.lastDL = r.dl; }
+      return r;
+    },
+    view: r => ({ big: `${r.club} · ${r.dist} m`, lines: [`Läge: <b>${r.lie}</b>`, `Landa: <b>${r.land}</b>`], dl: r.dl }),
+  },
+  bunker: {
+    label: 'Nästa boll',
+    next: (p = {}) => ({ dist: pickNum(8, 20, p.dist, 3), lie: pick(['Bra läge', 'Uppförslut', 'Nedförslut', 'Lite nedsjunken', 'Mycket green att jobba med', 'Kort till flagg'], p.lie) }),
+    view: r => ({ big: `${r.dist} m`, lines: [`Läge: <b>${r.lie}</b>`] }),
+  },
+  putt: {
+    label: 'Ny vinkel',
+    next: (p = {}) => ({ clock: pickNum(1, 12, p.clock, 2), dist: pick(['2 m', '2,5 m', '3 m'], p.dist) }),
+    view: r => ({ big: `${r.dist}`, lines: [`Från <b>klockan ${r.clock}</b> runt hålet`] }),
+  },
+  lag: {
+    label: 'Nästa putt',
+    next: (p = {}) => ({ dist: pick([6, 9, 12, 15], p.dist) }),
+    view: r => ({ big: `${r.dist} m`, lines: ['Fart först – stanna inom en klubblängd'] }),
+  },
+  updown: {
+    label: 'Nästa läge',
+    next: (p = {}) => ({ spot: pick(['Kort sida, ruff', 'Lång sida, fairway', 'Semiruff, nedförslut', 'Greenbunker', 'Tight lie, uppförslut', 'Djup ruff', 'Fransen', 'Bakom green', 'Över en kulle'], p.spot) }),
+    view: r => ({ big: r.spot, lines: ['Spela ut – max 2 slag = upp-och-ner'] }),
+  },
+};
+
+// ---------- Passet ----------
+const BLOCKS = [
+  { id: 'warmup', title: 'Uppvärmning', min: 10, type: 'none',
+    text: 'Rörlighet, några lugna svingar och korta chippar och puttar. Ingen räkning – känn in underlaget och greenens fart.' },
+  { id: 'chip', title: 'Chip med variation', min: 25, type: 'hits', target: 30, hit: 'Inom 1,5 m', unit: 'inom 1,5 m', share: 'Chip',
+    text: '30 bollar, 10–25 m. Byt klubba, läge, avstånd och landningspunkt varje boll – tryck ”Nästa boll”. Var 5:e boll har ett DL-inslag. De första 10 bollarna blir din baslinje.' },
+  { id: 'bunker', title: 'Greenbunker', min: 10, type: 'hits', target: 15, hit: 'Inom 2 m', unit: 'inom 2 m', share: 'Greenbunker',
+    text: '15 bollar, 8–20 m. Nytt avstånd och läge varje boll. Räkna bollar som stannar inom 2 m.' },
+  { id: 'putt', title: 'Puttar 2–3 m', min: 10, type: 'hits', target: 20, hit: 'I hål', unit: 'i hål', share: 'Puttar 2–3 m',
+    text: '20 puttar från 2–3 m. Ny vinkel runt hålet varje gång – gå runt som en klocka. Räkna i hål.' },
+  { id: 'lag', title: 'Lagputt', min: 10, type: 'hits', target: null, hit: 'Inom en klubblängd', unit: 'inom en klubblängd', share: 'Lagputt',
+    text: 'Slumpa 6, 9, 12 eller 15 m. Fokus på fart. Räkna puttar som stannar inom en klubblängd från hålet.' },
+  { id: 'updown', title: 'Test upp-och-ner', min: 10, type: 'hits', target: 9, hit: 'Upp-och-ner', unit: 'upp-och-ner', share: 'Upp-och-ner',
+    text: '9 bollar på olika platser runt green. Spela ut varje boll. Räkna upp-och-ner (max 2 slag) av 9.' },
+  { id: 'inspel', title: 'Inspel', min: 15, type: 'three', optional: true, share: 'Inspel',
+    text: 'Inspel mot flagga. Registrera varje slag som kort, lång eller på längd.' },
+];
+const blocks = () => BLOCKS.filter(b => !b.optional || cur.long).map((b, i) => ({ ...b, n: i + 1 }));
+const blockById = id => BLOCKS.find(b => b.id === id);
+
+const newSession = () => ({ start: new Date().toISOString(), long: false, open: 'warmup', b: {} });
+let cur = LS.get(K_CUR, null) || newSession();
+let hist = LS.get(K_HIST, []);
+let view = 'pass';
+const st = id => cur.b[id] || (cur.b[id] = { h: 0, a: 0, base: null, k: 0, l: 0, p: 0, el: 0, run: null, done: false, g: { n: 0, last: null } });
+const saveCur = () => LS.set(K_CUR, cur);
+
+// ---------- Hjälpare ----------
+const elapsed = s => s.el + (s.run ? Date.now() - s.run : 0);
+const fmt = ms => { const neg = ms < 0, t = Math.round(Math.abs(ms) / 1000); return (neg ? '+' : '') + Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
+const remaining = (b, s) => b.min * 60000 - elapsed(s);
+const pct = (h, a) => a ? Math.round(h / a * 100) + ' %' : '–';
+const fmtDate = iso => new Date(iso).toLocaleDateString('sv-SE', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+const fmtTime = iso => new Date(iso).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+
+function sumShort(b, s) {
+  const t = `<span class="t">${s.run || s.el ? fmt(remaining(b, s)) : b.min + ' min'}</span>`;
+  if (b.type === 'hits') return `${s.h}/${s.a}${t}`;
+  if (b.type === 'three') return `${s.k}·${s.l}·${s.p}${t}`;
+  return t;
+}
+
+// ---------- Rendering ----------
+function render() {
+  document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', t.dataset.v === view));
+  $('.theme').textContent = document.documentElement.dataset.theme === 'dark' ? '☀︎' : '☾';
+  $('#view').innerHTML = view === 'pass' ? passHTML() : histHTML();
+}
+
+function passHTML() {
+  return `
+  <div class="passhead">
+    <h1>Närspel med variation</h1>
+    <div class="sub">${fmtDate(cur.start)} · ${cur.long ? 90 : 75} min</div>
+    <label class="toggle"><input type="checkbox" data-act="long" ${cur.long ? 'checked' : ''}> Ta med inspel (90 min)</label>
+  </div>
+  ${blocks().map(cardHTML).join('')}
+  <div class="actions">
+    <button class="primary" data-act="save">Spara pass</button>
+    <button class="share" data-act="share">Dela resultat</button>
+    <button class="danger" data-act="reset">Nollställ pass</button>
+  </div>`;
+}
+
+const ctrRow = (id, k, label, val, extra = '') => `
+  <div class="ctr"><div class="clabel">${label}</div>
+    <div class="cgrid">
+      <button class="minus" data-act="inc" data-id="${id}" data-k="${k}" data-d="-1" aria-label="Minska ${label}">−</button>
+      <output>${val}${extra}</output>
+      <button class="plus" data-act="inc" data-id="${id}" data-k="${k}" data-d="1" aria-label="Öka ${label}">+</button>
+    </div></div>`;
+
+function cardHTML(b) {
+  const s = st(b.id), open = cur.open === b.id, rem = remaining(b, s);
+  let body = '';
+  if (open) {
+    body += `<p class="instr">${b.text}</p>
+      <div class="timer">
+        <div class="tval ${rem < 0 ? 'over' : ''}" data-timer="${b.id}">${fmt(rem)}</div>
+        <button class="${s.run ? 'pause' : 'go'}" data-act="timer" data-id="${b.id}">${s.run ? 'Paus' : 'Start'}</button>
+        <button class="ghost" data-act="treset" data-id="${b.id}" aria-label="Nollställ timer">↺</button>
+      </div>`;
+    const gen = GENS[b.id];
+    if (gen) {
+      let inner = '<div class="line">Tryck för första ' + (b.id === 'chip' || b.id === 'bunker' ? 'bollen' : 'slaget') + '.</div>';
+      if (s.g.last) {
+        const v = gen.view(s.g.last);
+        inner = `<div class="ball">${b.id === 'chip' || b.id === 'bunker' ? 'Boll' : 'Nr'} ${s.g.n}${b.target ? ' av ' + b.target : ''}</div>
+          <div class="big">${v.big}</div>${v.lines.map(l => `<div class="line">${l}</div>`).join('')}
+          ${v.dl ? `<div class="dl">DL: ${v.dl}</div>` : ''}`;
+      }
+      body += `<div class="gen">${inner}<button class="genbtn" data-act="gen" data-id="${b.id}">${gen.label} →</button></div>`;
+    }
+    if (b.type === 'hits') {
+      body += ctrRow(b.id, 'h', b.hit, s.h);
+      body += ctrRow(b.id, 'a', 'Försök', s.a, b.target ? `<small>/${b.target}</small>` : '');
+      body += `<div class="stat">Träff: ${pct(s.h, s.a)} <span>(${s.h} av ${s.a})</span></div>`;
+      if (b.id === 'chip' && s.a > 0) {
+        body += `<div class="stat">Baslinje första 10: ${s.base ?? 0}/${Math.min(s.a, 10)} <span>${s.a > 10 ? '· låst' : '· pågår'}</span></div>`;
+      }
+    } else if (b.type === 'three') {
+      const tot = s.k + s.l + s.p;
+      body += `<div class="three">${ctrRow(b.id, 'k', 'Kort', s.k)}${ctrRow(b.id, 'l', 'Lång', s.l)}${ctrRow(b.id, 'p', 'På längd', s.p)}</div>
+        <div class="stat">På längd: ${pct(s.p, tot)} <span>(${tot} slag)</span></div>`;
+    }
+    const list = blocks(), i = list.findIndex(x => x.id === b.id);
+    if (list[i + 1]) body += `<button class="nextblk" data-act="open" data-id="${list[i + 1].id}">Nästa block: ${list[i + 1].title} →</button>`;
+    body = `<div class="cbody">${body}</div>`;
+  }
+  return `<section class="card ${open ? 'open' : ''} ${s.run ? 'running' : ''}" id="c-${b.id}">
+    <button class="chead" data-act="open" data-id="${b.id}" aria-expanded="${open}">
+      <span class="num">${b.n}</span>
+      <span class="ctitle">${b.title}<small>${b.min} min</small></span>
+      <span class="sum" data-sum="${b.id}">${sumShort(b, s)}</span>
+    </button>${body}</section>`;
+}
+
+// ---------- Resultat & delning ----------
+function snapshot() {
+  const res = {};
+  let total = 0;
+  for (const b of blocks()) {
+    const s = st(b.id), el = elapsed(s);
+    total += el;
+    res[b.id] = { h: s.h, a: s.a, base: s.base, k: s.k, l: s.l, p: s.p, el };
+  }
+  return { id: Date.now(), start: cur.start, end: new Date().toISOString(), long: cur.long, total, b: res };
+}
+
+function lines(rec) {
+  const out = [];
+  for (const b of BLOCKS) {
+    const r = rec.b[b.id];
+    if (!r) continue;
+    if (b.type === 'hits' && (r.a || r.h)) {
+      let l = `${b.share}: ${r.h}/${r.a} ${b.unit} (${pct(r.h, r.a)})`;
+      if (b.id === 'chip' && r.a) l += ` · baslinje ${r.base ?? 0}/${Math.min(r.a, 10)}`;
+      out.push(l);
+    } else if (b.type === 'three' && (r.k + r.l + r.p)) {
+      out.push(`${b.share}: kort ${r.k} · lång ${r.l} · på längd ${r.p} (${pct(r.p, r.k + r.l + r.p)})`);
+    }
+  }
+  return out;
+}
+
+function shareText(rec) {
+  const l = lines(rec);
+  return [`⛳ Närspel med variation – ${fmtDate(rec.start)}`, `${rec.long ? 90 : 75} min-pass · tränad tid ${Math.round(rec.total / 60000)} min`, '',
+    ...(l.length ? l : ['Inga resultat registrerade'])].join('\n');
+}
+
+async function share(rec) {
+  const text = shareText(rec);
+  if (navigator.share) {
+    try { await navigator.share({ title: 'Närspel – resultat', text }); return; }
+    catch (e) { if (e.name === 'AbortError') return; }
+  }
+  try { await navigator.clipboard.writeText(text); toast('Resultat kopierat'); }
+  catch {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); toast('Resultat kopierat'); } catch { toast('Kunde inte kopiera'); }
+    ta.remove();
+  }
+}
+
+function histHTML() {
+  if (!hist.length) return `<div class="hist"><h1>Historik</h1><p class="empty">Inga sparade pass ännu. Kör ett pass och tryck ”Spara pass”.</p></div>`;
+  const last = hist.slice(0, 5), avg = id => {
+    let h = 0, a = 0;
+    last.forEach(r => { if (r.b[id]) { h += r.b[id].h; a += r.b[id].a; } });
+    return pct(h, a);
+  };
+  const trend = BLOCKS.filter(b => b.type === 'hits').map(b => `<div>${b.share}: ${avg(b.id)}</div>`).join('');
+  return `<div class="hist"><h1>Historik</h1>
+    <div class="trend"><h2>Snitt senaste ${last.length} pass</h2>${trend}</div>
+    ${hist.map((r, i) => `<article class="hcard">
+      <h2>${fmtDate(r.start)}</h2>
+      <div class="meta">${fmtTime(r.start)} · ${r.long ? 90 : 75} min-pass · ${Math.round(r.total / 60000)} min tränat</div>
+      <ul>${(lines(r).map(l => `<li>${l}</li>`).join('')) || '<li>Inga resultat</li>'}</ul>
+      <div class="hbtns"><button class="share" data-act="hshare" data-i="${i}">Dela</button>
+      <button class="danger" data-act="hdel" data-i="${i}">Ta bort</button></div>
+    </article>`).join('')}</div>`;
+}
+
+// ---------- Timer, ljud, skärmlås ----------
+let ac = null, wl = null;
+function unlockAudio() {
+  try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch {}
+}
+function beep() {
+  if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
+  if (!ac) return;
+  [0, 0.4, 0.8].forEach(t => {
+    const o = ac.createOscillator(), g = ac.createGain(), at = ac.currentTime + t;
+    o.frequency.value = 880; o.connect(g); g.connect(ac.destination);
+    g.gain.setValueAtTime(0.4, at); g.gain.exponentialRampToValueAtTime(0.001, at + 0.3);
+    o.start(at); o.stop(at + 0.3);
+  });
+}
+async function syncWake() {
+  const any = Object.values(cur.b).some(s => s.run);
+  try {
+    if (any && !wl && 'wakeLock' in navigator && document.visibilityState === 'visible') {
+      wl = await navigator.wakeLock.request('screen');
+      wl.addEventListener('release', () => { wl = null; });
+    } else if (!any && wl) { await wl.release(); wl = null; }
+  } catch {}
+}
+function pause(s) { if (s.run) { s.el = elapsed(s); s.run = null; } }
+
+setInterval(() => {
+  for (const b of blocks()) {
+    const s = st(b.id);
+    if (!s.run) continue;
+    const rem = remaining(b, s);
+    const tv = document.querySelector(`[data-timer="${b.id}"]`);
+    if (tv) { tv.textContent = fmt(rem); tv.classList.toggle('over', rem < 0); }
+    const sm = document.querySelector(`[data-sum="${b.id}"]`);
+    if (sm) sm.innerHTML = sumShort(b, s);
+    if (rem <= 0 && !s.done) {
+      s.done = true; saveCur(); beep();
+      const c = document.getElementById('c-' + b.id);
+      if (c) { c.classList.remove('ding'); void c.offsetWidth; c.classList.add('ding'); }
+      toast(`Tiden är slut: ${b.title}`);
+    }
+  }
+}, 250);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { syncWake(); render(); } });
+
+let toastT;
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ---------- Händelser ----------
+const ACTS = {
+  tab(el) { view = el.dataset.v; render(); scrollTo(0, 0); },
+  theme() {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next; LS.set(K_THEME, next); render();
+  },
+  open(el) {
+    const id = el.dataset.id;
+    cur.open = cur.open === id && el.classList.contains('chead') ? null : id;
+    saveCur(); render();
+    if (cur.open) document.getElementById('c-' + cur.open)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  },
+  timer(el) {
+    const s = st(el.dataset.id);
+    if (s.run) pause(s);
+    else { Object.values(cur.b).forEach(pause); s.run = Date.now(); unlockAudio(); }
+    saveCur(); render(); syncWake();
+  },
+  treset(el) {
+    const s = st(el.dataset.id);
+    if ((s.el || s.run) && !confirm('Nollställa timern?')) return;
+    s.el = 0; s.run = null; s.done = false; saveCur(); render(); syncWake();
+  },
+  inc(el) {
+    const id = el.dataset.id, s = st(id), k = el.dataset.k;
+    s[k] = Math.max(0, s[k] + Number(el.dataset.d));
+    if (id === 'chip' && s.a <= 10) s.base = s.h;   // baslinjen låses när försök passerar 10
+    saveCur(); render();
+  },
+  gen(el) {
+    const id = el.dataset.id, s = st(id), g = s.g;
+    g.n += 1; g.last = GENS[id].next(g.last || undefined, g.n, g);
+    saveCur(); render();
+  },
+  save() {
+    const rec = snapshot();
+    if (!lines(rec).length && rec.total < 60000) { toast('Inget att spara ännu'); return; }
+    if (!confirm('Spara passet och starta ett nytt?')) return;
+    hist.unshift(rec); LS.set(K_HIST, hist);
+    cur = newSession(); saveCur(); syncWake();
+    view = 'hist'; render(); scrollTo(0, 0); toast('Passet sparat');
+  },
+  share() { share(snapshot()); },
+  reset() {
+    if (!confirm('Nollställa passet? Osparade resultat försvinner.')) return;
+    cur = newSession(); saveCur(); syncWake(); render(); scrollTo(0, 0);
+  },
+  hshare(el) { share(hist[+el.dataset.i]); },
+  hdel(el) {
+    if (!confirm('Ta bort passet från historiken?')) return;
+    hist.splice(+el.dataset.i, 1); LS.set(K_HIST, hist); render();
+  },
+};
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (el && el.tagName !== 'INPUT' && ACTS[el.dataset.act]) ACTS[el.dataset.act](el);
+});
+document.addEventListener('change', e => {
+  if (e.target.dataset.act === 'long') {
+    cur.long = e.target.checked;
+    if (!cur.long) { pause(st('inspel')); if (cur.open === 'inspel') cur.open = null; }
+    saveCur(); render();
+  }
+});
+
+// ---------- Start ----------
+document.documentElement.dataset.theme = LS.get(K_THEME, null) || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+render(); syncWake();
+if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
