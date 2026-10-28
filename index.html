@@ -6,11 +6,11 @@
 <meta name="theme-color" content="#1B5A39">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Golfträning">
+<meta name="apple-mobile-web-app-title" content="Golftraining">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-192.png">
-<title>Golfträning</title>
+<title>Golftraining</title>
 <style>
 /* Typsnitt i repot (SIL OFL 1.1, se fonts/). Variabla filer: en fil täcker alla vikter. */
 @font-face { font-family: "Big Shoulders Display"; src: url(fonts/BigShouldersDisplay.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
@@ -200,7 +200,7 @@ ul { padding-left: 20px; margin: 8px 0 0; }
 </head>
 <body>
 <div class="shell">
-  <header class="topbar"><div class="brand"><svg viewBox="0 0 22 26" aria-hidden="true"><path d="M5 25V2"/><path d="M5 3l13 4.5L5 12"/><path d="M1 25h9"/></svg>Golfträning</div></header>
+  <header class="topbar"><div class="brand"><svg viewBox="0 0 22 26" aria-hidden="true"><path d="M5 25V2"/><path d="M5 3l13 4.5L5 12"/><path d="M1 25h9"/></svg>Golftraining</div></header>
   <main id="view"></main>
 </div>
 <nav class="tabs" id="tabs"></nav>
@@ -216,10 +216,10 @@ ul { padding-left: 20px; margin: 8px 0 0; }
 const I18N = {
   sv: {
     ui: {
-      appName: 'Golfträning', tabHome: 'Start', tabRun: 'Pass', tabHist: 'Historik', tabSettings: 'Inställningar',
+      appName: 'Golftraining', tabHome: 'Start', tabRun: 'Pass', tabHist: 'Historik', tabSettings: 'Inställningar',
       menu: 'Meny', theme: 'Utseende', themeSystem: 'System', themeLight: 'Ljust', themeDark: 'Mörkt',
       choosePlace: 'Var tränar du?', editPlace: 'Ändra platsen', stationsHere: 'Stationer: {list}', maxClub: 'Längsta klubba: {club}',
-      ongoing: 'Pågående pass', ongoingText: '{n} moment hittills. Fortsätt eller avsluta och spara.', resume: 'Fortsätt passet',
+      ongoing: 'Pågående pass', ongoingText: '{n} moment hittills. Fortsätt eller avsluta och spara.', ongoingSince: 'Startat {when}.', resume: 'Fortsätt passet',
       suggest: 'Förslag idag', suggestBoth: 'Kör båda (≈ 60 min)', suggestOne: 'Bara {name} (≈ 30 min)',
       noModules: 'Inga moduler passar platsens stationer. Ändra stationerna under Inställningar.',
       modulesHere: 'Alla moduler här', testsHere: 'Tester här',
@@ -256,7 +256,7 @@ const I18N = {
       yardHint: 'Slå 5 bollar per ruta och skriv in snittet från GC2. Sidled: tryck V eller H.',
       noYardage: 'Ingen längdtabell än. Kör modulen Längdtabell i garaget med GC2.',
       enterCarry: 'Carry (m)', register: 'Registrera', target: 'Mål',
-      shareTitle: 'Golfträning – resultat',
+      shareTitle: 'Golftraining – resultat',
       wakeNote: 'Skärmen hålls tänd under passet.',
       minutes: '≈ {n} min', out: 'UT', in: 'IN'
     },
@@ -359,7 +359,7 @@ const I18N = {
     btbSlope: { down: 'nedför', flat: 'plant', up: 'uppför' }, btbExtra: { ballHigh: 'boll högt', ballLow: 'boll lågt' },
     ball8St: { chip: 'Chip', pitch: 'Pitch', lob: 'Lobb', bunker: 'Bunker' }, ball8Round: 'Varv {r} av 5',
     swing: { hip: 'Höft', chest: 'Bröst', shoulder: 'Axel', threeQ: '3/4', full: 'Full' },
-    share: { head: '⛳ Golfträning – {date}', place: 'Plats: {p}' },
+    share: { head: '⛳ Golftraining – {date}', place: 'Plats: {p}' },
     v1: {
       name: 'Närspel med variation (v1)',
       lines: { chip: 'Chip: {h}/{a} inom 1,5 m ({p})', base: ' · baslinje {b}/{n}', bunker: 'Greenbunker: {h}/{a} inom 2 m ({p})', putt: 'Puttar 2–3 m: {h}/{a} i hål ({p})',
@@ -392,6 +392,7 @@ const fmtN = (x, d = 1) => Number(x).toLocaleString('sv-SE', { maximumFractionDi
 const fmtS = (x, d = 1) => (x > 0 ? '+' : x < 0 ? '−' : '') + fmtN(Math.abs(x), d);
 const DAY = 86400000;
 const fmtDate = iso => new Date(iso).toLocaleDateString('sv-SE', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+const fmtWhen = iso => new Date(iso).toLocaleString('sv-SE', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 const fmtShort = iso => new Date(iso).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
 const daysSince = iso => Math.floor((Date.now() - new Date(iso).getTime()) / DAY);
 const when = iso => { const d = daysSince(iso); return d <= 0 ? t('ui.today') : d === 1 ? t('ui.yesterday') : t('ui.daysAgo', { n: d }); };
@@ -607,7 +608,10 @@ const curPlace = () => placeById(D.placeId) || D.places[0];
 // =====================================================================
 // Pass: kö av moduler/tester, steg och resultat
 // =====================================================================
-let view = D.cur ? 'run' : 'home', editPlaceId = null, lastSaved = null;
+/* Ett pass som startades för mindre än 3 timmar sedan öppnas direkt; ett äldre väntar på startsidan (28 okt). */
+const RESUME_MS = 3 * 3600 * 1000;
+const startView = () => D.cur && Date.now() - Date.parse(D.cur.date) < RESUME_MS ? 'run' : 'home';
+let view = startView(), editPlaceId = null, lastSaved = null;
 const qItem = () => D.cur && D.cur.queue[D.cur.qi];
 const runPlace = () => placeById(D.cur?.placeId) || curPlace();
 const stepsOf = q => q.kind === 'module' ? MODULES[q.id].steps : [{ type: 'test', test: q.id }];
@@ -722,8 +726,8 @@ function homeHTML() {
     <div class="card soft"><div class="small">${t('ui.stationsHere', { list: stList || t('ui.none') })}</div>
     <div class="small">${t('ui.maxClub', { club: club(p.maxClub || 'D') })}</div>
     <button class="btn small" data-act="editPlace" data-id="${p.id}">${t('ui.editPlace')}</button></div>`;
-  if (D.cur) h += `<div class="card alert"><h3>${t('ui.ongoing')}</h3><p class="small">${t('ui.ongoingText', { n: D.cur.items.length })}</p>
-    <button class="btn primary" data-act="tab" data-v="run">${t('ui.resume')}</button></div>`;
+  if (D.cur) h += `<div class="card alert"><h3>${t('ui.ongoing')}</h3><p class="small">${t('ui.ongoingSince', { when: fmtWhen(D.cur.date) })} ${t('ui.ongoingText', { n: D.cur.items.length })}</p>
+    <button class="btn primary" data-act="tab" data-v="run">${t('ui.resume')}</button><button class="btn danger" data-act="endSession">${t('ui.endSession')}</button></div>`;
   const rem = reminders(p);
   if (rem.length) h += `<h2 class="h-sec">${t('ui.reminders')}</h2>` + rem.map(r => `<div class="card alert"><h3>${r.head}</h3>
     ${r.tests.map(id => `<button class="btn dark small" data-act="startTest" data-id="${id}">${t('ui.dueTest', { name: testName(id) })}</button>`).join('')}</div>`).join('');
@@ -1209,7 +1213,7 @@ $('#importFile').addEventListener('change', e => {
       if (d.v !== 2 || !Array.isArray(d.sessions) || !Array.isArray(d.places)) throw new Error('bad');
       if (!confirm(t('ui.importConfirm', { n: d.sessions.length }))) return;
       const base = defaults(); D = { ...base, ...d, settings: { ...base.settings, ...d.settings } };
-      save(); applyTheme(); view = D.cur ? 'run' : 'home'; render(); toast(t('ui.importOk'));
+      save(); applyTheme(); view = startView(); render(); toast(t('ui.importOk'));
     } catch { toast(t('ui.importBad')); }
   };
   r.readAsText(f); e.target.value = '';
