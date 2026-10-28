@@ -1,5 +1,5 @@
 // Höj versionen när filerna ändras så att nya versionen hämtas.
-const CACHE = 'golftraining-v6';
+const CACHE = 'golftraining-v7';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png',
   './fonts/BigShouldersDisplay.woff2', './fonts/AtkinsonHyperlegibleNext.woff2', './fonts/AtkinsonHyperlegibleMono.woff2'];
 
