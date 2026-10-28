@@ -146,6 +146,7 @@ details.card summary { min-height: 40px; display: flex; align-items: center; cur
 .series .sub { font-size: 17px; font-weight: 600; color: var(--muted); }
 .series .head { font-family: var(--f-num); font-size: 40px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
 .dl { display: inline-block; margin-top: 6px; background: var(--gorse); color: #1d1600; border-radius: 99px; padding: 3px 12px; font-weight: 700; font-size: 16px; }
+.tag { display: inline-block; margin: 6px 6px 0 0; background: var(--accent-soft); color: var(--ink); border-radius: 99px; padding: 3px 12px; font-weight: 700; font-size: 16px; }
 .explain { background: var(--chip); border-radius: 12px; padding: 10px 12px; font-size: 15.5px; margin: 8px 0; }
 .prog { font-weight: 700; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
 
@@ -273,7 +274,12 @@ const I18N = {
       stances: { narrow: 'smal stance', normal: 'normal stance', wide: 'bred stance', open: 'öppen stance', closed: 'stängd stance' },
       coinVariant: { A: 'Variant A: två mynt på varandra – träffa bara det översta', B: 'Variant B: två mynt bredvid varandra, en fingerbredd emellan – träffa bara det främre' },
       explain: 'Kort/lång = ca 3 m före/efter flaggan. Vänster/höger = ca 2 m bredvid.',
-      clock: 'från klockan {c}', newHole: 'nytt hål', dlPrefix: 'DL: '
+      clock: 'från klockan {c}', newHole: 'nytt hål', dlPrefix: 'DL: ',
+      teeAims: { left: 'landa i vänstra halvan', center: 'landa mitt i fairway', right: 'landa i högra halvan' },
+      teeExplain: 'Fairway = mellan dina två mål. Ett slag i fairway räknas oavsett halva.',
+      upDownLies: { fairway: 'fairway', rough: 'ruff', tight: 'tunt läge', up: 'uppförslut', down: 'nedförslut', bunker: 'greenbunker' },
+      ownClub: 'välj klubba själv', puttOut: 'putta ut',
+      upDownExplain: 'Varje boll: ett slag in på green, sedan puttar du ut. Upp och ner = i hål på högst två slag.'
     },
     mod: {
       chipVar: { name: 'Chip med variation', desc: '2 stationer, variationsserier, test 10 mot flagg',
@@ -298,10 +304,14 @@ const I18N = {
       ghost: { name: 'Spökhål', desc: 'Tre markeringar på rad, stanna precis förbi i tur och ordning. Fungerar på puttmatta.' },
       aimPoint: { name: 'AimPoint-kalibrering', desc: '10 punkter: läs lutningen, mät med telefonen',
         tech: 'Stå med fötterna på varsin sida om fallinjen och känn lutningen. Börja på en plan yta och jämför med en tydlig lutning.' },
+      teeShots: { name: 'Utslag med variation', desc: 'Driver, trä och hybrid mot en tänkt fairway – ny klubba, form och sida varje slag, drivertest',
+        tech: 'Välj två mål på rangen, ungefär 30 m isär, som fairwaykanter. Fem slag med full rutin före varje: stå bakom bollen, välj mållinje och en punkt strax framför bollen, slå.' },
+      upDown: { name: 'Upp och ner', desc: 'Nytt läge och avstånd varje boll, spela in och putta ut. Räkna upp och ner.',
+        tech: 'Välj en landningspunkt och slå fem bollar från samma läge med olika klubbor, till exempel SW, PW och J8. Se hur långt bollen rullar med varje klubba.' },
       coins: { name: 'Myntövningen', desc: 'Träffa rätt mynt – rena träffar av 10',
         tech: 'Lägg två mynt. Variant A: på varandra, träffa bara det översta. Variant B: bredvid varandra med en fingerbredd emellan, träffa bara det främre. Inga bollar, bara mynt.' }
     },
-    reg: { holed: 'I hål', withinClub: 'Inom en klubblängd', clean: 'Rena träffar av 10' },
+    reg: { holed: 'I hål', withinClub: 'Inom en klubblängd', clean: 'Rena träffar av 10', fairway: 'I fairway', upDown: 'Upp och ner' },
     log: {
       station: 'Station {n} ({d} m): {s} serier', series: '{s} serier', reg: '{label}: {sum} av {tot}',
       streak: 'Bästa {b} i rad ({n} försök)', coins: '{v} rena av 10',
@@ -395,6 +405,7 @@ const CHIP_CLUBS = ['7i', '8i', '9i', 'PW', 'GW', 'SW', 'LW', '9W', '5W'];
 const IRON_WEDGES = ['5i', '6i', '7i', '8i', '9i', 'PW', 'GW', 'SW', 'LW'];
 const WEDGES = ['PW', 'GW', 'SW', 'LW'];
 const BUNKER_CLUBS = ['GW', 'SW', 'LW'];
+const TEE_CLUBS = ['D', '3W', '5W', '3H', '4H'];
 const club = c => t('clubs.' + c);
 const clubOk = (place, c) => CLUBS.indexOf(c) >= CLUBS.indexOf(place.maxClub || 'D');
 const clubsAt = (place, list) => { const r = list.filter(c => clubOk(place, c)); return r.length ? r : [list[list.length - 1]]; };
@@ -417,6 +428,9 @@ const TARGETS = ['pin', 'short', 'long', 'left', 'right', 'shortLeft', 'shortRig
 const HEIGHTS = ['low', 'normal', 'high'];
 const SHAPES = ['fade', 'straight', 'draw'];
 const DLS = ['narrow', 'wide', 'ballFwd', 'ballBack', 'shortGrip', 'feetTogether', 'open', 'closed'];
+const TEE_AIMS = ['left', 'center', 'right'];
+const UPDOWN_DISTS = [5, 8, 10, 12, 15, 18, 20, 25];
+const UPDOWN_LIES = ['fairway', 'rough', 'tight', 'up', 'down'];   // + greenbunker om platsen har en
 const flagOf = () => D.settings.flags === 2 ? pick(['A', 'B']) : null;
 
 const GENS = {
@@ -430,6 +444,9 @@ const GENS = {
     shot: () => ({ height: pick(HEIGHTS) }) },
   shortPutt: { len: 4, shot: () => ({ dist: pick([1, 1.5, 2, 2.5, 3]), clock: 1 + rnd(12) }) },
   lagPutt: { len: 4, pre: () => ({ d: shuffle([6, 7, 8, 9, 10, 11, 12, 13, 14, 15]) }), shot: (c, p, i) => ({ dist: p.d[i] }) },
+  tee: { explain: 'gen.teeExplain', shot: c => ({ club: pick(clubsAt(c.place, TEE_CLUBS)), shape: pick(SHAPES), aim: pick(TEE_AIMS) }) },
+  upDown: { len: 3, explain: 'gen.upDownExplain',
+    shot: c => ({ dist: pick(UPDOWN_DISTS), lie: pick(c.place.st.bunker ? [...UPDOWN_LIES, 'bunker'] : UPDOWN_LIES) }) },
   coins: { pre: c => ({ variant: c.seriesNo % 2 ? 'B' : 'A' }),
     shot: c => ({ club: pick(clubsAt(c.place, WEDGES)), pos: pick(Object.keys(L.gen.ballPos)), stance: pick(Object.keys(L.gen.stances)) }) },
 };
@@ -453,6 +470,8 @@ function shotHTML(kind, s) {
   else if (kind === 'lagPutt') big = t('ui.lengthM', { d: s.dist });
   else if (kind === 'justPast') big = G.heights[s.height];
   else if (kind === 'coins') { big = club(s.club); sub = [G.ballPos[s.pos], G.stances[s.stance]]; }
+  else if (kind === 'tee') return `<div class="big">${club(s.club)} · ${G.shapes[s.shape]}</div><span class="tag">${G.teeAims[s.aim]}</span>`;
+  else if (kind === 'upDown') return `<div class="big">${t('ui.lengthM', { d: s.dist })}</div><div class="sub">${G.ownClub} · ${G.puttOut}</div><span class="tag">${G.upDownLies[s.lie]}</span>`;
   else {
     big = (s.flag ? s.flag + ' · ' : '') + G.targets[s.target];
     sub = [club(s.club), G.heights[s.height]];
@@ -474,10 +493,12 @@ const MODULES = {
   heights: { grp: 'short', needs: [['chip']], steps: [{ type: 'tech' }, { type: 'series', gen: 'heights3' }, { type: 'test', test: 't10flag' }] },
   leapfrog: { grp: 'short', needs: [['chip']], steps: [{ type: 'tech' }, { type: 'streak' }, { type: 'test', test: 't10flag' }] },
   bunkerVar: { grp: 'short', needs: [['bunker']], steps: [{ type: 'tech' }, { type: 'series', gen: 'bunker' }, { type: 'test', test: 't10bunker' }] },
+  upDown: { grp: 'short', needs: [['chip']], steps: [{ type: 'tech' }, { type: 'series', gen: 'upDown', balls: 18, reg: 'upDown' }] },
   shortPutts: { grp: 'putt', needs: [['putt']], steps: [{ type: 'tech' }, { type: 'series', gen: 'shortPutt', reg: 'holed', balls: 20 }, { type: 'test', test: 'puttPin' }] },
   lagPutt: { grp: 'putt', needs: [['putt']], steps: [{ type: 'tech' }, { type: 'series', gen: 'lagPutt', reg: 'withinClub', balls: 20 }, { type: 'test', test: 'lagSGF' }] },
   rangeVar: { grp: 'range', needs: [RANGE], steps: [{ type: 'tech' }, { type: 'series', gen: 'range', askBalls: 40 }, { type: 'test', test: 'nine' }] },
   justPast: { grp: 'range', needs: [RANGE], steps: [{ type: 'tech' }, { type: 'series', gen: 'justPast', askBalls: 40 }, { type: 'test', test: 'sevenTen' }] },
+  teeShots: { grp: 'range', needs: [['rangeGrass', 'toptracer']], club: 'D', steps: [{ type: 'tech' }, { type: 'series', gen: 'tee', askBalls: 24, reg: 'fairway' }, { type: 'test', test: 'driver' }] },
   yardage: { grp: 'garage', needs: [['gc2']], steps: [{ type: 'yardage' }] },
   gc2Rand: { grp: 'garage', needs: [['gc2', 'toptracer']], steps: [{ type: 'tech' }, { type: 'test', test: 'gc2Rand' }] },
   ghost: { grp: 'putt', needs: [['putt', 'puttMat']], steps: [{ type: 'tally' }] },
@@ -776,11 +797,11 @@ function seriesHTML(step) {
   if (step.gen === 'justPast') head += `<div class="head">${t('ui.lengthM', { d: st.pre.dist })}</div><div class="sub">${t('ui.landPast')}</div>`;
   if (step.gen === 'coins') head += `<div class="sub">${t('gen.coinVariant.' + st.pre.variant)}</div>`;
   if (step.gen === 'heights3' && st.pre.flag) head += `<div class="sub">${t('gen.flag', { f: st.pre.flag })}</div>`;
-  const explain = g.explain && st.n === 0 ? `<div class="explain">${t('gen.explain')}</div>` : '';
+  const explain = g.explain && st.n === 0 ? `<div class="explain">${t(typeof g.explain === 'string' ? g.explain : 'gen.explain')}</div>` : '';
   const shots = st.cur.map((s, i) => `<div class="shot"><span class="n">${a + i}</span><div>${shotHTML(step.gen, s)}</div></div>`).join('');
   const last = st.n + 1 >= nSeries;
   const action = step.reg
-    ? `<h3>${t('ui.regAfter', { label: t('reg.' + step.reg) })}</h3><div class="numgrid ${st.cur.length === 3 ? 'c3' : ''}">${Array.from({ length: st.cur.length + 1 }, (_, i) => `<button data-act="regSeries" data-v="${i}">${i}</button>`).join('')}</div>`
+    ? `<h3>${t('ui.regAfter', { label: t('reg.' + step.reg) })}</h3><div class="numgrid ${st.cur.length === 2 ? 'c3' : ''}">${Array.from({ length: st.cur.length + 1 }, (_, i) => `<button data-act="regSeries" data-v="${i}">${i}</button>`).join('')}</div>`
     : `<button class="btn primary huge" data-act="nextSeries">${last && !step.regEnd ? t('ui.lastSeries') : t('ui.nextSeries')}</button>`;
   return `${explain}<div class="prog">${t('ui.seriesOf', { i: st.n + 1, n: nSeries })} · ${t('ui.ballsRange', { a, b, t: total })}</div>
     <div class="series">${head}${shots}</div>${action}`;
