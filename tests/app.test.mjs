@@ -131,6 +131,51 @@ test('huvudlöst genomspel: utslag med serier och drivertest', () => {
   assert.deepEqual([...A.D.cur.items.find(i => i.id === 'teeShots').lines], ['I fairway: 9 av 12']);
 });
 
+// ---------------------------------------------------------------------------
+// Namn och pågående pass (28 okt)
+// ---------------------------------------------------------------------------
+test('appen heter Golftraining i rubrik, fliktitel, hemskärm och manifest', () => {
+  const src = html(), man = JSON.parse(read('manifest.webmanifest'));
+  assert.doesNotMatch(src + read('manifest.webmanifest'), /Golfträning/);
+  assert.match(src, /<title>Golftraining<\/title>/);
+  assert.match(src, /apple-mobile-web-app-title" content="Golftraining"/);
+  assert.equal(man.name, 'Golftraining');
+  assert.equal(man.short_name, 'Golftraining');
+});
+
+// Startar ett pass, flyttar dess starttid bakåt och laddar appen på nytt med samma lagring.
+function reopenWithSessionAge(hours) {
+  const A = loadApp();
+  A.D.placeId = 'brohof';
+  A.click('startMods', { ids: 'upDown' });
+  A.D.cur.date = new Date(Date.now() - hours * 3600e3).toISOString();
+  A.click('techDone');
+  return loadApp(A.storage());
+}
+
+test('ett pass som startades för mindre än 3 timmar sedan öppnas direkt', () => {
+  const B = reopenWithSessionAge(1);
+  assert.ok(B.D.cur, 'passet finns kvar');
+  assert.equal(B.currentView, 'run');
+  B.render();
+  assert.match(B.view(), /Upp och ner/);
+});
+
+test('ett äldre pass väntar på startsidan med starttid, fortsätt och avsluta', () => {
+  const B = reopenWithSessionAge(4);
+  assert.ok(B.D.cur, 'passet finns kvar');
+  assert.equal(B.currentView, 'home');
+  B.render();
+  const v = B.view();
+  assert.match(v, /Pågående pass/);
+  assert.match(v, /Startat [^<]*\d{2}:\d{2}\./);
+  assert.match(v, /data-act="tab" data-v="run">Fortsätt passet/);
+  assert.match(v, /data-act="endSession">Avsluta och spara pass/);
+  assert.doesNotMatch(v, /undefined|NaN/);
+  B.click('endSession');
+  assert.equal(B.D.cur, null, 'passet avslutades från startsidan');
+});
+
 test('startsidan visar de nya modulerna på rätt platser och kör utan fel i alla vyer', () => {
   const A = loadApp();
   for (const p of A.DEFAULT_PLACES()) {
