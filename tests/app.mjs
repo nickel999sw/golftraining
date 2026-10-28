@@ -22,9 +22,9 @@ function fakeEl() {
   return el;
 }
 
-export function loadApp() {
+export function loadApp(seed = []) {
   const els = new Map();
-  const store = new Map();
+  const store = new Map(seed);
   const $ = sel => { if (!els.has(sel)) els.set(sel, fakeEl()); return els.get(sel); };
   const listeners = {};
   const document = {
@@ -45,8 +45,9 @@ export function loadApp() {
   vm.runInContext(script(), ctx, { filename: 'index.html' });
   // Toppnivåns const-bindningar delas mellan skript i samma kontext, precis som i webbläsaren.
   const api = vm.runInContext(`({ MODULES, GENS, TESTS, STATIONS, DEFAULT_PLACES, GROUP_ORDER, L, t, fits, makeSeries, shotHTML,
-    ACTS, get D() { return D; }, render, suggestions })`, ctx);
+    ACTS, get D() { return D; }, render, suggestions, startView, get currentView() { return view; } })`, ctx);
   api.view = () => $('#view').innerHTML;
+  api.storage = () => [...store];
   api.click = (act, dataset = {}) => api.ACTS[act]({ dataset, textContent: '' });
   return api;
 }

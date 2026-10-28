@@ -1,4 +1,4 @@
-# Golfträning
+# Golftraining
 
 PWA för golfträning på svenska, gjord för iPhone i stående läge. Fungerar offline efter första besöket.
 
