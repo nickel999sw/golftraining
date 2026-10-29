@@ -110,11 +110,11 @@ Rekommendation: lägg till `users/{uid}/training/profile` med inställningar, pl
   - En post i utkorgen vinner alltid.
   - Ett dokument som finns i Firestore men inte lokalt läggs till lokalt. Det gäller till exempel en annan enhet eller en ny installation.
   - Ett id som finns i `synced` men saknas i Firestore har raderats på en annan enhet. Det får tas bort lokalt bara om alla tre villkoren gäller (beslut 29 okt):
-    1. läsningen kom från servern (`snapshot.metadata.fromCache === false`, alltså källa `server`), inte från en cache;
+    1. läsningen görs uttryckligen från servern: `get({ source: 'server' })` i compat-SDK:n (motsvarar `getDocsFromServer`). Utan nät misslyckas läsningen, och då körs ingen sammanslagning alls: ingenting läggs till eller tas bort lokalt, och utkorgen ligger kvar till nästa försök (ändrat 29 okt, ersätter kontrollen av `metadata.fromCache`);
     2. utkorgens `uid` är samma som den inloggade användarens;
     3. högst 2 poster skulle tas bort. Fler än 2: appen frågar i stället för att radera ("N pass och M testresultat finns inte längre i molnet. Ta bort dem i telefonen?"). Nej behåller dem lokalt och lägger dem i utkorgen som `set`, så att de laddas upp igen.
   - Uppfylls inte villkor 1 eller 2 tas ingenting bort lokalt.
-  - **Tester för alla tre fallen:** läsning från cache tar inte bort något; annat `uid` i utkorgen tar inte bort något; 3 eller fler saknade poster ger frågan och inget tas bort förrän svaret är ja (och nej laddar upp dem igen). Plus fallet som får radera: 1–2 poster, källa server, samma `uid`.
+  - **Tester för alla tre fallen:** en serverläsning som misslyckas (ingen anslutning) ger ingen sammanslagning och lämnar D och utkorgen oförändrade, och den falska Firestore kontrollerar att läsningen begärdes med `source: 'server'`; annat `uid` i utkorgen tar inte bort något; 3 eller fler saknade poster ger frågan och inget tas bort förrän svaret är ja (och nej laddar upp dem igen). Plus fallet som får radera: 1–2 poster, källa server, samma `uid`.
 - **Ingen Firestore-offlinecache** (`enablePersistence`): utkorgen är den enda kön, så statusen blir entydig. Golfrounds använder cachen, men har också två köer.
 - **Status i toppraden**, med samma koder och texter som Golfrounds `shot.sync.*`:
 
