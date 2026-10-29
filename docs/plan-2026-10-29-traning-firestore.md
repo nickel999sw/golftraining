@@ -228,6 +228,18 @@ match /trainingTests/{rid} {
    - **Resultat 29 okt:** flera sites är tillåtna på Spark (se avsnitt 9, med källa). Projektet har i dag en site, `golfrounds-ac8bd`. Både `golftraining.web.app` och `golftraining-nl.web.app` svarar "Site Not Found". Det betyder att inget är publicerat där, inte säkert att id:t är ledigt: det avgörs först när siten skapas. `golftraining-nl` är det beslutade namnet.
 2. **Regler** i Golfrounds: `firestore.rules` och emulatortester. Hela `npm test` ska gå igenom. **STOPP:** ditt ja innan `npm run deploy:rules`.
 3. **Golftraining:** datamodell, utkorg, synk, inloggning, status, radering, import och service worker. Tester offline och mot emulatorn. Skärmbilder i 390 px.
+   - **Resultat 29 okt** (grenen `feat/traning-firestore`, inte pushad):
+     - Synken ligger i `index.html` (avsnittet "Synk med Golfrounds Firestore"): dokumentformat, utkorg, läsning från servern med de tre skydden, radering av pass med dess testresultat, import som slår ihop, status i toppraden och Konto under Inställningar.
+     - `npm test`: 28 tester offline (11 nya i `tests/sync.test.mjs`). `npm run test:emulator`: 14 kontroller mot `demo-golfrounds` med Golfrounds regler.
+     - Skärmbilder i 390 px i `skarmbilder/firestore-2026-10-29/` (lokalt, mappen är ignorerad i git).
+     - **Avvikelser och tillägg att granska:**
+       - `synced` och `pending` använder sökvägen `<samling>/<id>`, inte bara id, så att pass och testresultat inte kan blandas ihop.
+       - Webbkonfigurationen ligger i `index.html` i stället för en egen `config.js` (en fil mindre att cacha). Samma publika id:n som Golfrounds.
+       - Ett annat konto än utkorgens: synken pausas helt (ingen läsning, inget skickas, inget tas bort) och statusen visar "Annat konto". Nej-svaret vid första inloggningen sparas i `localOnly`, så att frågan inte kommer igen.
+       - När ett pass tas bort räknas testets nivå om från de resultat som finns kvar (följd av beslutet att resultaten raderas med passet).
+       - Två resultat i samma millisekund får olika id (en nolla läggs till).
+       - Testet "inga externa URL:er" tillåter nu exakt de tre SDK-filerna från gstatic, och service workern cachar dem (version v9).
+       - `package.json`: två utvecklingsberoenden med låsta versioner, `firebase` 11.10.0 och `@firebase/rules-unit-testing` 4.0.1 (samma som Golfrounds), och skriptet `test:emulator`, som använder Golfrounds `firebase.json` och emulatorlås.
 4. **Hosting:** ny site, `firebase.json` och `.firebaserc`, och deploy till en förhandskanal. **STOPP:** du lägger till redirect-URI:n i Google Cloud-konsolen och provar inloggningen på iPhone.
 5. **Flytten:** exportera i den gamla appen, importera i den nya och kontrollera i Firestore (läsning) att antalen stämmer. **STOPP:** ditt ja innan produktion på den nya siten.
 6. **GitHub Pages:** sidan med länken till den nya adressen. **STOPP:** ditt ja innan push.

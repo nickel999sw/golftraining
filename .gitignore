@@ -1,3 +1,5 @@
 .claude/
 .DS_Store
 skarmbilder/
+node_modules/
+firestore-debug.log
