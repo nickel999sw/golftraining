@@ -1,6 +1,13 @@
 # Plan 29 okt: Golftraining sparar pass och testresultat i Golfrounds Firestore
 
-**Status:** utkast, inte godkänt. Ingen kod, inga regler och ingen data ändras förrän Niklas godkänt planen.
+**Status:** godkänd 29 okt 2026 av Niklas, med ändringarna nedan. Arbetet sker på grenen `feat/traning-firestore` i `~/Code/.worktrees/golftraining-firestore`. Planfilen ligger också på `main` (44014bd); ingen mer kod på `main`.
+
+**Ändringar vid godkännandet (29 okt):**
+1. Svar på frågorna i avsnitt 11: Firebase Hosting med ny site `golftraining-nl` (eller närmast lediga, Niklas tillfrågas innan något skapas); inställningar, platser och wedgelängder synkas senare; testresultat raderas med passet, lokalt och i Firestore; `lines` och `text` sparas som de är i första steget; strikt bara ägaren, ingen adminläsning.
+2. Skydd mot lokal radering vid sammanslagning, se avsnitt 4.
+3. Golftraining får en `CLAUDE.md` som första steg, innan någon kod skrivs (klar 29 okt, se avsnitt 10).
+4. Arbete på gren i worktree enligt Golfrounds `docs/plan-2026-10-28-arbetssatt.md`.
+5. Steg 1 ger ett tydligt besked med källa om flera Hosting-sites är tillåtna på Spark (klart, se avsnitt 9 och 10).
 
 Underlag: Golfrounds `CLAUDE.md`, `README.md`, `docs/` (särskilt `plan-2026-10-28-arbetssatt.md` och `plan-2026-10-28-deploy-import-moduler.md`), `firestore.rules`, `firebase.json`, `config.js`, `src/app.js` (inloggning och synk) och `test/rules.test.js`. I Golftraining: `index.html`, `sw.js`, `tests/` och `README.md`. Golftraining har ingen `CLAUDE.md` och hade ingen `docs/` före den här filen.
 
@@ -102,7 +109,12 @@ Rekommendation: lägg till `users/{uid}/training/profile` med inställningar, pl
 - **Läsning vid inloggning:** båda samlingarna hämtas från servern och slås ihop med D per id.
   - En post i utkorgen vinner alltid.
   - Ett dokument som finns i Firestore men inte lokalt läggs till lokalt. Det gäller till exempel en annan enhet eller en ny installation.
-  - Ett id som finns i `synced` men saknas i Firestore har raderats på en annan enhet och tas bort lokalt.
+  - Ett id som finns i `synced` men saknas i Firestore har raderats på en annan enhet. Det får tas bort lokalt bara om alla tre villkoren gäller (beslut 29 okt):
+    1. läsningen kom från servern (`snapshot.metadata.fromCache === false`, alltså källa `server`), inte från en cache;
+    2. utkorgens `uid` är samma som den inloggade användarens;
+    3. högst 2 poster skulle tas bort. Fler än 2: appen frågar i stället för att radera ("N pass och M testresultat finns inte längre i molnet. Ta bort dem i telefonen?"). Nej behåller dem lokalt och lägger dem i utkorgen som `set`, så att de laddas upp igen.
+  - Uppfylls inte villkor 1 eller 2 tas ingenting bort lokalt.
+  - **Tester för alla tre fallen:** läsning från cache tar inte bort något; annat `uid` i utkorgen tar inte bort något; 3 eller fler saknade poster ger frågan och inget tas bort förrän svaret är ja (och nej laddar upp dem igen). Plus fallet som får radera: 1–2 poster, källa server, samma `uid`.
 - **Ingen Firestore-offlinecache** (`enablePersistence`): utkorgen är den enda kön, så statusen blir entydig. Golfrounds använder cachen, men har också två köer.
 - **Status i toppraden**, med samma koder och texter som Golfrounds `shot.sync.*`:
 
@@ -187,7 +199,7 @@ match /trainingTests/{rid} {
 - **Golfrounds** använder redan alternativ 1 (`src/app.js:112`).
 - **Popup** i en PWA från hemskärmen på iPhone är opålitlig. Det är skälet till att Golfrounds har redirect som reserv.
 - **Ett projekt kan ha upp till 36 sites.** Alla delar Auth och Firestore.
-- **Osäkert:** jag har inte hittat ett uttryckligt besked om att flera sites ingår i Spark. Det kontrolleras i steg 1. Om det inte går, avbryts det steget.
+- **Flera sites ingår i Spark** (kontrollerat 29 okt). Firebase prissida, avsnittet Hosting: raden "Multiple sites per project" har bock både för Spark (no-cost) och Blaze. Taket är 36 sites per projekt (Firebase-dokumentationen om multisite). Kvoterna gäller per projekt, inte per site: 10 GB lagring och 360 MB överföring per dag delas med Golfrounds. Källor: https://firebase.google.com/pricing och https://firebase.google.com/docs/hosting/multisites.
 
 **Rekommendation:** Firebase Hosting, siten `golftraining-…`.
 - Site-id är globalt unika, så `golftraining` kan vara upptaget. Förslag: `golftraining-nl`, eller det du väljer.
@@ -211,15 +223,17 @@ match /trainingTests/{rid} {
 **Varför inte GitHub Pages som tillåten domän:** det räcker inte för inloggningen. Domänen kan läggas till i Authorized domains, men redirect-flödet går ändå sönder i Safari, och bara popup återstår.
 
 ## 10. Steg (med stopp)
+0. **CLAUDE.md för Golftraining** (flyttad hit från steg 7, beslut 29 okt). Klar 29 okt på grenen.
 1. **Kontroll utan ändringar:** att flera sites är möjliga på Spark, och vilket site-id som är ledigt. `firebase hosting:sites:create` körs först efter ditt ja, eftersom det skapar något.
+   - **Resultat 29 okt:** flera sites är tillåtna på Spark (se avsnitt 9, med källa). Projektet har i dag en site, `golfrounds-ac8bd`. Både `golftraining.web.app` och `golftraining-nl.web.app` svarar "Site Not Found". Det betyder att inget är publicerat där, inte säkert att id:t är ledigt: det avgörs först när siten skapas. `golftraining-nl` är det beslutade namnet.
 2. **Regler** i Golfrounds: `firestore.rules` och emulatortester. Hela `npm test` ska gå igenom. **STOPP:** ditt ja innan `npm run deploy:rules`.
 3. **Golftraining:** datamodell, utkorg, synk, inloggning, status, radering, import och service worker. Tester offline och mot emulatorn. Skärmbilder i 390 px.
 4. **Hosting:** ny site, `firebase.json` och `.firebaserc`, och deploy till en förhandskanal. **STOPP:** du lägger till redirect-URI:n i Google Cloud-konsolen och provar inloggningen på iPhone.
 5. **Flytten:** exportera i den gamla appen, importera i den nya och kontrollera i Firestore (läsning) att antalen stämmer. **STOPP:** ditt ja innan produktion på den nya siten.
 6. **GitHub Pages:** sidan med länken till den nya adressen. **STOPP:** ditt ja innan push.
-7. **Dokumentation:** README i Golftraining, en `CLAUDE.md` för Golftraining, och raden om deploy i din globala CLAUDE.md (commit, och fråga före push).
+7. **Dokumentation:** README i Golftraining, uppdatering av Golftrainings `CLAUDE.md` (deploy via Firebase), och raden om deploy i din globala CLAUDE.md (commit, och fråga före push).
 
-## 11. Frågor till Niklas
+## 11. Frågor till Niklas (besvarade 29 okt, se Status överst)
 1. **Hosting:** Firebase Hosting med en ny site, och vilket namn (förslag `golftraining-nl`)? Rekommendation: ja, se avsnitt 9.
 2. **Inställningar, platser och wedgelängder:** ska de också synkas, nu eller senare? Rekommendation: senare, som ett eget dokument.
 3. **Ta bort pass:** ska passets testresultat raderas med passet? Rekommendation: ja.
