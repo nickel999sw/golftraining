@@ -69,6 +69,8 @@ button { cursor: pointer; border: 0; background: none; padding: 0; }
 }
 .topbar { display: flex; align-items: center; min-height: 40px; }
 .brand { display: flex; align-items: center; gap: 10px; font-family: var(--f-num); font-weight: 800; font-size: 26px; letter-spacing: .02em; }
+.sync { margin-left: auto; font-size: 13px; color: var(--muted); }
+.sync[data-s="denied"], .sync[data-s="other"] { color: var(--bad); }
 .brand svg { width: 22px; height: 26px; stroke: var(--accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 .tabs {
@@ -200,13 +202,17 @@ ul { padding-left: 20px; margin: 8px 0 0; }
 </head>
 <body>
 <div class="shell">
-  <header class="topbar"><div class="brand"><svg viewBox="0 0 22 26" aria-hidden="true"><path d="M5 25V2"/><path d="M5 3l13 4.5L5 12"/><path d="M1 25h9"/></svg>Golftraining</div></header>
+  <header class="topbar"><div class="brand"><svg viewBox="0 0 22 26" aria-hidden="true"><path d="M5 25V2"/><path d="M5 3l13 4.5L5 12"/><path d="M1 25h9"/></svg>Golftraining</div><span class="sync" id="sync" role="status"></span></header>
   <main id="view"></main>
 </div>
 <nav class="tabs" id="tabs"></nav>
 <input type="file" id="importFile" accept="application/json,.json" hidden>
 <div class="toast" id="toast" role="status"></div>
 
+<!-- Firebase compat 10.12.2, samma version som Golfrounds. Service workern cachar filerna, så appen startar utan nät. -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
 'use strict';
 // =====================================================================
@@ -215,6 +221,21 @@ ul { padding-left: 20px; margin: 8px 0 0; }
 // =====================================================================
 const I18N = {
   sv: {
+    sync: {
+      saved: 'Sparat', saving: 'Sparar…', phone: 'Sparat i telefonen', denied: 'Servern sa nej', local: 'Bara den här enheten', other: 'Annat konto',
+      account: 'Konto', signIn: 'Logga in med Google', signOut: 'Logga ut', signedInAs: 'Inloggad som {name}',
+      accountText: 'Inloggad sparas pass och testresultat också i Golfrounds databas, så att de finns kvar på andra enheter.',
+      otherText: 'Datan i telefonen hör till ett annat konto. Ingenting synkas förrän du loggar in med det kontot igen.',
+      unavailable: 'Inloggningen går inte att ladda just nu. Datan sparas i telefonen.', signInFail: 'Inloggningen misslyckades',
+      askUpload: 'Ladda upp {n} pass och {m} testresultat från telefonen?',
+      askRemove: '{n} pass och {m} testresultat finns inte längre i molnet. Ta bort dem i telefonen?',
+      importConfirm: 'Importera backupen? {n} pass och {m} testresultat laddas upp, {k} finns redan.',
+      importConfirmLocal: 'Importera backupen? {n} pass och {m} testresultat läggs till, {k} finns redan.',
+      importDiff: '{d} av dem finns redan med annat innehåll. Molnets version behålls.',
+      importSettings: 'Ersätta inställningar, platser och wedgelängder med backupens?',
+      importNeedsNet: 'Importen behöver nät när du är inloggad',
+      importOk: 'Backupen är importerad: {n} pass och {m} testresultat'
+    },
     ui: {
       appName: 'Golftraining', tabHome: 'Start', tabRun: 'Pass', tabHist: 'Historik', tabSettings: 'Inställningar',
       menu: 'Meny', theme: 'Utseende', themeSystem: 'System', themeLight: 'Ljust', themeDark: 'Mörkt',
@@ -249,9 +270,9 @@ const I18N = {
       periodStart: 'Startdatum', periodWeeks: 'Antal veckor', periodSet: 'Starta period på {place}', periodEnd: 'Avsluta perioden',
       periodNow: 'Pågår: {place}, {from} – {to}',
       backup: 'Backup', exportJson: 'Exportera backup (JSON)', importJson: 'Importera backup (JSON)',
-      importConfirm: 'Ersätta all data i appen med backupen ({n} pass)?', importOk: 'Backupen är importerad', importBad: 'Filen är inte en giltig backup',
+      importBad: 'Filen är inte en giltig backup',
       histSessions: 'Pass', histTests: 'Tester över tid', histYardage: 'Längdtabell', noHistory: 'Inga sparade pass ännu.',
-      delete: 'Ta bort', confirmDelete: 'Ta bort passet från historiken?', share: 'Dela', place: 'Plats',
+      delete: 'Ta bort', confirmDelete: 'Ta bort passet och dess testresultat från historiken?', share: 'Dela', place: 'Plats',
       v1Place: 'Version 1', carry: 'Carry', side: 'Sidled', left: 'V', right: 'H', saveRow: 'Spara',
       yardHint: 'Slå 5 bollar per ruta och skriv in snittet från GC2. Sidled: tryck V eller H.',
       noYardage: 'Ingen längdtabell än. Kör modulen Längdtabell i garaget med GC2.',
@@ -549,7 +570,7 @@ const TESTS = {
   aimPoint: { needs: [['putt']], kind: 'aim', higher: false },
 };
 const testName = id => t('test.' + id + '.name');
-const tstate = id => D.tests[id] || (D.tests[id] = { level: TESTS[id].level ? TESTS[id].level.start : null, results: [] });
+const tstate = id => D.tests[id] || (D.tests[id] = { level: TESTS[id]?.level ? TESTS[id].level.start : null, results: [] });
 const lvlText = (id, v) => v == null ? '' : t('test.' + id + '.lvl', { v: fmtN(v) });
 function fmtVal(id, r) {
   const T = TESTS[id];
@@ -643,7 +664,7 @@ function endSession() {
   if (hasData) {
     const p = placeById(c.placeId);
     const s = { id: c.id, date: c.date, placeId: c.placeId, placeName: p ? p.name : '', items: c.items.filter(i => i.kind === 'test' || i.lines.length) };
-    D.sessions.unshift(s); lastSaved = s; view = 'summary'; toast(t('ui.saved'));
+    D.sessions.unshift(s); lastSaved = s; view = 'summary'; toast(t('ui.saved')); queue(COL_S + '/' + s.id, 'set');
   } else { view = 'home'; toast(t('ui.nothingToSave')); }
   D.cur = null; save(); render(); scrollTo(0, 0); syncWake();
 }
@@ -655,7 +676,9 @@ function recordTest(id, v, text, extra = {}) {
     const next = v >= T.level.thr ? +(clamp(ts.level + T.level.step, T.level.step < 0 ? T.level.lim : null, T.level.step > 0 ? T.level.lim : null)).toFixed(2) : ts.level;
     r.nextLvl = next; ts.level = next;
   }
-  ts.results.push(r);
+  r.id = resultId(id, r);
+  while (ts.results.some(x => resultId(id, x) === r.id)) r.id += '0';   // två resultat i samma millisekund får ändå olika id
+  ts.results.push(r); queue(COL_T + '/' + r.id, 'set');
   if (D.cur) D.cur.items.push({ kind: 'test', id, name: testName(id), v, text: fmtVal(id, r) + (text ? ' · ' + text : ''), lvl: r.lvl ?? null });
   return r;
 }
@@ -1169,6 +1192,7 @@ function settingsHTML() {
     <h2 class="h-sec">${t('ui.places')}</h2><div class="list">${D.places.map(x => `<button class="item" data-act="editPlace" data-id="${x.id}"><span class="t">${esc(x.name)}<small>${STATIONS.filter(k => x.st[k]).map(k => t('stations.' + k)).join(', ')}</small></span><span class="go">›</span></button>`).join('')}</div>
     <button class="btn" data-act="addPlace">${t('ui.addPlace')}</button>
     <h2 class="h-sec">${t('ui.period')}</h2><p class="small">${t('ui.periodText')}</p>${per}
+    <h2 class="h-sec">${t('sync.account')}</h2>${accountHTML()}
     <h2 class="h-sec">${t('ui.backup')}</h2><button class="btn dark" data-act="export">${t('ui.exportJson')}</button><button class="btn" data-act="import">${t('ui.importJson')}</button>`;
 }
 function placeEditHTML() {
@@ -1211,9 +1235,7 @@ $('#importFile').addEventListener('change', e => {
     try {
       const d = JSON.parse(r.result);
       if (d.v !== 2 || !Array.isArray(d.sessions) || !Array.isArray(d.places)) throw new Error('bad');
-      if (!confirm(t('ui.importConfirm', { n: d.sessions.length }))) return;
-      const base = defaults(); D = { ...base, ...d, settings: { ...base.settings, ...d.settings } };
-      save(); applyTheme(); view = startView(); render(); toast(t('ui.importOk'));
+      importBackup(d);
     } catch { toast(t('ui.importBad')); }
   };
   r.readAsText(f); e.target.value = '';
@@ -1233,6 +1255,257 @@ let toastT;
 function toast(msg) { const el = $('#toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2400); }
 function applyTheme() { const th = D.settings.theme; if (th) document.documentElement.dataset.theme = th; else delete document.documentElement.dataset.theme; }   // utan val följer appen systemet
 const num = id => { const v = parseFloat(String($(id)?.value || '').replace(',', '.')); return isFinite(v) ? v : null; };
+
+// =====================================================================
+// Synk med Golfrounds Firestore (docs/plan-2026-10-29-traning-firestore.md)
+// Lokalt först: D i localStorage är det appen visar. Utkorgen skickar avslutade pass och testresultat till
+// users/{uid}/trainingSessions och users/{uid}/trainingTests när det finns nät och en inloggning.
+// =====================================================================
+const SYNC_KEY = 'golftraning.sync.v1';
+const COL_S = 'trainingSessions', COL_T = 'trainingTests';
+const FIREBASE_CONFIG = { apiKey: 'AIzaSyBdpZ_oDNyq5yUjQ22HAgHtOpNeRjyu06k', authDomain: 'golfrounds-ac8bd.firebaseapp.com', projectId: 'golfrounds-ac8bd',
+  storageBucket: 'golfrounds-ac8bd.firebasestorage.app', messagingSenderId: '169328614188', appId: '1:169328614188:web:a700502909e2faaa046a89' };   // publika id:n, åtkomsten styrs av reglerna
+const DENIED = ['permission-denied', 'invalid-argument'];   // ett nej från servern; allt annat räknas som saknat nät
+const MAX_QUIET_REMOVE = 2;   // fler poster än så tas inte bort utan att fråga (beslut 29 okt)
+
+/* Dokument i Firestore. Saknade värden blir null, aldrig 0. Namn sparas inte: de tas fram ur id:t när passet visas. */
+const nn = x => x === undefined ? null : x;
+const clean = x => Array.isArray(x) ? x.map(clean) : x && typeof x === 'object' ? Object.fromEntries(Object.entries(x).map(([k, v]) => [k, clean(v)])) : nn(x);
+const resultId = (testId, r) => r.id || testId + '_' + Date.parse(r.date).toString(36);
+const itemName = i => i.kind === 'test' ? testName(i.id) : i.id === 'v1' ? t('v1.name') : t('mod.' + i.id + '.name');
+const R_KEYS = ['id', 'date', 'v', 'text', 'sid', 'lvl', 'nextLvl'];
+function sessionDoc(s) {
+  return { id: s.id, schema: 1, date: s.date, placeId: nn(s.placeId), placeName: nn(s.placeName), v1: !!s.v1,
+    items: s.items.map(i => i.kind === 'test' ? { kind: 'test', id: i.id, v: nn(i.v), text: nn(i.text), lvl: nn(i.lvl) }
+      : { kind: 'module', id: i.id, lines: (i.lines || []).slice() }) };
+}
+function testDoc(testId, r) {
+  const extra = {};
+  for (const k in r) if (!R_KEYS.includes(k)) extra[k] = r[k];
+  return { id: resultId(testId, r), schema: 1, testId, date: r.date, sid: nn(r.sid), v: nn(r.v), text: nn(r.text), lvl: nn(r.lvl), nextLvl: nn(r.nextLvl), extra: clean(extra) };
+}
+const docSession = d => ({ id: d.id, date: d.date, placeId: d.placeId, placeName: d.placeName, ...(d.v1 ? { v1: true } : {}),
+  items: (d.items || []).map(i => ({ ...i, name: itemName(i) })) });
+const docTest = d => ({ ...(d.extra || {}), id: d.id, date: d.date, v: d.v, text: d.text, sid: d.sid, lvl: d.lvl, nextLvl: d.nextLvl });
+const canon = x => Array.isArray(x) ? x.map(canon) : x && typeof x === 'object' ? Object.fromEntries(Object.keys(x).sort().map(k => [k, canon(x[k])])) : x;
+const strip = d => { const { updated, source, ...rest } = d; return rest; };
+const same = (a, b) => JSON.stringify(canon(strip(a))) === JSON.stringify(canon(strip(b)));
+const isSession = path => path.startsWith(COL_S + '/');
+
+/* Allt lokalt som dokument, per sökväg "<samling>/<id>". */
+function localDocs() {
+  const m = new Map();
+  D.sessions.forEach(s => m.set(COL_S + '/' + s.id, sessionDoc(s)));
+  for (const id in D.tests) D.tests[id].results.forEach(r => m.set(COL_T + '/' + resultId(id, r), testDoc(id, r)));
+  return m;
+}
+function putLocal(path, d) {
+  if (isSession(path)) {
+    const s = docSession(d), i = D.sessions.findIndex(x => x.id === s.id);
+    if (i >= 0) D.sessions[i] = s; else D.sessions.push(s);
+    D.sessions.sort((a, b) => b.date.localeCompare(a.date));
+  } else {
+    const rs = tstate(d.testId).results, r = docTest(d), i = rs.findIndex(x => resultId(d.testId, x) === d.id);
+    if (i >= 0) rs[i] = r; else rs.push(r);
+    rs.sort((a, b) => a.date.localeCompare(b.date));
+  }
+}
+function dropLocal(path) {
+  const id = path.slice(path.indexOf('/') + 1);
+  if (isSession(path)) { D.sessions = D.sessions.filter(s => s.id !== id); return; }
+  for (const tid in D.tests) D.tests[tid].results = D.tests[tid].results.filter(r => resultId(tid, r) !== id);
+}
+/* Nivån följer det senaste resultatet (nextLvl), eller testets startnivå när inget resultat finns kvar. */
+function relevel() {
+  for (const id in D.tests) {
+    const T = TESTS[id]; if (!T?.level) continue;
+    const last = [...D.tests[id].results].reverse().find(r => r.nextLvl != null);
+    D.tests[id].level = last ? last.nextLvl : T.level.start;
+  }
+}
+/* Ta bort pass: passet och dess testresultat, lokalt och (via utkorgen) i Firestore. */
+function removeSession(id) {
+  D.sessions = D.sessions.filter(x => x.id !== id); queue(COL_S + '/' + id, 'delete');
+  for (const tid in D.tests) D.tests[tid].results = D.tests[tid].results.filter(r => {
+    if (r.sid !== id) return true;
+    queue(COL_T + '/' + resultId(tid, r), 'delete'); return false;
+  });
+  relevel();
+}
+
+/* Utkorgen: { uid, pending: { path: { op, at, source, blocked? } }, synced: [path], localOnly: [path] } */
+const syncDefaults = () => ({ uid: null, pending: {}, synced: [], localOnly: [] });
+let SY = { ...syncDefaults(), ...LS.get(SYNC_KEY, {}) };
+const sySave = () => LS.set(SYNC_KEY, SY);
+const sync = { fs: null, user: null, auth: null, busy: false, flushing: null, timer: null };
+function queue(path, op, source = 'app') {
+  SY.pending[path] = { op, at: new Date().toISOString(), source };
+  SY.localOnly = SY.localOnly.filter(p => p !== path);
+  sySave(); showSync();
+  clearTimeout(sync.timer); sync.timer = setTimeout(flush, 300);
+}
+const canSync = () => !!(sync.fs && sync.user && SY.uid === sync.user.uid);
+function syncState() {
+  if (!sync.user) return 'local';
+  if (SY.uid && SY.uid !== sync.user.uid) return 'other';
+  if (sync.busy) return 'saving';
+  const p = Object.values(SY.pending);
+  return p.some(x => x.blocked) ? 'denied' : p.length ? 'phone' : 'saved';
+}
+function showSync() { const el = $('#sync'), s = syncState(); el.textContent = t('sync.' + s); el.dataset.s = s; }
+const withTimeout = (p, ms = 15000) => { let tm; return Promise.race([p, new Promise((_, rej) => { tm = setTimeout(() => rej({ code: 'timeout' }), ms); })]).finally(() => clearTimeout(tm)); };
+
+/* Skicka utkorgen. set() med hela dokumentet eller delete(); båda kan göras om utan skada. Ett nej läggs på posten och prövas inte om. */
+function flush() {
+  if (!sync.flushing) sync.flushing = doFlush().finally(() => { sync.flushing = null; });
+  return sync.flushing;
+}
+async function doFlush() {
+  if (!canSync() || !Object.values(SY.pending).some(p => !p.blocked)) return;
+  sync.busy = true; showSync();
+  try {
+    const docs = localDocs();
+    for (const [path, p] of Object.entries(SY.pending)) {
+      if (p.blocked) continue;
+      if (p.op === 'set' && !docs.has(path)) { delete SY.pending[path]; sySave(); continue; }
+      try {
+        if (p.op === 'set') await withTimeout(sync.fs.write(path, { ...docs.get(path), updated: new Date().toISOString(), source: p.source || 'app' }));
+        else await withTimeout(sync.fs.remove(path));
+      } catch (e) {
+        if (e && DENIED.includes(e.code)) { p.blocked = e.code; sySave(); continue; }
+        break;   // inget nät: resten ligger kvar till nästa försök
+      }
+      if (SY.pending[path] === p) delete SY.pending[path];   // en ny ändring under tiden ligger kvar
+      SY.synced = SY.synced.filter(x => x !== path);
+      if (p.op === 'set') SY.synced.push(path);
+      sySave();
+    }
+  } finally { sync.busy = false; showSync(); }
+}
+
+/* Läs båda samlingarna uttryckligen från servern (get med source 'server'). Utan nät misslyckas läsningen. */
+async function readServer() {
+  const [s, r] = await Promise.all([sync.fs.read(COL_S), sync.fs.read(COL_T)]);
+  return new Map([...s.map(d => [COL_S + '/' + d.id, d]), ...r.map(d => [COL_T + '/' + d.id, d])]);
+}
+const countOf = paths => ({ n: paths.filter(isSession).length, m: paths.filter(p => !isSession(p)).length });
+
+/* Sammanslagning vid inloggning. Lokala poster tas bort bara om (1) läsningen kom från servern, (2) utkorgens uid är den
+   inloggade och (3) högst två poster skulle försvinna; fler än två frågar först (beslut 29 okt). */
+async function pull() {
+  if (!sync.fs || !sync.user) return { ok: false, reason: 'signedOut' };
+  if (SY.uid && SY.uid !== sync.user.uid) { showSync(); return { ok: false, reason: 'other' }; }
+  let server;
+  try { server = await withTimeout(readServer()); } catch { showSync(); return { ok: false, reason: 'offline' }; }
+  const first = !SY.uid, local = localDocs(), synced = new Set(SY.synced);
+  let changed = false;
+  for (const [path, d] of server) {   // från servern: nytt eller ändrat, utom det som väntar i utkorgen
+    if (SY.pending[path]) continue;
+    const mine = local.get(path);
+    if (!mine || !same(mine, d)) { putLocal(path, d); changed = true; }
+  }
+  const gone = [], fresh = [];
+  for (const path of local.keys()) {
+    if (server.has(path)) continue;
+    if (first) { if (!SY.localOnly.includes(path)) fresh.push(path); }
+    else if (!SY.pending[path] && synced.has(path)) gone.push(path);
+  }
+  let removed = 0;
+  if (gone.length) {
+    if (gone.length <= MAX_QUIET_REMOVE || confirm(t('sync.askRemove', countOf(gone)))) { gone.forEach(dropLocal); removed = gone.length; changed = true; }
+    else gone.forEach(p => queue(p, 'set'));   // nej: de finns kvar och laddas upp igen
+  }
+  if (fresh.length) {
+    if (confirm(t('sync.askUpload', countOf(fresh)))) fresh.forEach(p => { if (SY.pending[p]?.op !== 'set') queue(p, 'set'); });
+    else fresh.forEach(p => { delete SY.pending[p]; SY.localOnly.push(p); });
+  }
+  SY.uid = sync.user.uid;
+  SY.synced = [...server.keys()].filter(p => SY.pending[p]?.op !== 'delete' && !gone.includes(p));
+  sySave();
+  if (changed) { relevel(); save(); render(); }
+  showSync();
+  await flush();
+  return { ok: true, removed, asked: gone.length > MAX_QUIET_REMOVE };
+}
+
+/* Importera backup: slå ihop per id i stället för att ersätta. Det som är nytt läggs i utkorgen; finns samma id redan i
+   Firestore behålls Firestores version. Inställningar, platser och wedgelängder ersätts bara efter en fråga. */
+async function importBackup(d) {
+  const inc = new Map();
+  d.sessions.forEach(s => inc.set(COL_S + '/' + s.id, sessionDoc(s)));
+  for (const id in d.tests || {}) (d.tests[id].results || []).forEach(r => inc.set(COL_T + '/' + resultId(id, r), testDoc(id, r)));
+  const local = localDocs();
+  let server = null;
+  if (canSync()) { try { server = await withTimeout(readServer()); } catch { toast(t('sync.importNeedsNet')); return { ok: false }; } }
+  const there = server || local, paths = [...inc.keys()];
+  const up = paths.filter(p => !there.has(p)), diff = paths.filter(p => there.has(p) && !same(there.get(p), inc.get(p))).length;
+  let msg = t(server ? 'sync.importConfirm' : 'sync.importConfirmLocal', { ...countOf(up), k: paths.length - up.length });
+  if (diff) msg += ' ' + t('sync.importDiff', { d: diff });
+  if (!confirm(msg)) return { ok: false };
+  for (const p of paths) {
+    if (server && server.has(p)) { if (!local.has(p) || !same(local.get(p), server.get(p))) putLocal(p, server.get(p)); }
+    else if (!local.has(p)) putLocal(p, inc.get(p));
+  }
+  up.forEach(p => queue(p, 'set', 'backup'));
+  const keep = ['settings', 'places', 'placeId', 'yardage', 'period'];
+  if (keep.some(k => d[k] !== undefined && JSON.stringify(d[k]) !== JSON.stringify(D[k])) && confirm(t('sync.importSettings'))) {
+    const base = defaults();
+    for (const k of keep) if (d[k] !== undefined) D[k] = k === 'settings' ? { ...base.settings, ...d.settings } : d[k];
+    applyTheme();
+  }
+  relevel(); save(); view = startView(); render(); toast(t('sync.importOk', countOf(up)));
+  return { ok: true, up: up.length, existing: paths.length - up.length, diff };
+}
+
+/* Firestore via compat-SDK:n. Läsningen går alltid till servern, aldrig till en cache. */
+function fsAdapter(fdb, uid) {
+  const col = c => fdb.collection('users').doc(uid).collection(c);
+  const ref = path => { const [c, id] = path.split('/'); return col(c).doc(id); };
+  return {
+    read: c => col(c).get({ source: 'server' }).then(q => q.docs.map(x => x.data())),
+    write: (path, doc) => ref(path).set(doc),
+    remove: path => ref(path).delete(),
+  };
+}
+function attachSync(fs, user) {
+  sync.fs = fs; sync.user = user; showSync();
+  return user ? pull() : Promise.resolve({ ok: false, reason: 'signedOut' });
+}
+/* Samma inloggning som Golfrounds. På *.web.app körs inloggningen via sidans egen domän, så att den fungerar i Safari. */
+function initSync() {
+  showSync();
+  if (!window.firebase) return;
+  const cfg = { ...FIREBASE_CONFIG };
+  if (/\.(web\.app|firebaseapp\.com)$/.test(location.hostname)) cfg.authDomain = location.hostname;
+  // Lokalt mot emulatorn med ?emu (demo-projektet, aldrig produktionen).
+  const emu = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && /[?&]emu\b/.test(location.search);
+  if (emu) cfg.projectId = 'demo-golfrounds';
+  firebase.initializeApp(cfg);
+  sync.auth = firebase.auth(); const fdb = firebase.firestore();
+  if (emu) { sync.auth.useEmulator(location.protocol + '//127.0.0.1:9099'); fdb.useEmulator('127.0.0.1', 8080); }
+  sync.auth.getRedirectResult().catch(() => {});
+  sync.auth.onAuthStateChanged(u => {
+    attachSync(u ? fsAdapter(fdb, u.uid) : null, u ? { uid: u.uid, name: u.displayName || u.email || '' } : null);
+    if (view === 'settings') render();
+  });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') flush(); });
+  addEventListener('online', () => flush());
+}
+function signIn() {
+  if (!sync.auth) { toast(t('sync.unavailable')); return; }
+  const p = new firebase.auth.GoogleAuthProvider();
+  sync.auth.signInWithPopup(p).catch(e => {
+    if (e && ['auth/popup-blocked', 'auth/operation-not-supported-in-this-environment', 'auth/cancelled-popup-request'].includes(e.code)) return sync.auth.signInWithRedirect(p);
+    if (e && e.code !== 'auth/popup-closed-by-user') toast(t('sync.signInFail'));
+  });
+}
+function accountHTML() {
+  if (!sync.user) return `<p class="small">${t('sync.accountText')}</p>` + (sync.auth
+    ? `<button class="btn dark" data-act="signIn">${t('sync.signIn')}</button>` : `<p class="small muted">${t('sync.unavailable')}</p>`);
+  return `<p class="small">${t('sync.signedInAs', { name: esc(sync.user.name) })} · ${t('sync.' + syncState())}</p>`
+    + (syncState() === 'other' ? `<p class="small">${t('sync.otherText')}</p>` : '') + `<button class="btn" data-act="signOut">${t('sync.signOut')}</button>`;
+}
+const SYNC = { attach: attachSync, pull, flush, importBackup, fsAdapter, state: syncState, sessionDoc, testDoc, resultId, get outbox() { return SY; } };
 
 // =====================================================================
 // Händelser
@@ -1304,7 +1577,9 @@ const ACTS = {
   testDone() { nextStep(); },
   // historik
   shareSession(el) { const s = D.sessions.find(x => x.id === el.dataset.id); if (s) shareText(sessionText(s)); },
-  delSession(el) { if (!confirm(t('ui.confirmDelete'))) return; D.sessions = D.sessions.filter(x => x.id !== el.dataset.id); rerender(); },
+  delSession(el) { if (!confirm(t('ui.confirmDelete'))) return; removeSession(el.dataset.id); rerender(); },
+  signIn() { signIn(); },
+  signOut() { sync.auth?.signOut(); },
   // inställningar
   setPile(el) { D.settings.pile = clamp(D.settings.pile + +el.dataset.d, 10, 21); rerender(); },
   setLen(el) { D.settings.seriesLen = clamp(D.settings.seriesLen + +el.dataset.d, 3, 5); rerender(); },
@@ -1329,7 +1604,7 @@ document.addEventListener('click', e => {
 // =====================================================================
 // Start
 // =====================================================================
-applyTheme(); save(); render(); syncWake();
+applyTheme(); save(); render(); syncWake(); initSync();
 if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 </body>

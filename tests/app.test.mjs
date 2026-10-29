@@ -255,9 +255,12 @@ test('typsnitten laddas lokalt från fonts/', () => {
 // ---------------------------------------------------------------------------
 // Offline
 // ---------------------------------------------------------------------------
-test('inga externa URL:er i index.html eller manifestet', () => {
+// Undantag (plan 2026-10-29-traning-firestore): Firebase SDK från gstatic, exakt de tre filerna som sw.js cachar.
+const SDK_URLS = ['firebase-app-compat.js', 'firebase-auth-compat.js', 'firebase-firestore-compat.js'].map(f => 'https://www.gstatic.com/firebasejs/10.12.2/' + f);
+test('inga externa URL:er i index.html eller manifestet, utom Firebase SDK', () => {
   for (const f of ['index.html', 'manifest.webmanifest']) {
-    const s = read(f);
+    let s = read(f);
+    if (f === 'index.html') for (const u of SDK_URLS) { assert.ok(s.includes(`<script src="${u}"></script>`), `${u} saknas`); s = s.split(`<script src="${u}"></script>`).join(''); }
     assert.doesNotMatch(s, /https?:\/\//i, `${f} innehåller en http(s)-adress`);
     assert.doesNotMatch(s, /(?:src|href)\s*=\s*["']\/\//i, `${f} innehåller en protokollrelativ adress`);
     assert.doesNotMatch(s, /@import/i, `${f} innehåller @import`);
@@ -287,7 +290,8 @@ test('service workern förcachar alla lokala filer appen behöver, inklusive typ
   for (const f of readdirSync(join(ROOT, 'fonts')).filter(f => f.endsWith('.woff2'))) refs.add('fonts/' + f);
   for (const r of refs) assert.ok(norm.has(r), `${r} saknas i ASSETS i sw.js`);
   // Och allt i listan finns på disk.
-  for (const a of norm) if (a) assert.ok(existsSync(join(ROOT, a)), `${a} i ASSETS finns inte`);
+  for (const a of norm) if (a && !SDK_URLS.includes(a)) assert.ok(existsSync(join(ROOT, a)), `${a} i ASSETS finns inte`);
+  assert.deepEqual(assets.filter(a => /^https?:/.test(a)), SDK_URLS, 'bara Firebase SDK får komma från en annan domän');
 });
 
 test('cacheversionen i sw.js är höjd när cachade filer ändrats jämfört med main', t => {
