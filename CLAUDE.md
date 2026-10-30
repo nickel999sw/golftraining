@@ -1,13 +1,14 @@
 # CLAUDE.md – Golftraining
 
-Läs den här filen, README.md och allt i docs/ innan du gör något. Pågående arbete: docs/plan-2026-10-29-traning-firestore.md.
+Läs den här filen, README.md och allt i docs/ innan du gör något. Senaste plan: docs/plan-2026-10-29-traning-firestore.md (genomförd 30 okt).
 
 ## Projektet
 - Golftraining är en PWA för golfträning på iPhone i stående läge: moduler, tester med nivåer, pass och historik.
 - En fil: `index.html` (HTML, CSS och JS), plus `sw.js`, `manifest.webmanifest`, `fonts/` och ikonerna.
-- Data ligger i localStorage under `golftraning.v2`. Enligt planen ovan sparas pass och testresultat också i Golfrounds Firestore (`golfrounds-ac8bd`), under `users/{uid}/trainingSessions` och `users/{uid}/trainingTests`.
+- Data ligger i localStorage under `golftraning.v2`. Pass och testresultat sparas också i Golfrounds Firestore (`golfrounds-ac8bd`), under `users/{uid}/trainingSessions` och `users/{uid}/trainingTests`.
 - Säkerhetsreglerna för de samlingarna ligger i Golfrounds `firestore.rules` och testas där. Golftraining har ingen egen regelfil.
-- Live i dag: https://nickel999sw.github.io/golftraining/ (GitHub Pages, publiceras vid push till `main`).
+- Live: https://golftraining-nl.web.app (Firebase Hosting, siten `golftraining-nl` i `golfrounds-ac8bd`). Publiceras med `npm run deploy`, förhandskanal med `npm run deploy:preview`. Se README, avsnittet Publicering, för redirect-URI och Authorized domains.
+- GitHub Pages (https://nickel999sw.github.io/golftraining/) publicerar grenen `gh-pages`, som bara är en länksida. En push till `main` publicerar ingenting.
 
 ## Hur du arbetar med mig
 - Svara på svenska, kort och i punktform. Börja med svaret.
@@ -20,7 +21,7 @@ Läs den här filen, README.md och allt i docs/ innan du gör något. Pågående
 - **NULL, inte 0.** Ett värde som saknas lagras som `null`, aldrig som 0 eller tom sträng. Det gäller localStorage, backup och Firestore.
 - **Inga gränssnittstexter i koden.** Alla texter går via `I18N.sv` och `t()` i `index.html`. Nya texter läggs där, inte i HTML-strängar eller logik.
 - **Databasen lagrar koder** (test-id, modul-id, plats-id), inte visningstext. Undantag som är godkänt i planen: modulernas `lines` och testens `text` sparas som de är i första steget.
-- **Fråga före deploy och push.** En push till `main` är en publicering (GitHub Pages). Efter flytten till Firebase Hosting gäller samma sak för `firebase deploy` och förhandskanaler.
+- **Fråga före deploy och push.** Det gäller `npm run deploy`, `npm run deploy:preview`, push av `gh-pages` (publicerar länksidan) och push av `main`.
 - **Fråga före varje skrivning, flytt eller radering i produktionens Firestore** (`golfrounds-ac8bd`). Läsning för kontroll går bra.
 - **Tester bara mot emulatorn `demo-golfrounds`.** Aldrig mot produktionen. Bara en process åt gången kör emulatorn.
 - **En radering i appen raderar också i Firestore**, inte bara lokalt. Det ska finnas ett test för varje sådan radering.
