@@ -241,6 +241,7 @@ match /trainingTests/{rid} {
        - Testet "inga externa URL:er" tillåter nu exakt de tre SDK-filerna från gstatic, och service workern cachar dem (version v9).
        - `package.json`: två utvecklingsberoenden med låsta versioner, `firebase` 11.10.0 och `@firebase/rules-unit-testing` 4.0.1 (samma som Golfrounds), och skriptet `test:emulator`, som använder Golfrounds `firebase.json` och emulatorlås.
 4. **Hosting:** ny site, `firebase.json` och `.firebaserc`, och deploy till en förhandskanal. **STOPP:** du lägger till redirect-URI:n i Google Cloud-konsolen och provar inloggningen på iPhone.
+   - **30 okt, före ditt ja till att skapa siten:** `firebase.json` (target `golftraining`, roten publiceras utom tester, docs, node_modules, paketfiler, md-filer och punktfiler; no-cache för `/`, `/index.html` och `/sw.js`), `.firebaserc` (`golfrounds-ac8bd`, target `golftraining` → `golftraining-nl`) och skripten `deploy` och `deploy:preview` (kanalen `preview`, 30 dagar). Ett nytt test kontrollerar vad som publiceras. Projektet har fortfarande bara siten `golfrounds-ac8bd`.
 5. **Flytten:** exportera i den gamla appen, importera i den nya och kontrollera i Firestore (läsning) att antalen stämmer. **STOPP:** ditt ja innan produktion på den nya siten.
 6. **GitHub Pages:** sidan med länken till den nya adressen. **STOPP:** ditt ja innan push.
 7. **Dokumentation:** README i Golftraining, uppdatering av Golftrainings `CLAUDE.md` (deploy via Firebase), och raden om deploy i din globala CLAUDE.md (commit, och fråga före push).
