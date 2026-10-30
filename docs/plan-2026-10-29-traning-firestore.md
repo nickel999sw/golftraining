@@ -251,6 +251,7 @@ match /trainingTests/{rid} {
 6. **GitHub Pages:** sidan med länken till den nya adressen. **STOPP:** ditt ja innan push.
    - **Byggt 30 okt, inte pushat. Avvikelse:** Pages publicerar i dag roten på `main`, så en push av `main` med den nya koden skulle lägga hela appen på den gamla adressen. Länksidan ligger därför på en egen gren, `gh-pages` (utan historik, bara `index.html`, `sw.js`, `icon-180.png` och README), och Pages ska byta källa till den grenen. Därefter publicerar en push till `main` ingenting.
    - `sw.js` på `gh-pages` ersätter den gamla appens worker: den tömmer cachen, avregistrerar sig och laddar om sidan. localStorage rörs inte. Provat lokalt: den gamla appen med worker v8 och cache, filerna byttes, och efter en omladdning visades länksidan av sig själv, med tom cache, ingen worker och datan kvar.
+   - **Live 30 okt:** `gh-pages` pushad (a502bb3), Niklas bytte källa för Pages till `gh-pages` / root. https://nickel999sw.github.io/golftraining visar länksidan och den nya `sw.js`; `manifest.webmanifest` och `package.json` ger 404. En push till `main` publicerar inte längre något. Steg 6 klart.
 7. **Dokumentation:** README i Golftraining, uppdatering av Golftrainings `CLAUDE.md` (deploy via Firebase), och raden om deploy i din globala CLAUDE.md (commit, och fråga före push).
 
 ## 11. Frågor till Niklas (besvarade 29 okt, se Status överst)
