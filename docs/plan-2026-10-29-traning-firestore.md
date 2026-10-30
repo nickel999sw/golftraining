@@ -1,6 +1,6 @@
 # Plan 29 okt: Golftraining sparar pass och testresultat i Golfrounds Firestore
 
-**Status:** godkänd 29 okt 2026 av Niklas, med ändringarna nedan. Arbetet sker på grenen `feat/traning-firestore` i `~/Code/.worktrees/golftraining-firestore`. Planfilen ligger också på `main` (44014bd); ingen mer kod på `main`.
+**Status:** godkänd 29 okt 2026 av Niklas, med ändringarna nedan. Genomförd 30 okt 2026 (steg 0–7), sammanslagen på `main`. Live på https://golftraining-nl.web.app.
 
 **Ändringar vid godkännandet (29 okt):**
 1. Svar på frågorna i avsnitt 11: Firebase Hosting med ny site `golftraining-nl` (eller närmast lediga, Niklas tillfrågas innan något skapas); inställningar, platser och wedgelängder synkas senare; testresultat raderas med passet, lokalt och i Firestore; `lines` och `text` sparas som de är i första steget; strikt bara ägaren, ingen adminläsning.
@@ -253,6 +253,7 @@ match /trainingTests/{rid} {
    - `sw.js` på `gh-pages` ersätter den gamla appens worker: den tömmer cachen, avregistrerar sig och laddar om sidan. localStorage rörs inte. Provat lokalt: den gamla appen med worker v8 och cache, filerna byttes, och efter en omladdning visades länksidan av sig själv, med tom cache, ingen worker och datan kvar.
    - **Live 30 okt:** `gh-pages` pushad (a502bb3), Niklas bytte källa för Pages till `gh-pages` / root. https://nickel999sw.github.io/golftraining visar länksidan och den nya `sw.js`; `manifest.webmanifest` och `package.json` ger 404. En push till `main` publicerar inte längre något. Steg 6 klart.
 7. **Dokumentation:** README i Golftraining, uppdatering av Golftrainings `CLAUDE.md` (deploy via Firebase), och raden om deploy i din globala CLAUDE.md (commit, och fråga före push).
+   - **Klart 30 okt:** README (synk, ny adress, avsnitten Publicering och Tester), Golftrainings CLAUDE.md (live-adress, deploy, gh-pages) och raden i den globala CLAUDE.md. Grenen slogs ihop med `main`.
 
 ## 11. Frågor till Niklas (besvarade 29 okt, se Status överst)
 1. **Hosting:** Firebase Hosting med en ny site, och vilket namn (förslag `golftraining-nl`)? Rekommendation: ja, se avsnitt 9.
