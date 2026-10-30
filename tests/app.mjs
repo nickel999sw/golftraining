@@ -37,7 +37,7 @@ export function loadApp(seed = []) {
     document, console, Date, Math, JSON, Intl, Promise, setTimeout, clearTimeout,
     navigator: {}, location: { protocol: 'file:' },
     localStorage: { getItem: k => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: k => store.delete(k) },
-    addEventListener() {}, removeEventListener() {}, scrollTo() {}, confirm: () => true,
+    addEventListener() {}, removeEventListener() {}, scrollTo() {}, confirm: (...a) => (ctx.onConfirm ? ctx.onConfirm(...a) : true),
     Blob: class {}, File: class {}, URL, FileReader: class {},
   };
   ctx.window = ctx;
@@ -45,9 +45,10 @@ export function loadApp(seed = []) {
   vm.runInContext(script(), ctx, { filename: 'index.html' });
   // Toppnivåns const-bindningar delas mellan skript i samma kontext, precis som i webbläsaren.
   const api = vm.runInContext(`({ MODULES, GENS, TESTS, STATIONS, DEFAULT_PLACES, GROUP_ORDER, L, t, fits, makeSeries, shotHTML,
-    ACTS, get D() { return D; }, render, suggestions, startView, get currentView() { return view; } })`, ctx);
+    ACTS, SYNC, get D() { return D; }, render, suggestions, startView, get currentView() { return view; } })`, ctx);
   api.view = () => $('#view').innerHTML;
   api.storage = () => [...store];
+  api.onConfirm = fn => { ctx.onConfirm = fn; };
   api.click = (act, dataset = {}) => api.ACTS[act]({ dataset, textContent: '' });
   return api;
 }

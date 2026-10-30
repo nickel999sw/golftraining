@@ -1,0 +1,4 @@
+{
+  "projects": { "default": "golfrounds-ac8bd" },
+  "targets": { "golfrounds-ac8bd": { "hosting": { "golftraining": ["golftraining-nl"] } } }
+}
