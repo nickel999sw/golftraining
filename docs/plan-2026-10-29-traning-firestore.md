@@ -249,6 +249,8 @@ match /trainingTests/{rid} {
    - **Publicerad 30 okt** efter Niklas ja: `npm run deploy`, 12 filer, https://golftraining-nl.web.app. Utvecklingsfilerna ger 404, `no-cache` på `/` och `/sw.js`, `authDomain` = `golftraining-nl.web.app`, inga fel i konsolen. Golfrounds opåverkat. GitHub Pages är oförändrad tills steg 6.
    - **Inloggningen på huvudadressen** fungerade först när Niklas lade till `golftraining-nl.web.app` under Authorized domains i Firebase Auth. Förhandsdomänen lades till automatiskt av CLI:n, huvuddomänen för en extra site gjorde det inte. Därefter: inloggning, appen på hemskärmen och backupen importerad igen utan dubbletter. Steg 5 klart 30 okt.
 6. **GitHub Pages:** sidan med länken till den nya adressen. **STOPP:** ditt ja innan push.
+   - **Byggt 30 okt, inte pushat. Avvikelse:** Pages publicerar i dag roten på `main`, så en push av `main` med den nya koden skulle lägga hela appen på den gamla adressen. Länksidan ligger därför på en egen gren, `gh-pages` (utan historik, bara `index.html`, `sw.js`, `icon-180.png` och README), och Pages ska byta källa till den grenen. Därefter publicerar en push till `main` ingenting.
+   - `sw.js` på `gh-pages` ersätter den gamla appens worker: den tömmer cachen, avregistrerar sig och laddar om sidan. localStorage rörs inte. Provat lokalt: den gamla appen med worker v8 och cache, filerna byttes, och efter en omladdning visades länksidan av sig själv, med tom cache, ingen worker och datan kvar.
 7. **Dokumentation:** README i Golftraining, uppdatering av Golftrainings `CLAUDE.md` (deploy via Firebase), och raden om deploy i din globala CLAUDE.md (commit, och fråga före push).
 
 ## 11. Frågor till Niklas (besvarade 29 okt, se Status överst)
