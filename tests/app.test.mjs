@@ -255,9 +255,12 @@ test('typsnitten laddas lokalt från fonts/', () => {
 // ---------------------------------------------------------------------------
 // Offline
 // ---------------------------------------------------------------------------
-test('inga externa URL:er i index.html eller manifestet', () => {
+// Undantag (plan 2026-10-29-traning-firestore): Firebase SDK från gstatic, exakt de tre filerna som sw.js cachar.
+const SDK_URLS = ['firebase-app-compat.js', 'firebase-auth-compat.js', 'firebase-firestore-compat.js'].map(f => 'https://www.gstatic.com/firebasejs/10.12.2/' + f);
+test('inga externa URL:er i index.html eller manifestet, utom Firebase SDK', () => {
   for (const f of ['index.html', 'manifest.webmanifest']) {
-    const s = read(f);
+    let s = read(f);
+    if (f === 'index.html') for (const u of SDK_URLS) { assert.ok(s.includes(`<script src="${u}"></script>`), `${u} saknas`); s = s.split(`<script src="${u}"></script>`).join(''); }
     assert.doesNotMatch(s, /https?:\/\//i, `${f} innehåller en http(s)-adress`);
     assert.doesNotMatch(s, /(?:src|href)\s*=\s*["']\/\//i, `${f} innehåller en protokollrelativ adress`);
     assert.doesNotMatch(s, /@import/i, `${f} innehåller @import`);
@@ -287,7 +290,8 @@ test('service workern förcachar alla lokala filer appen behöver, inklusive typ
   for (const f of readdirSync(join(ROOT, 'fonts')).filter(f => f.endsWith('.woff2'))) refs.add('fonts/' + f);
   for (const r of refs) assert.ok(norm.has(r), `${r} saknas i ASSETS i sw.js`);
   // Och allt i listan finns på disk.
-  for (const a of norm) if (a) assert.ok(existsSync(join(ROOT, a)), `${a} i ASSETS finns inte`);
+  for (const a of norm) if (a && !SDK_URLS.includes(a)) assert.ok(existsSync(join(ROOT, a)), `${a} i ASSETS finns inte`);
+  assert.deepEqual(assets.filter(a => /^https?:/.test(a)), SDK_URLS, 'bara Firebase SDK får komma från en annan domän');
 });
 
 test('cacheversionen i sw.js är höjd när cachade filer ändrats jämfört med main', t => {
@@ -305,4 +309,24 @@ test('cacheversionen i sw.js är höjd när cachade filer ändrats jämfört med
   assert.notEqual(now, was, `cachade filer har ändrats men CACHE är fortfarande ${was}`);
   const num = v => +v.match(/(\d+)$/)[1];
   assert.ok(num(now) > num(was), `${now} ska vara högre än ${was}`);
+});
+
+// Firebase Hosting (plan 2026-10-29-traning-firestore, steg 4): roten publiceras, utom det som bara hör till utvecklingen.
+test('firebase.json publicerar appens filer men inte tester, docs, node_modules eller paketfiler', () => {
+  const fb = JSON.parse(read('firebase.json')), rc = JSON.parse(read('.firebaserc'));
+  assert.equal(fb.hosting.target, 'golftraining');
+  assert.equal(fb.hosting.public, '.');
+  assert.deepEqual(rc.targets['golfrounds-ac8bd'].hosting.golftraining, ['golftraining-nl']);
+  assert.equal(fb.firestore, undefined, 'reglerna deployas bara från Golfrounds');
+  const rx = g => new RegExp('^' + g.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*\*\//g, '\u0000')
+    .replace(/\*\*/g, '\u0001').replace(/\*/g, '[^/]*').replace(/\u0000/g, '(?:.*/)?').replace(/\u0001/g, '.*') + '$');
+  // En ignorerad mapp tar med allt under sig, som i Firebase CLI.
+  const ignored = f => f.split('/').some((_, i, a) => fb.hosting.ignore.some(g => rx(g).test(a.slice(0, i + 1).join('/'))));
+  const local = swAssets(read('sw.js')).filter(a => a.startsWith('./') && a !== './').map(a => a.slice(2));
+  for (const f of [...local, 'sw.js']) assert.ok(!ignored(f), `${f} måste publiceras`);
+  for (const f of ['tests/app.mjs', 'docs/plan-2026-10-29-traning-firestore.md', 'node_modules/firebase/package.json',
+    'package.json', 'package-lock.json', 'README.md', 'CLAUDE.md', 'skarmbilder/a.jpg', '.gitignore', '.claude/launch.json', 'firebase.json', '.firebaserc'])
+    assert.ok(ignored(f), `${f} ska inte publiceras`);
+  for (const s of ['/', '/index.html', '/sw.js'])
+    assert.ok(fb.hosting.headers.some(h => h.source === s && h.headers.some(x => x.key === 'Cache-Control' && x.value === 'no-cache')), `${s} no-cache`);
 });
