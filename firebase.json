@@ -1,0 +1,11 @@
+{
+  "hosting": {
+    "target": "golftraining",
+    "public": ".",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**", "docs/**", "tests/**", "skarmbilder/**",
+               "package.json", "package-lock.json", "*.md", "firestore-debug.log"],
+    "headers": [ { "source": "/index.html", "headers": [ { "key": "Cache-Control", "value": "no-cache" } ] },
+                 { "source": "/", "headers": [ { "key": "Cache-Control", "value": "no-cache" } ] },
+                 { "source": "/sw.js", "headers": [ { "key": "Cache-Control", "value": "no-cache" } ] } ]
+  }
+}

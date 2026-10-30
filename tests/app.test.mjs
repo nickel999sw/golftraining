@@ -310,3 +310,23 @@ test('cacheversionen i sw.js är höjd när cachade filer ändrats jämfört med
   const num = v => +v.match(/(\d+)$/)[1];
   assert.ok(num(now) > num(was), `${now} ska vara högre än ${was}`);
 });
+
+// Firebase Hosting (plan 2026-10-29-traning-firestore, steg 4): roten publiceras, utom det som bara hör till utvecklingen.
+test('firebase.json publicerar appens filer men inte tester, docs, node_modules eller paketfiler', () => {
+  const fb = JSON.parse(read('firebase.json')), rc = JSON.parse(read('.firebaserc'));
+  assert.equal(fb.hosting.target, 'golftraining');
+  assert.equal(fb.hosting.public, '.');
+  assert.deepEqual(rc.targets['golfrounds-ac8bd'].hosting.golftraining, ['golftraining-nl']);
+  assert.equal(fb.firestore, undefined, 'reglerna deployas bara från Golfrounds');
+  const rx = g => new RegExp('^' + g.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*\*\//g, '\u0000')
+    .replace(/\*\*/g, '\u0001').replace(/\*/g, '[^/]*').replace(/\u0000/g, '(?:.*/)?').replace(/\u0001/g, '.*') + '$');
+  // En ignorerad mapp tar med allt under sig, som i Firebase CLI.
+  const ignored = f => f.split('/').some((_, i, a) => fb.hosting.ignore.some(g => rx(g).test(a.slice(0, i + 1).join('/'))));
+  const local = swAssets(read('sw.js')).filter(a => a.startsWith('./') && a !== './').map(a => a.slice(2));
+  for (const f of [...local, 'sw.js']) assert.ok(!ignored(f), `${f} måste publiceras`);
+  for (const f of ['tests/app.mjs', 'docs/plan-2026-10-29-traning-firestore.md', 'node_modules/firebase/package.json',
+    'package.json', 'package-lock.json', 'README.md', 'CLAUDE.md', 'skarmbilder/a.jpg', '.gitignore', '.claude/launch.json', 'firebase.json', '.firebaserc'])
+    assert.ok(ignored(f), `${f} ska inte publiceras`);
+  for (const s of ['/', '/index.html', '/sw.js'])
+    assert.ok(fb.hosting.headers.some(h => h.source === s && h.headers.some(x => x.key === 'Cache-Control' && x.value === 'no-cache')), `${s} no-cache`);
+});
