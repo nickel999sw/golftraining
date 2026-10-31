@@ -129,6 +129,25 @@ test('huvudlöst genomspel: utslag med serier och drivertest', () => {
   }
   assert.match(A.view(), /Drivertest/);
   assert.deepEqual([...A.D.cur.items.find(i => i.id === 'teeShots').lines], ['I fairway: 9 av 12']);
+  // Spec 31 okt, punkt 4: en tom sida sparas som null och räknas inte i sidsnittet.
+  const drive = (len, side) => { A.el('#dLen').value = len; A.el('#dSide').value = side; A.click('drvReg'); };
+  drive('250', '10'); drive('260', '');
+  assert.deepEqual([...A.D.cur.st.drives.map(d => d.side)], [10, null]);
+  assert.doesNotMatch(A.view(), /undefined|NaN/);
+  A.click('drvSave');
+  const r = A.D.tests.driver.results.at(-1);
+  assert.equal(r.avgSide, 10, 'sidsnittet räknas bara på slag med sida'); assert.equal(r.avgLen, 255);
+});
+
+test('drivertest där inget slag har sida: sidsnittet saknas och handicappet är utanför tabellen', () => {
+  const A = loadApp();
+  A.D.placeId = 'komet';
+  A.click('startTest', { id: 'driver' });
+  A.el('#dLen').value = '250'; A.el('#dSide').value = ''; A.click('drvReg');
+  A.click('drvSave');
+  const r = A.D.tests.driver.results.at(-1);
+  assert.equal(r.avgSide, null); assert.equal(r.v, null);
+  assert.doesNotMatch(r.text, /NaN|undefined/);
 });
 
 // ---------------------------------------------------------------------------
