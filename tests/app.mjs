@@ -48,6 +48,7 @@ export function loadApp(seed = []) {
     ACTS, SYNC, get D() { return D; }, render, suggestions, startView, get currentView() { return view; } })`, ctx);
   api.view = () => $('#view').innerHTML;
   api.storage = () => [...store];
+  api.el = $;
   api.onConfirm = fn => { ctx.onConfirm = fn; };
   api.click = (act, dataset = {}) => api.ACTS[act]({ dataset, textContent: '' });
   return api;

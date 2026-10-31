@@ -1081,7 +1081,7 @@ function driverHTML() {
   const st = D.cur.st, X = L.test.driver;
   st.drives = st.drives || []; st.dir = st.dir || 'R';
   const n = st.drives.length;
-  const list = st.drives.length ? `<table class="t"><tr><th>#</th><th>${X.len}</th><th>${X.side}</th></tr>${st.drives.map((d, i) => `<tr><td>${i + 1}</td><td>${fmtN(d.len)}</td><td>${fmtS(d.side)}</td></tr>`).join('')}</table>` : '';
+  const list = st.drives.length ? `<table class="t"><tr><th>#</th><th>${X.len}</th><th>${X.side}</th></tr>${st.drives.map((d, i) => `<tr><td>${i + 1}</td><td>${fmtN(d.len)}</td><td>${d.side == null ? t('ui.none') : fmtS(d.side)}</td></tr>`).join('')}</table>` : '';
   if (n >= 12) {
     const r = driverResult(st.drives);
     return `${list}<div class="card"><div class="series"><div class="head">${r.v == null ? '–' : fmtS(r.v)}</div><div class="sub">${esc(r.text)}</div></div></div>
@@ -1107,9 +1107,11 @@ function driverCat(h) {
 }
 function driverResult(drives) {
   const X = L.test.driver;
-  const al = drives.reduce((a, d) => a + d.len, 0) / drives.length, as = drives.reduce((a, d) => a + Math.abs(d.side), 0) / drives.length;
-  const h = driverHcp(al, as);
-  const text = t('test.driver.avg', { l: fmtN(al), s: fmtN(as) }) + ' · ' + (h == null ? X.outside : t('test.driver.hcp', { h: fmtS(h) }) + ' (' + driverCat(h) + ')');
+  // Spec 31 okt, punkt 4: en tom sida saknas (null) och räknas inte i sidsnittet.
+  const sided = drives.filter(d => d.side != null);
+  const al = drives.reduce((a, d) => a + d.len, 0) / drives.length, as = sided.length ? sided.reduce((a, d) => a + Math.abs(d.side), 0) / sided.length : null;
+  const h = as == null ? null : driverHcp(al, as);
+  const text = t('test.driver.avg', { l: fmtN(al), s: as == null ? t('ui.none') : fmtN(as) }) + ' · ' + (h == null ? X.outside : t('test.driver.hcp', { h: fmtS(h) }) + ' (' + driverCat(h) + ')');
   return { v: h, text, avgLen: al, avgSide: as };
 }
 
@@ -1565,7 +1567,7 @@ const ACTS = {
   tsSave() { const st = D.cur.st, r = twoSixResult(st); st.result = recordTest('twoSix', r.v, r.text, { of: r.of, per: r.per, variant: st.variant }); rerender(); scrollTo(0, 0); },
   drvDir(el) { D.cur.st.dir = el.dataset.v; document.querySelectorAll('[data-act=drvDir]').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === el.dataset.v)); save(); },
   drvReg() { const st = D.cur.st, l = num('#dLen'), s = num('#dSide'); if (l == null) return;
-    st.drives.push({ len: l, side: (s || 0) * (st.dir === 'L' ? -1 : 1) }); rerender(); setTimeout(() => $('#dLen')?.focus(), 0); },
+    st.drives.push({ len: l, side: s == null ? null : s * (st.dir === 'L' ? -1 : 1) }); rerender(); setTimeout(() => $('#dLen')?.focus(), 0); },
   drvUndo() { D.cur.st.drives.pop(); rerender(); },
   drvSave() { const st = D.cur.st, r = driverResult(st.drives); st.result = recordTest('driver', r.v, r.text, { avgLen: r.avgLen, avgSide: r.avgSide }); rerender(); scrollTo(0, 0); },
   testDone() { nextStep(); },
