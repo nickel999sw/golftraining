@@ -129,10 +129,8 @@ details.card summary { min-height: 40px; display: flex; align-items: center; cur
 
 .numgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 10px 0; }
 .numgrid.c3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.numgrid.c6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .numgrid button { min-height: 64px; border-radius: 12px; background: var(--chip); font-family: var(--f-num); font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .numgrid button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
-.numgrid.c6 button { font-size: 24px; min-height: 56px; }
 .numgrid.aim { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .numgrid.aim button { font-size: 26px; min-height: 56px; }
 
@@ -237,7 +235,7 @@ const I18N = {
       importOk: 'Backupen är importerad: {n} pass och {m} testresultat'
     },
     ui: {
-      appName: 'Golftraining', tabHome: 'Start', tabRun: 'Pass', tabHist: 'Historik', tabSettings: 'Inställningar',
+      tabHome: 'Start', tabRun: 'Pass', tabHist: 'Historik', tabSettings: 'Inställningar',
       menu: 'Meny', theme: 'Utseende', themeSystem: 'System', themeLight: 'Ljust', themeDark: 'Mörkt',
       choosePlace: 'Var tränar du?', editPlace: 'Ändra platsen', stationsHere: 'Stationer: {list}', maxClub: 'Längsta klubba: {club}',
       ongoing: 'Pågående pass', ongoingText: '{n} moment hittills. Fortsätt eller avsluta och spara.', ongoingSince: 'Startat {when}.', resume: 'Fortsätt passet',
@@ -247,7 +245,7 @@ const I18N = {
       lastDone: 'Senast {when}', never: 'Inte gjord än', daysAgo: 'för {n} dagar sedan', today: 'i dag', yesterday: 'i går',
       reminders: 'Påminnelser', periodBaseline: 'Testvecka – baslinje (vecka 1)', periodRetest: 'Testvecka – upprepa (sista veckan)',
       dueTest: 'Dags för {name}', monthly8: '8-bollsövningen – månadens test',
-      module: 'Modul', step: 'Steg {i} av {n}', item: '{i} av {n}',
+      step: 'Steg {i} av {n}', item: '{i} av {n}',
       skipStep: 'Hoppa över', endSession: 'Avsluta och spara pass', next: 'Nästa →', done: 'Klar →', back: '← Tillbaka',
       techOptional: 'Teknik (valfritt)', allDone: 'Klart!', allDoneText: 'Allt i kön är gjort. Lägg till fler moduler eller tester från Start, eller avsluta passet.',
       moreFromHome: 'Lägg till mer', nothingToSave: 'Inget att spara – passet avslutades.',
@@ -260,7 +258,7 @@ const I18N = {
       lengthM: '{d} m', landPast: 'Landa 1–2 m förbi – aldrig kort', aimHole: 'Sikta på att sänka bollen',
       streakNow: 'Bollar i rad nu', saveTry: 'Spara försöket', tries: 'Försök: {list}', best: 'Bästa',
       latest: 'Senaste', level: 'Nivå', reference: 'Referens', source: 'Källa', none: '–',
-      selectResult: 'Välj resultat', saveResult: 'Spara resultat', undo: 'Ångra senaste', result: 'Resultat',
+      saveResult: 'Spara resultat', undo: 'Ångra senaste', result: 'Resultat',
       nextLevel: 'Nästa gång: {lvl}', levelSame: 'Nivån är kvar: {lvl}',
       shotNo: 'Slag {i} av {n}', puttNo: 'Putt {i} av {n}',
       settingsSeries: 'Serier', pile: 'Bollar per hög/rör', seriesLen: 'Slag per serie', flags: 'Antal flaggor',
@@ -272,14 +270,13 @@ const I18N = {
       backup: 'Backup', exportJson: 'Exportera backup (JSON)', importJson: 'Importera backup (JSON)',
       importBad: 'Filen är inte en giltig backup',
       histSessions: 'Pass', histTests: 'Tester över tid', histYardage: 'Längdtabell', noHistory: 'Inga sparade pass ännu.',
-      delete: 'Ta bort', confirmDelete: 'Ta bort passet och dess testresultat från historiken?', share: 'Dela', place: 'Plats',
+      delete: 'Ta bort', confirmDelete: 'Ta bort passet och dess testresultat från historiken?', share: 'Dela',
       v1Place: 'Version 1', carry: 'Carry', side: 'Sidled', left: 'V', right: 'H', saveRow: 'Spara',
       yardHint: 'Slå 5 bollar per ruta och skriv in snittet från GC2. Sidled: tryck V eller H.',
       noYardage: 'Ingen längdtabell än. Kör modulen Längdtabell i garaget med GC2.',
       enterCarry: 'Carry (m)', register: 'Registrera', target: 'Mål',
       shareTitle: 'Golftraining – resultat',
-      wakeNote: 'Skärmen hålls tänd under passet.',
-      minutes: '≈ {n} min', out: 'UT', in: 'IN'
+      out: 'UT', in: 'IN'
     },
     stations: { chip: 'Närspelsyta', bunker: 'Greenbunker', putt: 'Puttinggreen', puttMat: 'Puttmatta', rangeGrass: 'Range gräs', rangeMat: 'Range matta', toptracer: 'Toptracer', gc2: 'GC2', matNet: 'Matta och duk', matNoNet: 'Matta utan nät' },
     places: { brohof: 'Bro Hof', komet: 'Komethallen', garageSE: 'Garaget Sverige', garagePT: 'Garaget Portugal', portugal: 'Portugal bana (mall)' },
@@ -553,7 +550,7 @@ const TESTS = {
   btb3: { needs: [['chip'], ['bunker']], kind: 'shots', higher: true, baseline: true,
     shots: () => BTB3.map(s => [`${s.d} m · ${t('btbLie.' + s.lie)}`, [t('btbRoll.' + s.roll), t('btbSlope.' + s.slope), s.extra ? t('btbExtra.' + s.extra) : null].filter(Boolean).join(' · ')]),
     opts: () => ['W', 'D', 'L'].map(k => ({ key: k, pts: { W: 1, D: 0.5, L: 0 }[k], label: L.opt.btb[k][0], sub: L.opt.btb[k][1] })), cols: 3 },
-  ball8: { needs: [['chip'], ['bunker']], kind: 'shots', higher: true, monthly: true, max: 160,
+  ball8: { needs: [['chip'], ['bunker']], kind: 'shots', higher: true,
     shots: () => { const r = []; for (let v = 1; v <= 5; v++) BALL8.forEach(([k, d], i) => r.push([`${i + 1}. ${t('ball8St.' + k)} ${d} m`, t('ball8Round', { r: v })])); return r; },
     opts: () => [4, 3, 2, 1, 0].map((p, i) => ({ key: p, pts: p, label: L.opt.ball8[i], sub: t('opt.points', { p }) })), cols: 2 },
   ball50: { needs: [['putt']], kind: 'shots', higher: false, baseline: true, puttLabel: true,
@@ -583,7 +580,6 @@ function fmtVal(id, r) {
   if (id === 'twoSix') return `${r.v}/${r.of}`;
   if (id === 'gc2Rand') return `${fmtN(r.v)} m`;
   if (id === 'aimPoint') return `${fmtN(r.v, 2)} %`;
-  return String(r.v);
 }
 function bestOf(id) {
   const rs = tstate(id).results.filter(r => r.v != null && (id !== 'twoSix' || r.of));
@@ -663,7 +659,7 @@ function endSession() {
   if (!confirm(hasData ? t('ui.confirmEnd') : t('ui.confirmDiscard'))) return;
   if (hasData) {
     const p = placeById(c.placeId);
-    const s = { id: c.id, date: c.date, placeId: c.placeId, placeName: p ? p.name : '', items: c.items.filter(i => i.kind === 'test' || i.lines.length) };
+    const s = { id: c.id, date: c.date, placeId: c.placeId, placeName: p ? p.name : null, items: c.items.filter(i => i.kind === 'test' || i.lines.length) };
     D.sessions.unshift(s); lastSaved = s; view = 'summary'; toast(t('ui.saved')); queue(COL_S + '/' + s.id, 'set');
   } else { view = 'home'; toast(t('ui.nothingToSave')); }
   D.cur = null; save(); render(); scrollTo(0, 0); syncWake();
@@ -886,7 +882,7 @@ function gc2Target(place, prev) {
   return d;
 }
 function gc2RandResult(shots) {
-  const X = L.test.gc2Rand, mean = a => a.reduce((x, y) => x + y, 0) / a.length, ad = s => Math.abs(s.c - s.d);
+  const mean = a => a.reduce((x, y) => x + y, 0) / a.length, ad = s => Math.abs(s.c - s.d);
   const v = +mean(shots.map(ad)).toFixed(1);
   const buckets = GC2_BUCKETS.map(([a, b], i) => { const inB = shots.filter(s => gc2Bucket(s.d) === i);
     return { r: `${a}–${b}`, n: inB.length, v: inB.length ? +mean(inB.map(ad)).toFixed(1) : null }; });
@@ -895,7 +891,6 @@ function gc2RandResult(shots) {
   return { v, text, buckets, shortPct };
 }
 function gc2StatsHTML(r) {
-  const X = L.test.gc2Rand;
   return `<div class="stats"><div class="stat"><span>${t('test.gc2Rand.avgHead')}</span><b>${fmtN(r.v)} m</b></div><div class="stat"><span>${t('test.gc2Rand.shortHead')}</span><b>${r.shortPct} %</b></div>
     ${r.buckets.map(x => `<div class="stat"><span>${x.r} m (${x.n})</span><b>${x.v == null ? t('ui.none') : fmtN(x.v) + ' m'}</b></div>`).join('')}</div>`;
 }
@@ -926,7 +921,7 @@ function tiltPct(beta, gamma) {
   return Math.tan(Math.acos(c)) * 100;
 }
 function aimResult(pts) {
-  const X = L.test.aimPoint, devs = pts.map(p => p.r - p.m), mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+  const devs = pts.map(p => p.r - p.m), mean = a => a.reduce((x, y) => x + y, 0) / a.length;
   const v = +mean(devs.map(Math.abs)).toFixed(2), bias = +mean(devs).toFixed(2), d = fmtS(bias, 2) || '0';
   const verdict = bias < -0.25 ? t('test.aimPoint.under', { d }) : bias > 0.25 ? t('test.aimPoint.over', { d }) : t('test.aimPoint.right', { d });
   return { v, bias, text: verdict + ' · ' + t('test.aimPoint.perPoint', { list: devs.map(x => fmtS(x) || '0').join(' ') }) };
@@ -956,7 +951,7 @@ function aimHTML() {
 }
 let aimBusy = false;
 async function aimMeasure() {
-  const st = D.cur.st, X = L.test.aimPoint, live = () => $('#aimLive');
+  const st = D.cur.st, live = () => $('#aimLive');
   const fail = msg => { aimBusy = false; if (D.cur?.st !== st) return; st.msg = msg; st.manual = true; st.meas = null; rerender(); };
   if (aimBusy) return;
   const DOE = window.DeviceOrientationEvent;
@@ -1048,7 +1043,6 @@ function shotsResult(id, picks) {
     const per = BALL8.map(([k, d], s) => `${t('ball8St.' + k)} ${d}: ${pts.filter((_, i) => i % 8 === s).reduce((a, b) => a + b, 0)}`);
     return { v: sum, text: per.join(' · '), label: `${sum}/160` };
   }
-  return { v: sum, text: '', label: String(sum) };
 }
 
 const TS_ORDER = [6, 5, 4, 3, 2];
@@ -1141,7 +1135,7 @@ function summaryHTML() {
   return `<h1>${t('ui.sessionSummary')}</h1><div class="card"><h3>${fmtDate(s.date)}</h3><div class="muted small">${esc(s.placeName)}</div>${itemsHTML(s.items)}</div>
     <button class="btn dark huge" data-act="shareSession" data-id="${s.id}">${t('ui.shareResult')}</button><button class="btn" data-act="tab" data-v="home">${t('ui.newSession')}</button>`;
 }
-function chartSVG(vals, higher) {
+function chartSVG(vals) {
   const W = 300, H = 100, P = 16;
   if (vals.length === 1) vals = [vals[0], vals[0]];
   const mn = Math.min(...vals), mx = Math.max(...vals), span = mx - mn || 1;
@@ -1155,7 +1149,7 @@ function yardageTable() {
   const ws = WEDGES.filter(w => D.yardage[w]);
   if (!ws.length) return `<p class="muted">${t('ui.noYardage')}</p>`;
   return `<div class="scroll"><table class="t"><tr><th></th>${SWINGS.map(s => `<th>${t('swing.' + s)}</th>`).join('')}</tr>
-    ${ws.map(w => `<tr><th>${club(w)}</th>${SWINGS.map(s => { const v = D.yardage[w][s]; return `<td>${v ? `<b>${fmtN(v.carry)}</b><br><span class="muted">${v.side ? fmtS(v.side) : '0'}</span>` : '–'}</td>`; }).join('')}</tr>`).join('')}</table></div>
+    ${ws.map(w => `<tr><th>${club(w)}</th>${SWINGS.map(s => { const v = D.yardage[w][s]; return `<td>${v ? `<b>${fmtN(v.carry)}</b><br><span class="muted">${v.side != null ? fmtS(v.side) : '–'}</span>` : '–'}</td>`; }).join('')}</tr>`).join('')}</table></div>
     <p class="small muted">${t('ui.carry')} (m) / ${t('ui.side')} (m, ${t('ui.left')} = −)</p>`;
 }
 function histHTML() {
@@ -1164,7 +1158,7 @@ function histHTML() {
   h += withRes.length ? withRes.map(id => { const rs = tstate(id).results, b = bestOf(id), lt = rs[rs.length - 1];
     const vals = rs.filter(r => r.v != null).map(r => id === 'twoSix' ? Math.round(r.v / r.of * 100) : r.v);
     return `<div class="card"><h3>${testName(id)}</h3><div class="small">${t('ui.latest')} <b>${fmtVal(id, lt)}</b> (${fmtShort(lt.date)}) · ${t('ui.best')} <b>${b ? fmtVal(id, b) : '–'}</b>${tstate(id).level != null ? ' · ' + lvlText(id, tstate(id).level) : ''}</div>
-      ${vals.length ? chartSVG(vals, TESTS[id].higher) : ''}</div>`; }).join('') : `<p class="muted">${t('ui.never')}</p>`;
+      ${vals.length ? chartSVG(vals) : ''}</div>`; }).join('') : `<p class="muted">${t('ui.never')}</p>`;
   h += `<h2 class="h-sec">${t('ui.histYardage')}</h2>${yardageTable()}<h2 class="h-sec">${t('ui.histSessions')}</h2>`;
   if (!D.sessions.length) return h + `<p class="muted">${t('ui.noHistory')}</p>`;
   return h + D.sessions.map(s => `<article class="card"><h3>${fmtDate(s.date)}</h3><div class="muted small">${esc(s.placeName || '')}</div>${itemsHTML(s.items)}
@@ -1540,7 +1534,7 @@ const ACTS = {
   ySave(el) { const st = D.cur.st, sw = el.dataset.sw, c = num('#c-' + sw), s = num('#s-' + sw);
     if (c == null) return; const old = D.yardage[st.w]?.[sw];
     const sign = (st.sign[sw] || (old && old.side < 0 ? 'L' : 'R')) === 'L' ? -1 : 1;
-    (D.yardage[st.w] = D.yardage[st.w] || {})[sw] = { carry: c, side: s == null ? 0 : sign * Math.abs(s), date: new Date().toISOString() };
+    (D.yardage[st.w] = D.yardage[st.w] || {})[sw] = { carry: c, side: s == null ? null : sign * Math.abs(s), date: new Date().toISOString() };
     st.count = (st.count || 0) + 1; save(); toast(`${club(st.w)} ${t('swing.' + sw)}: ${fmtN(c)} m`); },
   yDone() { const n = D.cur.st.count || 0; if (n) modLog(t('log.yardage', { n })); nextStep(); },
   // spökhål
@@ -1559,7 +1553,7 @@ const ACTS = {
   aimFinal() { const st = D.cur.st, r = aimResult(st.pts); st.result = recordTest('aimPoint', r.v, r.text, { bias: r.bias, pts: st.pts.slice() }); rerender(); scrollTo(0, 0); },
   // tester
   cntPick(el) { D.cur.st.pick = +el.dataset.v; rerender(); },
-  cntSave() { const st = D.cur.st, id = curStep().test; if (st.pick == null) return; st.result = recordTest(id, st.pick, ''); rerender(); scrollTo(0, 0); },
+  cntSave() { const st = D.cur.st, id = curStep().test; if (st.pick == null) return; st.result = recordTest(id, st.pick, null); rerender(); scrollTo(0, 0); },
   shotPick(el) { D.cur.st.picks.push(isNaN(+el.dataset.k) ? el.dataset.k : +el.dataset.k); rerender(); },
   shotsUndo() { D.cur.st.picks.pop(); rerender(); },
   shotsSave() { const st = D.cur.st, id = curStep().test, r = shotsResult(id, st.picks); st.result = recordTest(id, r.v, r.text, { picks: st.picks.slice() }); rerender(); scrollTo(0, 0); },

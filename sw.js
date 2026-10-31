@@ -1,5 +1,5 @@
 // Höj versionen när filerna ändras så att nya versionen hämtas.
-const CACHE = 'golftraining-v9';
+const CACHE = 'golftraining-v10';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png',
   './fonts/BigShouldersDisplay.woff2', './fonts/AtkinsonHyperlegibleNext.woff2', './fonts/AtkinsonHyperlegibleMono.woff2',
   // Firebase SDK (synk med Golfrounds Firestore). Bara de här tre adresserna från en annan domän hanteras här.
