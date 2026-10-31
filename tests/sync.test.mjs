@@ -36,6 +36,7 @@ test('dokumenten: saknade värden blir null, aldrig 0; 0 förblir 0; inga namn; 
   assert.ok(sd.items.every(i => !('name' in i)), 'namnet sparas inte');
   assert.equal(sd.items[0].v, 0, 'v = 0 är ett riktigt värde');
   assert.equal(td.v, 0); assert.equal(td.sid, s.id); assert.equal(td.lvl, 1.8);
+  assert.equal(r.text, null, 'räknetest har ingen text: null, inte tom sträng'); assert.equal(td.text, null);
   assert.deepEqual(td.extra, {});
   // Saknade värden
   const v1 = j(A.SYNC.sessionDoc({ id: 'v1-1', date: '2024-05-01T10:00:00.000Z', placeName: 'Version 1', v1: true, items: [{ kind: 'module', id: 'v1', name: 'x', lines: ['a'] }] }));
@@ -44,6 +45,16 @@ test('dokumenten: saknade värden blir null, aldrig 0; 0 förblir 0; inga namn; 
   for (const k of ['v', 'text', 'sid', 'lvl', 'nextLvl']) assert.equal(bare[k], null, k + ' saknas → null');
   assert.deepEqual(bare.extra, { avgLen: null, picks: [1, null] }, 'också i extra');
   assert.equal(j(A.SYNC.sessionDoc({ id: 'x', date: 'd', items: [{ kind: 'test', id: 'nine' }] })).items[0].v, null);
+});
+
+test('ett pass utan känd plats sparas med placeName null, inte tom sträng', () => {
+  const A = loadApp();
+  A.D.placeId = 'brohof';
+  A.click('startTest', { id: 't10flag' });
+  A.D.cur.placeId = 'finns-inte';
+  A.click('cntPick', { v: '3' }); A.click('cntSave'); A.click('testDone'); A.click('endSessionNow');
+  assert.equal(A.D.sessions[0].placeName, null);
+  assert.equal(j(A.SYNC.sessionDoc(A.D.sessions[0])).placeName, null);
 });
 
 test('ett avslutat pass och dess testresultat läggs i utkorgen och skickas med set()', async () => {
