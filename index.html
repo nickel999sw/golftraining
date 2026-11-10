@@ -359,6 +359,21 @@ const I18N = {
       sevenTen: { name: '7 av 10', desc: '10 slag mot en zon. Räkna antal i zonen.', lvl: 'Zon ±{v} m', rule: '7/10 eller bättre ger 2,5 m mindre zon nästa gång.', ask: 'Antal i zonen' },
       gc2Rand: { name: 'Slumpade längder (GC2/Toptracer)', desc: 'Appen slumpar en ny längd per slag: 40–100 m med wedge, 100–140 m med J9–J7. Skriv in carry efter varje slag. Resultat = snittavvikelse i meter, lägre är bättre.',
         wedge: 'Wedge', irons: 'J9–J7', avgHead: 'Snittavvikelse', shortHead: 'Andel korta', shortPct: 'Korta {p} %', bucket: '{r} m: {v} m ({n})' },
+      approach40: { name: 'Inspelstestet (40)', desc: '40 inspel i fyra block med ny klubba eller ny längd varje slag. Skriv in carry från radarn, eller tryck Träff eller Miss utan radar. Poäng 0–40, högre är bättre.',
+        ref: '15 i hcp: 2 · 4 · ≈3 · 1 = minst 10. Låg hcp (0–5): 3 · 7 · ≈7 · 3 = ≈20. Tid 8 · 13 · 15 · 9 min, ca 45 min.',
+        src: 'Play Ready Golf (Isaac Ramsey): "I Did the Math on How a 15 Handicap Should Practice", YouTube. Måtten omräknade från yards och fot.',
+        blocks: ['Wedgematris', 'Greenfinder', 'Missa inte kort', 'Begränsa skadan'],
+        rules: ['Poäng inom 4,6 m från målet. Mål: full, −9 m och −18 m.', 'Poäng på green: ±13,5 m i längd, 27 m bred.', 'Sikta på bakre tredjedelen. Poäng när bollen når green: ±13,5 m runt greenens mitt.', 'Poäng inom 27 m från målet.'],
+        refHi: ['2', '4', '≈3', '1', '≥10'], refLo: ['3', '7', '≈7', '3', '≈20'], hcp15: '15 hcp', hcpLow: 'Låg hcp', you: 'Du', total: 'Totalt', date: 'Datum',
+        setupHead: 'Klubbor och carry', setupText: 'Tre klubbor per block och deras carry i meter. Sparas i telefonen och används nästa gång.',
+        setupEdit: 'Ändra klubbor och längder', setupSave: 'Spara klubbor och längder', start: 'Starta testet', fullM: 'Full carry (m)', carryM: 'Carry (m)',
+        needCarry: 'Fyll i carry för alla tolv klubbor.', dupClub: 'Block {b} har samma klubba två gånger.', badCarry: 'Carry måste vara större än 0.',
+        blockName: 'Block {b}: {name}', blockHead: 'Block {b} av 4 · {name}', blockShort: 'B{b}', shotOf: 'Slag {i} av {n} · totalt {k} av 40', time: 'ca {m} min',
+        target: '{club} · {d} m', green: 'Green {d} m · sikta {a} m',
+        carryIn: 'Uppmätt carry (m)', side: 'Utanför i sidled', sideShort: '(sidled)', noRadar: 'Utan carry:', hit: 'Träff', miss: 'Miss',
+        club: 'Klubba', pt: 'Poäng', yes: '✓', no: '–',
+        blockDone: 'Block {b} klart, {name}: {p} av {n}', refRow: 'Riktmärke: 15 hcp {hi} · låg hcp {lo}', nextBlock: 'Nästa block →',
+        textBlock: 'B{b} {p}/{n}' },
       aimPoint: { name: 'AimPoint-kalibrering', desc: '10 punkter på puttinggreenen. Ange lutningen du läser, mät sedan med telefonen liggande på greenen. Resultat = snittavvikelse i procentenheter, lägre är bättre.',
         point: 'Punkt {i} av 10', yourRead: 'Lutning du läser (%)', measure: 'Mät med telefonen', measHint: 'Lägg telefonen platt på greenen vid punkten, gärna med skärmen nedåt (kameran gör att baksidan lutar). Mätningen startar efter 3 sekunder och tar 2 sekunder.',
         countdown: 'Lägg ner telefonen … mätning om {s} s', measuring: 'Mäter … {v} %', measured: 'Uppmätt: {v} %', unstable: 'Sensorn var instabil. Mät igen eller ange värdet manuellt.',
@@ -565,6 +580,7 @@ const TESTS = {
   sevenTen: { needs: [RANGE], kind: 'count', n: 10, higher: true, level: { start: 17.5, step: -2.5, lim: 2.5, thr: 7 } },
   gc2Rand: { needs: [['gc2', 'toptracer']], kind: 'gc2rand', higher: false },
   aimPoint: { needs: [['putt']], kind: 'aim', higher: false },
+  approach40: { needs: [RANGE], kind: 'approach40', higher: true },
 };
 const testName = id => t('test.' + id + '.name');
 const tstate = id => D.tests[id] || (D.tests[id] = { level: TESTS[id]?.level ? TESTS[id].level.start : null, results: [] });
@@ -580,6 +596,7 @@ function fmtVal(id, r) {
   if (id === 'twoSix') return `${r.v}/${r.of}`;
   if (id === 'gc2Rand') return `${fmtN(r.v)} m`;
   if (id === 'aimPoint') return `${fmtN(r.v, 2)} %`;
+  if (id === 'approach40') return `${r.v}/40`;
 }
 function bestOf(id) {
   const rs = tstate(id).results.filter(r => r.v != null && (id !== 'twoSix' || r.of));
@@ -979,6 +996,106 @@ async function aimMeasure() {
 }
 
 // ----- Tester -----
+// ----- Inspelstestet (40), docs/plan-2026-11-10-inspel40.md -----
+/* Fyra block efter Play Ready Golf. Zonen per block i meter (A1–A5): cirkel 4,6 m, green ±13,5 m, green ±13,5 m, cirkel 27 m.
+   Gränsvärdet räknas som inom. Sidledsknappen = utanför zonen fast längden är inom, och ger 0. */
+const A40 = {
+  n: [9, 12, 14, 5],
+  lim: [4.6, 13.5, 13.5, 27],
+  min: [8, 13, 15, 9],
+  clubs: [['LW', 'SW', 'GW'], ['PW', '9i', '8i'], ['7i', '6i', '5i'], ['3W', '3H', '5i']],   // förval: Portugal-bagen
+  latin: [[0, 0], [1, 1], [2, 2], [0, 1], [1, 2], [2, 0], [0, 2], [1, 0], [2, 1]],   // block 1: [klubba, längd], ny klubba och ny längd varje slag
+  drop: [0, 9, 18],   // block 1: full, −9 m, −18 m
+  aim3: 9,            // block 3: mitten av bakre tredjedelen av en 27 m lång green
+  /* Förval: wedgarnas fulla carry från längdtabellen, annars null (måste fyllas i). */
+  defaults() { return { blocks: A40.clubs.map(cs => ({ clubs: cs.slice(), carry: cs.map(c => D.yardage[c]?.full?.carry ?? null) })) }; },
+  setup() { return D.settings.approach40 || A40.defaults(); },
+  ready: s => s.blocks.every(b => b.carry.every(c => c != null && c > 0)),
+  /* De 40 slagen i ordning: block 1 som latinsk kvadrat, block 2 kort–medel–lång ×4 och block 3 roterat efter carry, block 4 i vald ordning. */
+  plan(s) {
+    const out = [], r1 = x => +x.toFixed(1);
+    const b1 = s.blocks[0];
+    A40.latin.forEach(([c, l]) => out.push({ block: 1, club: b1.clubs[c], target: r1(b1.carry[c] - A40.drop[l]) }));
+    [1, 2, 3].forEach(bi => {
+      const b = s.blocks[bi], idx = [0, 1, 2];
+      if (bi < 3) idx.sort((x, y) => b.carry[x] - b.carry[y]);
+      for (let i = 0; i < A40.n[bi]; i++) { const k = idx[i % 3]; out.push({ block: bi + 1, club: b.clubs[k], target: r1(b.carry[k]) }); }
+    });
+    return out;
+  },
+  pt: (block, target, carry, side) => carry == null ? null : !side && Math.abs(carry - target) <= A40.lim[block - 1] + 1e-9 ? 1 : 0,
+  per: shots => [1, 2, 3, 4].map(b => shots.filter(s => s.block === b).reduce((a, s) => a + s.pt, 0)),
+  text: shots => A40.per(shots).map((p, i) => t('test.approach40.textBlock', { b: i + 1, p, n: A40.n[i] })).join(' · '),
+};
+function a40SetupHTML(s, err) {
+  const X = L.test.approach40;
+  return `<h2 class="h-sec">${X.setupHead}</h2><p class="small">${X.setupText}</p>${err ? `<div class="card alert">${esc(err)}</div>` : ''}
+    ${s.blocks.map((b, bi) => `<div class="card"><h3>${t('test.approach40.blockName', { b: bi + 1, name: X.blocks[bi] })}</h3>
+      ${b.clubs.map((c, i) => `<div class="row" style="margin:8px 0"><select id="a40k-${bi}-${i}" style="flex:1 1 40%">${CLUBS.map(x => `<option value="${x}" ${x === c ? 'selected' : ''}>${club(x)}</option>`).join('')}</select>
+        <input type="number" inputmode="decimal" id="a40c-${bi}-${i}" placeholder="${bi ? X.carryM : X.fullM}" value="${b.carry[i] ?? ''}" style="flex:1 1 40%"></div>`).join('')}</div>`).join('')}
+    <button class="btn primary huge" data-act="a40SetSave">${X.setupSave}</button>`;
+}
+function a40RefHTML(bi) {
+  const X = L.test.approach40;
+  return `<p class="small">${t('test.approach40.refRow', { hi: X.refHi[bi], lo: X.refLo[bi] })}</p>`;
+}
+function a40TableHTML(shots) {
+  const X = L.test.approach40;
+  return `<table class="t"><tr><th>#</th><th>${X.club}</th><th>${t('ui.target')}</th><th>${t('ui.carry')}</th><th>${X.pt}</th></tr>${shots.map((s, i) =>
+    `<tr><td>${i + 1}</td><td>${club(s.club)}</td><td>${fmtN(s.target)}</td><td>${s.carry == null ? t('ui.none') : fmtN(s.carry) + (s.side ? ' ' + X.sideShort : '')}</td><td>${s.pt ? X.yes : X.no}</td></tr>`).join('')}</table>`;
+}
+function a40SumHTML(shots) {
+  const X = L.test.approach40, per = A40.per(shots), v = per.reduce((a, b) => a + b, 0);
+  return `<table class="t"><tr><th></th>${[0, 1, 2, 3].map(i => `<th>${t('test.approach40.blockShort', { b: i + 1 })}</th>`).join('')}<th>${X.total}</th></tr>
+    <tr><td>${X.you}</td>${per.map(p => `<td><b>${p}</b></td>`).join('')}<td><b>${v}</b></td></tr>
+    <tr><td>${X.hcp15}</td>${X.refHi.map(x => `<td>${x}</td>`).join('')}</tr>
+    <tr><td>${X.hcpLow}</td>${X.refLo.map(x => `<td>${x}</td>`).join('')}</tr></table>`;
+}
+function a40HTML() {
+  const st = D.cur.st, X = L.test.approach40;
+  if (!st.plan) {
+    const s = st.draft || A40.setup();
+    if (st.edit || !A40.ready(s)) return a40SetupHTML(s, st.err);
+    return `<h2 class="h-sec">${X.setupHead}</h2><div class="card">${s.blocks.map((b, bi) => `<p><b>${t('test.approach40.blockName', { b: bi + 1, name: X.blocks[bi] })}:</b> ${b.clubs.map((c, i) => `${club(c)} ${fmtN(b.carry[i])} m`).join(' · ')}</p>`).join('')}</div>
+      <button class="btn" data-act="a40Edit">${X.setupEdit}</button><button class="btn primary huge" data-act="a40Start">${X.start}</button>`;
+  }
+  const n = st.shots.length, undo = n ? `<button class="btn" data-act="a40Undo">${t('ui.undo')}</button>` : '';
+  if (n === 40) return `<div class="card">${a40SumHTML(st.shots)}</div><button class="btn primary huge" data-act="a40Save">${t('ui.saveResult')}</button>${undo}`;
+  if (st.pause != null) {
+    const bi = st.pause, p = A40.per(st.shots)[bi];
+    return `<div class="card alert"><h3>${t('test.approach40.blockDone', { b: bi + 1, name: X.blocks[bi], p, n: A40.n[bi] })}</h3>${a40RefHTML(bi)}</div>
+      <button class="btn primary huge" data-act="a40Next">${X.nextBlock}</button>${undo}`;
+  }
+  const sh = st.plan[n], bi = sh.block - 1, first = st.plan.findIndex(x => x.block === sh.block), inBlock = st.shots.slice(first);
+  const big = t('test.approach40.target', { club: club(sh.club), d: fmtN(sh.target) }), aim = sh.block === 3 ? `<div class="sub">${t('test.approach40.green', { d: fmtN(sh.target), a: fmtN(sh.target + A40.aim3) })}</div>` : '';
+  return `<div class="shotcard"><div class="no">${t('test.approach40.blockHead', { b: sh.block, name: X.blocks[bi] })}</div>
+    <div class="sub">${t('test.approach40.shotOf', { i: n - first + 1, n: A40.n[bi], k: n + 1 })} · ${t('test.approach40.time', { m: A40.min[bi] })}</div>
+    <div class="big">${big}</div>${aim}<p class="small">${X.rules[bi]}</p>
+    <label class="f" for="a40Carry">${X.carryIn}</label><input type="number" inputmode="decimal" id="a40Carry">
+    <div class="chips" style="margin-top:10px"><button class="chip" data-act="a40Side" aria-pressed="${!!st.side}">${X.side}</button></div>
+    <button class="btn primary huge" data-act="a40Reg">${t('ui.register')}</button>
+    <p class="small">${X.noRadar}</p><div class="btnrow"><button class="btn" data-act="a40Hit" data-v="1">${X.hit}</button><button class="btn" data-act="a40Hit" data-v="0">${X.miss}</button></div></div>
+    ${inBlock.length ? a40TableHTML(inBlock) : ''}${undo}`;
+}
+/* Ett slag registreras; efter blockets sista slag (utom det sista blocket) visas blockets poäng innan nästa block. */
+function a40Push(carry, side, pt) {
+  const st = D.cur.st, sh = st.plan[st.shots.length];
+  if (!sh) return;
+  st.shots.push({ block: sh.block, club: sh.club, target: sh.target, carry, side, pt });
+  st.side = false;
+  const nx = st.plan[st.shots.length];
+  if (nx && nx.block !== sh.block) st.pause = sh.block - 1;
+  rerender(); setTimeout(() => $('#a40Carry')?.focus(), 0);
+}
+function a40HistHTML(rs) {
+  const X = L.test.approach40, last = rs.filter(r => r.shots).slice(-10).reverse();
+  if (!last.length) return '';
+  return `<div class="scroll"><table class="t"><tr><th>${X.date}</th>${[0, 1, 2, 3].map(i => `<th>${t('test.approach40.blockShort', { b: i + 1 })}</th>`).join('')}<th>${X.total}</th></tr>
+    ${last.map(r => `<tr><td>${fmtShort(r.date)}</td>${A40.per(r.shots).map(p => `<td>${p}</td>`).join('')}<td><b>${r.v}</b></td></tr>`).join('')}
+    <tr><td class="muted">${X.hcp15}</td>${X.refHi.map(x => `<td class="muted">${x}</td>`).join('')}</tr>
+    <tr><td class="muted">${X.hcpLow}</td>${X.refLo.map(x => `<td class="muted">${x}</td>`).join('')}</tr></table></div>`;
+}
+
 function testInfoHTML(id) {
   const ts = tstate(id), lt = lastTest(id), b = bestOf(id), T = TESTS[id];
   const ref = L.test[id].ref ? `<div class="ref"><b>${t('ui.reference')}:</b> ${L.test[id].ref}<span class="src">${t('ui.source')}: ${L.test[id].src}</span></div>` : '';
@@ -1001,6 +1118,7 @@ function testHTML(id) {
   else if (T.kind === 'driver') h += driverHTML();
   else if (T.kind === 'gc2rand') h += gc2RandHTML();
   else if (T.kind === 'aim') h += aimHTML();
+  else if (T.kind === 'approach40') h += a40HTML();
   return h;
 }
 function resultHTML(id, r) {
@@ -1160,7 +1278,7 @@ function histHTML() {
   h += withRes.length ? withRes.map(id => { const rs = tstate(id).results, b = bestOf(id), lt = rs[rs.length - 1];
     const vals = rs.filter(r => r.v != null).map(r => id === 'twoSix' ? Math.round(r.v / r.of * 100) : r.v);
     return `<div class="card"><h3>${testName(id)}</h3><div class="small">${t('ui.latest')} <b>${fmtVal(id, lt)}</b> (${fmtShort(lt.date)}) · ${t('ui.best')} <b>${b ? fmtVal(id, b) : '–'}</b>${tstate(id).level != null ? ' · ' + lvlText(id, tstate(id).level) : ''}</div>
-      ${vals.length ? chartSVG(vals) : ''}</div>`; }).join('') : `<p class="muted">${t('ui.never')}</p>`;
+      ${vals.length ? chartSVG(vals) : ''}${id === 'approach40' ? a40HistHTML(rs) : ''}</div>`; }).join('') : `<p class="muted">${t('ui.never')}</p>`;
   h += `<h2 class="h-sec">${t('ui.histYardage')}</h2>${yardageTable()}<h2 class="h-sec">${t('ui.histSessions')}</h2>`;
   if (!D.sessions.length) return h + `<p class="muted">${t('ui.noHistory')}</p>`;
   return h + D.sessions.map(s => `<article class="card"><h3>${fmtDate(s.date)}</h3><div class="muted small">${esc(s.placeName || '')}</div>${itemsHTML(s.items)}
@@ -1570,6 +1688,26 @@ const ACTS = {
     st.drives.push({ len: l, side: s == null ? null : s * (st.dir === 'L' ? -1 : 1) }); rerender(); setTimeout(() => $('#dLen')?.focus(), 0); },
   drvUndo() { D.cur.st.drives.pop(); rerender(); },
   drvSave() { const st = D.cur.st, r = driverResult(st.drives); st.result = recordTest('driver', r.v, r.text, { avgLen: r.avgLen, avgSide: r.avgSide }); rerender(); scrollTo(0, 0); },
+  // inspelstestet (40)
+  a40Edit() { const st = D.cur.st; st.edit = true; st.draft = JSON.parse(JSON.stringify(A40.setup())); st.err = null; rerender(); },
+  a40SetSave() { const st = D.cur.st, X = L.test.approach40;
+    const blocks = [0, 1, 2, 3].map(bi => ({ clubs: [0, 1, 2].map(i => $(`#a40k-${bi}-${i}`).value), carry: [0, 1, 2].map(i => num(`#a40c-${bi}-${i}`)) }));
+    st.draft = { blocks };
+    const dup = blocks.findIndex(b => new Set(b.clubs).size < 3);
+    st.err = dup >= 0 ? t('test.approach40.dupClub', { b: dup + 1 }) : blocks.some(b => b.carry.some(c => c != null && c <= 0)) ? X.badCarry : null;
+    if (!st.err) { D.settings.approach40 = { blocks }; st.draft = null; st.err = A40.ready(D.settings.approach40) ? null : X.needCarry; st.edit = !!st.err; }
+    rerender(); scrollTo(0, 0); },
+  a40Start() { const st = D.cur.st, s = A40.setup(); if (!A40.ready(s)) return;
+    st.setup = JSON.parse(JSON.stringify(s)); st.plan = A40.plan(st.setup); st.shots = []; st.pause = null; st.side = false; rerender(); scrollTo(0, 0); },
+  a40Side(el) { const st = D.cur.st; st.side = !st.side; el.setAttribute('aria-pressed', st.side); save(); },
+  a40Reg() { const st = D.cur.st, c = num('#a40Carry'), sh = st.plan?.[st.shots.length]; if (c == null || c <= 0 || !sh) return;
+    a40Push(c, !!st.side, A40.pt(sh.block, sh.target, c, !!st.side)); },
+  a40Hit(el) { a40Push(null, null, +el.dataset.v); },   // utan carry: sidled är okänt (null), knappen avgör poängen
+  a40Next() { D.cur.st.pause = null; rerender(); scrollTo(0, 0); },
+  a40Undo() { const st = D.cur.st; st.shots.pop(); st.pause = null; rerender(); },
+  a40Save() { const st = D.cur.st, v = A40.per(st.shots).reduce((a, b) => a + b, 0);
+    const setup = st.setup.blocks.map((b, i) => ({ block: i + 1, clubs: b.clubs.slice(), carry: b.carry.slice() }));
+    st.result = recordTest('approach40', v, A40.text(st.shots), { shots: st.shots.slice(), setup }); rerender(); scrollTo(0, 0); },
   testDone() { nextStep(); },
   // historik
   shareSession(el) { const s = D.sessions.find(x => x.id === el.dataset.id); if (s) shareText(sessionText(s)); },
