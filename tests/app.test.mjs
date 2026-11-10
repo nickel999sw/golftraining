@@ -202,8 +202,8 @@ test('startsidan visar de nya modulerna på rätt platser och kör utan fel i al
     for (const v of ['home', 'hist', 'settings']) { A.click('tab', { v }); assert.doesNotMatch(A.view(), /undefined|NaN/); }
     A.click('tab', { v: 'home' });
     const home = A.view();
-    assert.equal(home.includes('data-ids="teeShots"'), ['brohof', 'komet', 'portugal'].includes(p.id), `utslag på ${p.id}`);
-    assert.equal(home.includes('data-ids="upDown"'), ['brohof', 'portugal'].includes(p.id), `upp och ner på ${p.id}`);
+    assert.equal(home.includes('data-kind="mod" data-id="teeShots"'), ['brohof', 'komet', 'portugal'].includes(p.id), `utslag på ${p.id}`);
+    assert.equal(home.includes('data-kind="mod" data-id="upDown"'), ['brohof', 'portugal'].includes(p.id), `upp och ner på ${p.id}`);
   }
 });
 
