@@ -223,7 +223,9 @@ const I18N = {
     sync: {
       saved: 'Sparat', saving: 'Sparar…', phone: 'Sparat i telefonen', denied: 'Servern sa nej', local: 'Bara den här enheten', other: 'Annat konto',
       account: 'Konto', signIn: 'Logga in med Google', signOut: 'Logga ut', signedInAs: 'Inloggad som {name}',
-      accountText: 'Inloggad sparas pass och testresultat också i Golfrounds databas, så att de finns kvar på andra enheter.',
+      accountText: 'Inloggad sparas pass, testresultat, inställningar, platser och wedgelängder också i Golfrounds databas, så att de finns kvar på andra enheter.',
+      askProfile: { settings: 'Inställningarna i molnet (bland annat klubbor och carry i Inspelstestet) skiljer sig från den här enhetens. Använd molnets?',
+        places: 'Platserna och testveckorna i molnet skiljer sig från den här enhetens. Använd molnets?', yardage: 'Längdtabellen i molnet skiljer sig från den här enhetens. Använd molnets?' },
       otherText: 'Datan i telefonen hör till ett annat konto. Ingenting synkas förrän du loggar in med det kontot igen.',
       unavailable: 'Inloggningen går inte att ladda just nu. Datan sparas i telefonen.', signInFail: 'Inloggningen misslyckades',
       askUpload: 'Ladda upp {n} pass och {m} testresultat från telefonen?',
@@ -640,7 +642,7 @@ function load() {
   return { ...base, ...d, settings: { ...base.settings, ...d.settings } };
 }
 let D = load();
-const save = () => LS.set(KEY, D);
+const save = () => { LS.set(KEY, D); profWatch(); };
 const placeById = id => D.places.find(p => p.id === id);
 const curPlace = () => placeById(D.placeId) || D.places[0];
 
@@ -1417,7 +1419,7 @@ const num = id => { const v = parseFloat(String($(id)?.value || '').replace(',',
 // users/{uid}/trainingSessions och users/{uid}/trainingTests när det finns nät och en inloggning.
 // =====================================================================
 const SYNC_KEY = 'golftraning.sync.v1';
-const COL_S = 'trainingSessions', COL_T = 'trainingTests';
+const COL_S = 'trainingSessions', COL_T = 'trainingTests', COL_P = 'training';
 const FIREBASE_CONFIG = { apiKey: 'AIzaSyBdpZ_oDNyq5yUjQ22HAgHtOpNeRjyu06k', authDomain: 'golfrounds-ac8bd.firebaseapp.com', projectId: 'golfrounds-ac8bd',
   storageBucket: 'golfrounds-ac8bd.firebasestorage.app', messagingSenderId: '169328614188', appId: '1:169328614188:web:a700502909e2faaa046a89' };   // publika id:n, åtkomsten styrs av reglerna
 const DENIED = ['permission-denied', 'invalid-argument'];   // ett nej från servern; allt annat räknas som saknat nät
@@ -1488,8 +1490,42 @@ function removeSession(id) {
   relevel();
 }
 
-/* Utkorgen: { uid, pending: { path: { op, at, source, blocked? } }, synced: [path], localOnly: [path] } */
-const syncDefaults = () => ({ uid: null, pending: {}, synced: [], localOnly: [] });
+/* Profilen (plan 2026-11-10-profil-synk): tre dokument under training/. theme och placeId stannar i enheten. */
+const PROF = {
+  [COL_P + '/settings']: { get: () => ({ schema: 1, pile: D.settings.pile, seriesLen: D.settings.seriesLen, flags: D.settings.flags, approach40: D.settings.approach40 ?? null }),
+    put: d => { D.settings.pile = d.pile; D.settings.seriesLen = d.seriesLen; D.settings.flags = d.flags;
+      if (d.approach40 == null) delete D.settings.approach40; else D.settings.approach40 = d.approach40; } },
+  [COL_P + '/places']: { get: () => ({ schema: 1, places: D.places, period: D.period ?? null }),
+    put: d => { D.places = d.places; D.period = d.period ?? null; if (!placeById(D.placeId)) D.placeId = D.places[0].id; } },
+  [COL_P + '/yardage']: { get: () => ({ schema: 1, yardage: D.yardage }), put: d => { D.yardage = d.yardage || {}; } },
+};
+const profDoc = path => clean(PROF[path].get());
+const pkey = d => JSON.stringify(canon(strip(d)));
+function profDefault(path) { const keep = D; D = defaults(); try { return pkey(profDoc(path)); } finally { D = keep; } }
+/* En lokal ändring läggs i utkorgen, men först när enheten har läst profilen från molnet en gång (regel 1). */
+function profWatch() {
+  if (!SY.profRead) return;
+  for (const path in PROF) if (!SY.pending[path] && pkey(profDoc(path)) !== SY.prof[path]) queue(path, 'set');
+}
+/* Sammanslagning per dokument (regel 3). Lokalt tas över tyst bara om det är lika med basen eller med standardvärdena. */
+function mergeProfile(rows) {
+  const server = new Map(rows.map(({ id, ...d }) => [COL_P + '/' + id, d]));
+  let changed = false;
+  for (const path in PROF) {
+    if (SY.pending[path]) continue;
+    const lk = pkey(profDoc(path)), dk = profDefault(path), S = server.get(path);
+    if (!S) { if (lk === dk) SY.prof[path] = dk; else queue(path, 'set'); continue; }
+    const sk = pkey(S);
+    if (sk !== lk && (lk === SY.prof[path] || lk === dk || confirm(t('sync.askProfile.' + path.slice(COL_P.length + 1))))) { PROF[path].put(S); changed = true; }
+    else if (sk !== lk) { queue(path, 'set'); continue; }
+    SY.prof[path] = sk;
+  }
+  SY.profRead = true;
+  return changed;
+}
+
+/* Utkorgen: { uid, pending: { path: { op, at, source, blocked? } }, synced: [path], localOnly: [path], prof: { path: bas }, profRead } */
+const syncDefaults = () => ({ uid: null, pending: {}, synced: [], localOnly: [], prof: {}, profRead: false });
 let SY = { ...syncDefaults(), ...LS.get(SYNC_KEY, {}) };
 const sySave = () => LS.set(SYNC_KEY, SY);
 const sync = { fs: null, user: null, auth: null, busy: false, flushing: null, timer: null };
@@ -1520,6 +1556,7 @@ async function doFlush() {
   sync.busy = true; showSync();
   try {
     const docs = localDocs();
+    for (const path in PROF) docs.set(path, profDoc(path));
     for (const [path, p] of Object.entries(SY.pending)) {
       if (p.blocked) continue;
       if (p.op === 'set' && !docs.has(path)) { delete SY.pending[path]; sySave(); continue; }
@@ -1531,11 +1568,12 @@ async function doFlush() {
         break;   // inget nät: resten ligger kvar till nästa försök
       }
       if (SY.pending[path] === p) delete SY.pending[path];   // en ny ändring under tiden ligger kvar
-      SY.synced = SY.synced.filter(x => x !== path);
-      if (p.op === 'set') SY.synced.push(path);
+      if (PROF[path]) SY.prof[path] = pkey(docs.get(path));
+      else { SY.synced = SY.synced.filter(x => x !== path); if (p.op === 'set') SY.synced.push(path); }
       sySave();
     }
   } finally { sync.busy = false; showSync(); }
+  profWatch();   // en ändring medan dokumentet skickades
 }
 
 /* Läs båda samlingarna uttryckligen från servern (get med source 'server'). Utan nät misslyckas läsningen. */
@@ -1551,7 +1589,8 @@ async function pull() {
   if (!sync.fs || !sync.user) return { ok: false, reason: 'signedOut' };
   if (SY.uid && SY.uid !== sync.user.uid) { showSync(); return { ok: false, reason: 'other' }; }
   let server;
-  try { server = await withTimeout(readServer()); } catch { showSync(); return { ok: false, reason: 'offline' }; }
+  let profRows;
+  try { [server, profRows] = await withTimeout(Promise.all([readServer(), sync.fs.read(COL_P)])); } catch { showSync(); return { ok: false, reason: 'offline' }; }
   const first = !SY.uid, local = localDocs(), synced = new Set(SY.synced);
   let changed = false;
   for (const [path, d] of server) {   // från servern: nytt eller ändrat, utom det som väntar i utkorgen
@@ -1575,6 +1614,7 @@ async function pull() {
     else fresh.forEach(p => { delete SY.pending[p]; SY.localOnly.push(p); });
   }
   SY.uid = sync.user.uid;
+  if (mergeProfile(profRows)) changed = true;
   SY.synced = [...server.keys()].filter(p => SY.pending[p]?.op !== 'delete' && !gone.includes(p));
   sySave();
   if (changed) { relevel(); save(); render(); }
@@ -1617,7 +1657,7 @@ function fsAdapter(fdb, uid) {
   const col = c => fdb.collection('users').doc(uid).collection(c);
   const ref = path => { const [c, id] = path.split('/'); return col(c).doc(id); };
   return {
-    read: c => col(c).get({ source: 'server' }).then(q => q.docs.map(x => x.data())),
+    read: c => col(c).get({ source: 'server' }).then(q => q.docs.map(x => ({ id: x.id, ...x.data() }))),
     write: (path, doc) => ref(path).set(doc),
     remove: path => ref(path).delete(),
   };

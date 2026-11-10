@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import { initializeTestEnvironment } from '@firebase/rules-unit-testing';
+import { initializeTestEnvironment, assertFails, assertSucceeds } from '@firebase/rules-unit-testing';
 import { loadApp } from '../app.mjs';
 
 const G = process.env.GOLFROUNDS_DIR || join(homedir(), 'Code', 'golfrounds');
@@ -100,6 +100,30 @@ try {
   E.ACTS.delSession({ dataset: { id: es.id } }); await E.SYNC.flush();
   ed = (await raw()).t.find(x => x.id === er.id);
   ok(!ed, 'Ta bort pass: approach40-resultatet är borta i Firestore');
+
+  console.log('-- profilen: training/settings, places, yardage (plan 10 nov, kräver Golfrounds regler för training)');
+  const prof = async () => { let out; await env.withSecurityRulesDisabled(async c => {
+    const q = await c.firestore().collection('users').doc('uA').collection('training').get();
+    out = Object.fromEntries(q.docs.map(d => [d.id, d.data()]));
+  }); return out; };
+  let pd = await prof();
+  ok(pd.settings && JSON.stringify(pd.settings.approach40) === JSON.stringify(E.D.settings.approach40) && !('theme' in pd.settings), 'klubbor och carry från Inspelstestet skrevs till training/settings, utan theme');
+  ok(!pd.places && !pd.yardage, 'standardplatser och tom längdtabell laddades inte upp');
+  ok(JSON.stringify(F.D.settings.approach40) === JSON.stringify(E.D.settings.approach40), 'en annan enhet tog in klubbor och carry tyst');
+  F.D.places[0].name = 'Bro Hof GK'; F.D.yardage = { PW: { full: { carry: 107, side: null } } }; F.click('place', { id: F.D.placeId });
+  await new Promise(r => setTimeout(r, 350)); await F.SYNC.flush();
+  pd = await prof();
+  ok(pd.places?.places[0].name === 'Bro Hof GK' && pd.places.period === null && pd.yardage?.yardage.PW.full.side === null, 'platser och längdtabell skrevs, null som null');
+  await E.SYNC.pull();
+  ok(E.D.places[0].name === 'Bro Hof GK' && E.D.yardage.PW.full.carry === 107, 'enheten som laddade upp först läser tillbaka platser och längder');
+  const ua = as('uA', 'anna@example.com'), ub = as('uB', 'bo@example.com');
+  const tr = (db, id) => db.collection('users').doc('uA').collection('training').doc(id);
+  ok(await assertFails(tr(ub, 'settings').get()).then(() => true, () => false), 'en annan användare kan inte läsa profilen');
+  ok(await assertFails(tr(ub, 'settings').set({ schema: 1, pile: 1, seriesLen: 3, flags: 1, approach40: null })).then(() => true, () => false), '... och inte skriva den');
+  ok(await assertFails(tr(ua, 'profile').set({ schema: 1 })).then(() => true, () => false), 'okänt dokument-id nekas');
+  ok(await assertFails(tr(ua, 'settings').set({ schema: 1, pile: 16, seriesLen: 4, flags: 2, approach40: null, theme: 'dark' })).then(() => true, () => false), 'okänt fält (theme) nekas');
+  ok(await assertFails(tr(ua, 'yardage').delete()).then(() => true, () => false), 'ägaren kan inte radera profilen');
+  ok(await assertSucceeds(tr(ua, 'yardage').get()).then(() => true, () => false), 'ägaren kan läsa');
 } catch (e) { console.error('FAIL', e); fails++; }
 
 await env.cleanup();

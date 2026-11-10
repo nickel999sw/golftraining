@@ -1,6 +1,6 @@
 # Plan 10 nov: Synka inställningar, platser och wedgelängder
 
-**Status:** utkast, väntar på Niklas ja. Det här är steget "senare" från planen 29 okt (fråga 2, avsnitt 3.3).
+**Status:** godkänd 10 nov 2026 av Niklas, med rekommendationerna på frågorna 1–3 i avsnitt 7. Det här är steget "senare" från planen 29 okt (fråga 2, avsnitt 3.3).
 
 **Gren:** `feat/profil-synk` i worktree `~/Code/.worktrees/golftraining-profil-synk`. Reglerna ändras i Golfrounds, i en egen session och på en egen gren där (se avsnitt 6).
 
