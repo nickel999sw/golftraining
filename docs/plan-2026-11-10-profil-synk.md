@@ -125,6 +125,16 @@ Reglerna testas i Golfrounds egna regeltester.
 1. **Specen godkänns.** STOPP: ditt ja.
 2. **Golfrounds, i en egen session:** reglerna och regeltesterna på en gren. STOPP: du ser testerna.
 3. **Golftraining:** koden, `npm test` och emulatortesterna mot regelgrenen (`GOLFROUNDS_DIR`). STOPP: du ser resultatet.
+   - **Resultat 10 nov** (grenen `feat/profil-synk`, inte pushad):
+     - **Regler:** Golfrounds `feat/training-profil` (0e5f066), med 1416 gröna regeltester.
+     - **Koden** finns i `index.html` vid `PROF`, `profWatch` och `mergeProfile` i synkavsnittet:
+       - `save()` anropar `profWatch`;
+       - `fsAdapter.read` lämnar med dokumentets id;
+       - nya texter finns i `sync.askProfile`, och `sync.accountText` är uppdaterad.
+     - **`npm test`:** 59 tester, varav 11 nya i `tests/profile.test.mjs`, bland dem testet av skrivsökvägarna. 7 mutationer fångades, också en skrivning till fel sökväg.
+     - **Emulatorn** (mot regelgrenen): 31 av 31 kontroller gröna, varav 11 nya för profilen.
+     - Cacheversionen är v13.
+     - **Viktigt om ordningen:** med dagens regler nekas läsningen av `training`. Läsningen räknas då som misslyckad, och inga pass från andra enheter tas in. Reglerna måste alltså publiceras före appen. Den gamla appen påverkas inte av de nya reglerna.
 4. **Reglerna publiceras i produktionen** (`golfrounds-ac8bd`). Det frågas separat. Måste göras före steg 5.
 5. **Golftraining** slås ihop, pushas och publiceras. Det frågas om var för sig.
 
