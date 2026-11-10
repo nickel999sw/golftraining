@@ -1,6 +1,6 @@
 # Plan 10 nov: Visa alla övningar
 
-**Status:** utkast 10 nov 2026, väntar på Niklas godkännande. Ingen kod förrän planen är godkänd.
+**Status:** godkänd 10 nov 2026 av Niklas, med rekommendationerna på frågorna 1–2 i avsnitt 5.
 
 **Gren:** `feat/alla-ovningar` i worktree `~/Code/.worktrees/golftraining-alla-ovningar`. Den är skild från `feat/inspel40`. Slås den här grenen ihop först, kommer Inspelstestet med i listan när den grenen slås ihop, utan extra kod.
 
@@ -51,6 +51,12 @@
    - cacheversionen höjd.
 
    STOPP: du ser skärmbilderna.
+   - **Resultat 10 nov** (grenen `feat/alla-ovningar`, inte pushad):
+     - Koden finns i `index.html`: `allHTML`, `exerciseHTML` och `needsText` efter `homeHTML`, vyn `all` i `render`, och nya texter under `I18N.sv.ui`.
+     - `npm test` ger 36 tester, varav 5 nya i `tests/all.test.mjs`.
+     - Cacheversionen är v11.
+     - Skärmbilder i 390 px finns i `skarmbilder/alla-ovningar-2026-11-10/`.
+     - **Att tänka på vid sammanslagningen:** `feat/inspel40` höjer också cachen till v11. Den gren som slås ihop sist får v12.
 3. **Sammanslagning med `main`.** STOPP: ditt ja.
 4. **Push av `main` och `npm run deploy`.** Frågas om var för sig.
 

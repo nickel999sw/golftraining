@@ -242,6 +242,9 @@ const I18N = {
       suggest: 'Förslag idag', suggestBoth: 'Kör båda (≈ 60 min)', suggestOne: 'Bara {name} (≈ 30 min)',
       noModules: 'Inga moduler passar platsens stationer. Ändra stationerna under Inställningar.',
       modulesHere: 'Alla moduler här', testsHere: 'Tester här',
+      showAll: 'Visa alla övningar', allTitle: 'Alla övningar', allText: 'Alla moduler och tester, och var de går att göra. Byt plats på startsidan för att köra en övning.',
+      needsLbl: 'Kräver', runsAt: 'Går på', and: 'och', or: 'eller', noPlace: 'Ingen av dina platser', clubOk: '{club} tillåten', allTests: 'Tester',
+      groups: { short: 'Närspel', putt: 'Putt', range: 'Range', garage: 'Garage' },
       lastDone: 'Senast {when}', never: 'Inte gjord än', daysAgo: 'för {n} dagar sedan', today: 'i dag', yesterday: 'i går',
       reminders: 'Påminnelser', periodBaseline: 'Testvecka – baslinje (vecka 1)', periodRetest: 'Testvecka – upprepa (sista veckan)',
       dueTest: 'Dags för {name}', monthly8: '8-bollsövningen – månadens test',
@@ -730,10 +733,10 @@ const ICONS = {
 };
 function render() {
   const tabs = [['home', 'ui.tabHome'], ...(D.cur ? [['run', 'ui.tabRun']] : []), ['hist', 'ui.tabHist'], ['settings', 'ui.tabSettings']];
-  const active = view === 'placeEdit' ? 'settings' : view === 'summary' ? 'hist' : view;
+  const active = view === 'placeEdit' ? 'settings' : view === 'summary' ? 'hist' : view === 'all' ? 'home' : view;
   $('#tabs').setAttribute('aria-label', t('ui.menu'));
   $('#tabs').innerHTML = `<div>${tabs.map(([v, k]) => `<button class="tab" data-act="tab" data-v="${v}" ${active === v ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[v]}</svg>${t(k)}</button>`).join('')}</div>`;
-  const V = { home: homeHTML, run: runHTML, hist: histHTML, settings: settingsHTML, placeEdit: placeEditHTML, summary: summaryHTML }[view] || homeHTML;
+  const V = { home: homeHTML, run: runHTML, hist: histHTML, settings: settingsHTML, placeEdit: placeEditHTML, summary: summaryHTML, all: allHTML }[view] || homeHTML;
   $('#view').innerHTML = V();
 }
 
@@ -763,7 +766,25 @@ function homeHTML() {
   if (tests.length) h += `<h2 class="h-sec">${t('ui.testsHere')}</h2><div class="list">${tests.map(id => { const lt = lastTest(id), b = bestOf(id), lv = tstate(id).level;
     const meta = [lt ? `${t('ui.latest')} ${fmtVal(id, lt)} (${when(lt.date)})` : t('ui.never'), b ? `${t('ui.best')} ${fmtVal(id, b)}` : '', lv != null ? lvlText(id, lv) : ''].filter(Boolean).join(' · ');
     return `<button class="item" data-act="startTest" data-id="${id}"><span class="t">${testName(id)}<small>${meta}</small></span><span class="go">›</span></button>`; }).join('')}</div>`;
-  return h;
+  return h + `<button class="btn" data-act="tab" data-v="all">${t('ui.showAll')}</button>`;
+}
+/* Alla övningar (plan 2026-11-10-alla-ovningar): bara läsning. Platsen väljs på startsidan, eftersom den styr klubbor och lägen. */
+function needsText(def) {
+  const st = (def.needs || []).map(g => g.map(k => t('stations.' + k)).join(` ${t('ui.or')} `)).join(` ${t('ui.and')} `);
+  return def.club ? `${st} · ${t('ui.clubOk', { club: club(def.club) })}` : st;
+}
+function exerciseHTML(kind, id, def, name, desc) {
+  const at = D.places.filter(p => fits(p, def)).map(p => esc(p.name)).join(', ');
+  return `<div class="card" data-ex="${kind}:${id}"><h3>${name}</h3><p class="small muted">${desc}</p>
+    <div class="small"><b>${t('ui.needsLbl')}:</b> ${needsText(def)}</div><div class="small"><b>${t('ui.runsAt')}:</b> ${at || t('ui.noPlace')}</div></div>`;
+}
+function allHTML() {
+  let h = `<button class="btn small" data-act="tab" data-v="home">${t('ui.back')}</button><h1>${t('ui.allTitle')}</h1><p class="small">${t('ui.allText')}</p>`;
+  for (const g of GROUP_ORDER) {
+    const ids = Object.keys(MODULES).filter(id => MODULES[id].grp === g);
+    if (ids.length) h += `<h2 class="h-sec">${t('ui.groups.' + g)}</h2>` + ids.map(id => exerciseHTML('mod', id, MODULES[id], t('mod.' + id + '.name'), t('mod.' + id + '.desc'))).join('');
+  }
+  return h + `<h2 class="h-sec">${t('ui.allTests')}</h2>` + Object.keys(TESTS).map(id => exerciseHTML('test', id, TESTS[id], testName(id), L.test[id].desc)).join('');
 }
 
 function runHTML() {
