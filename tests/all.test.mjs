@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { loadApp } from './app.mjs';
 
 const open = A => { A.click('tab', { v: 'all' }); return A.view(); };
-const card = (v, key) => { const i = v.indexOf(`data-ex="${key}"`); assert.ok(i >= 0, 'saknas: ' + key); return v.slice(i, v.indexOf('</div></div>', i)); };
+const card = (v, key) => { const i = v.indexOf(`data-ex="${key}"`); assert.ok(i >= 0, 'saknas: ' + key); return v.slice(i, v.indexOf('</div></button>', i)); };
 
 test('vyn listar varje modul och varje test exakt en gång, grupperna i ordning och testerna sist', () => {
   const A = loadApp(), v = open(A);

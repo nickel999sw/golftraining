@@ -93,6 +93,7 @@ p { margin: 0 0 12px; }
 
 /* ---------- Kort ---------- */
 .card { background: var(--card); border-radius: var(--r-md); box-shadow: var(--shadow); padding: 14px 16px; margin: 10px 0; }
+.card.ex { display: block; width: 100%; text-align: left; color: inherit; }
 .card.soft { background: var(--chip); box-shadow: none; }
 .card.soft .btn, .card.soft .chip { background: var(--card); }
 .card.alert { background: color-mix(in srgb, var(--gorse) 16%, var(--card)); border: 1px solid color-mix(in srgb, var(--gorse) 60%, transparent); }
@@ -245,6 +246,7 @@ const I18N = {
       showAll: 'Visa alla övningar', allTitle: 'Alla övningar', allText: 'Alla moduler och tester, och var de går att göra. Byt plats på startsidan för att köra en övning.',
       needsLbl: 'Kräver', runsAt: 'Går på', and: 'och', or: 'eller', noPlace: 'Ingen av dina platser', clubOk: '{club} tillåten', allTests: 'Tester',
       groups: { short: 'Närspel', putt: 'Putt', range: 'Range', garage: 'Garage' },
+      start: 'Starta', exSteps: 'Steg', exStep: { tech: 'Teknik', series: 'Variationsserie', streak: 'Serie i rad', test: 'Test: {name}', yardage: 'Längdtabell', tally: 'Räkning' },
       lastDone: 'Senast {when}', never: 'Inte gjord än', daysAgo: 'för {n} dagar sedan', today: 'i dag', yesterday: 'i går',
       reminders: 'Påminnelser', periodBaseline: 'Testvecka – baslinje (vecka 1)', periodRetest: 'Testvecka – upprepa (sista veckan)',
       dueTest: 'Dags för {name}', monthly8: '8-bollsövningen – månadens test',
@@ -648,7 +650,7 @@ const curPlace = () => placeById(D.placeId) || D.places[0];
 /* Ett pass som startades för mindre än 3 timmar sedan öppnas direkt; ett äldre väntar på startsidan (28 okt). */
 const RESUME_MS = 3 * 3600 * 1000;
 const startView = () => D.cur && Date.now() - Date.parse(D.cur.date) < RESUME_MS ? 'run' : 'home';
-let view = startView(), editPlaceId = null, lastSaved = null;
+let view = startView(), editPlaceId = null, lastSaved = null, exSel = null;   // exSel: { kind, id, from } för vyn Övning
 const qItem = () => D.cur && D.cur.queue[D.cur.qi];
 const runPlace = () => placeById(D.cur?.placeId) || curPlace();
 const stepsOf = q => q.kind === 'module' ? MODULES[q.id].steps : [{ type: 'test', test: q.id }];
@@ -750,10 +752,10 @@ const ICONS = {
 };
 function render() {
   const tabs = [['home', 'ui.tabHome'], ...(D.cur ? [['run', 'ui.tabRun']] : []), ['hist', 'ui.tabHist'], ['settings', 'ui.tabSettings']];
-  const active = view === 'placeEdit' ? 'settings' : view === 'summary' ? 'hist' : view === 'all' ? 'home' : view;
+  const active = view === 'placeEdit' ? 'settings' : view === 'summary' ? 'hist' : view === 'all' || view === 'ex' ? 'home' : view;
   $('#tabs').setAttribute('aria-label', t('ui.menu'));
   $('#tabs').innerHTML = `<div>${tabs.map(([v, k]) => `<button class="tab" data-act="tab" data-v="${v}" ${active === v ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[v]}</svg>${t(k)}</button>`).join('')}</div>`;
-  const V = { home: homeHTML, run: runHTML, hist: histHTML, settings: settingsHTML, placeEdit: placeEditHTML, summary: summaryHTML, all: allHTML }[view] || homeHTML;
+  const V = { home: homeHTML, run: runHTML, hist: histHTML, settings: settingsHTML, placeEdit: placeEditHTML, summary: summaryHTML, all: allHTML, ex: exHTML }[view] || homeHTML;
   $('#view').innerHTML = V();
 }
 
@@ -778,11 +780,11 @@ function homeHTML() {
   } else h += `<p class="card">${t('ui.noModules')}</p>`;
   const mods = Object.keys(MODULES).filter(id => fits(p, MODULES[id]));
   if (mods.length) h += `<h2 class="h-sec">${t('ui.modulesHere')}</h2><div class="list">${mods.map(id => { const ld = lastDoneModule(id);
-    return `<button class="item" data-act="startMods" data-ids="${id}"><span class="t">${t('mod.' + id + '.name')}<small>${t('mod.' + id + '.desc')}<br>${ld ? t('ui.lastDone', { when: when(ld) }) : t('ui.never')}</small></span><span class="go">›</span></button>`; }).join('')}</div>`;
+    return `<button class="item" data-act="exOpen" data-kind="mod" data-id="${id}" data-from="home"><span class="t">${t('mod.' + id + '.name')}<small>${t('mod.' + id + '.desc')}<br>${ld ? t('ui.lastDone', { when: when(ld) }) : t('ui.never')}</small></span><span class="go">›</span></button>`; }).join('')}</div>`;
   const tests = Object.keys(TESTS).filter(id => fits(p, TESTS[id]));
   if (tests.length) h += `<h2 class="h-sec">${t('ui.testsHere')}</h2><div class="list">${tests.map(id => { const lt = lastTest(id), b = bestOf(id), lv = tstate(id).level;
     const meta = [lt ? `${t('ui.latest')} ${fmtVal(id, lt)} (${when(lt.date)})` : t('ui.never'), b ? `${t('ui.best')} ${fmtVal(id, b)}` : '', lv != null ? lvlText(id, lv) : ''].filter(Boolean).join(' · ');
-    return `<button class="item" data-act="startTest" data-id="${id}"><span class="t">${testName(id)}<small>${meta}</small></span><span class="go">›</span></button>`; }).join('')}</div>`;
+    return `<button class="item" data-act="exOpen" data-kind="test" data-id="${id}" data-from="home"><span class="t">${testName(id)}<small>${meta}</small></span><span class="go">›</span></button>`; }).join('')}</div>`;
   return h + `<button class="btn" data-act="tab" data-v="all">${t('ui.showAll')}</button>`;
 }
 /* Alla övningar (plan 2026-11-10-alla-ovningar): bara läsning. Platsen väljs på startsidan, eftersom den styr klubbor och lägen. */
@@ -792,8 +794,26 @@ function needsText(def) {
 }
 function exerciseHTML(kind, id, def, name, desc) {
   const at = D.places.filter(p => fits(p, def)).map(p => esc(p.name)).join(', ');
-  return `<div class="card" data-ex="${kind}:${id}"><h3>${name}</h3><p class="small muted">${desc}</p>
-    <div class="small"><b>${t('ui.needsLbl')}:</b> ${needsText(def)}</div><div class="small"><b>${t('ui.runsAt')}:</b> ${at || t('ui.noPlace')}</div></div>`;
+  return `<button class="card ex" data-ex="${kind}:${id}" data-act="exOpen" data-kind="${kind}" data-id="${id}" data-from="all"><h3>${name}</h3><p class="small muted">${desc}</p>
+    <div class="small"><b>${t('ui.needsLbl')}:</b> ${needsText(def)}</div><div class="small"><b>${t('ui.runsAt')}:</b> ${at || t('ui.noPlace')}</div></button>`;
+}
+/* Övning (plan 2026-11-10-ovning-info): visa en övning utan att starta. Bara Starta (från startsidan) ändrar något. */
+function exHTML() {
+  const x = exSel;
+  if (!x) { view = 'home'; return homeHTML(); }
+  const mod = x.kind === 'mod', def = mod ? MODULES[x.id] : TESTS[x.id];
+  const name = mod ? t('mod.' + x.id + '.name') : testName(x.id), desc = mod ? t('mod.' + x.id + '.desc') : L.test[x.id].desc;
+  let h = `<button class="btn small" data-act="tab" data-v="${x.from}">${t('ui.back')}</button><h1>${name}</h1>`;
+  if (mod) {
+    const ld = lastDoneModule(x.id), hasTech = def.steps.some(s => s.type === 'tech');
+    h += `<div class="card soft"><p>${desc}</p><div class="small">${ld ? t('ui.lastDone', { when: when(ld) }) : t('ui.never')}</div></div>`;
+    if (hasTech) h += `<div class="card"><h3>${t('ui.techOptional')}</h3><p>${t('mod.' + x.id + '.tech')}</p></div>`;
+    h += `<div class="card"><h3>${t('ui.exSteps')}</h3><ol class="small">${def.steps.map(s => `<li>${t('ui.exStep.' + s.type, { name: s.test ? testName(s.test) : '' })}</li>`).join('')}</ol></div>`;
+  } else h += testInfoHTML(x.id);
+  h += `<div class="card"><div class="small"><b>${t('ui.needsLbl')}:</b> ${needsText(def)}</div><div class="small"><b>${t('ui.runsAt')}:</b> ${D.places.filter(p => fits(p, def)).map(p => esc(p.name)).join(', ') || t('ui.noPlace')}</div></div>`;
+  if (x.from === 'home') h += mod ? `<button class="btn primary huge" data-act="startMods" data-ids="${x.id}">${t('ui.start')}</button>`
+    : `<button class="btn primary huge" data-act="startTest" data-id="${x.id}">${t('ui.start')}</button>`;
+  return h;
 }
 function allHTML() {
   let h = `<button class="btn small" data-act="tab" data-v="home">${t('ui.back')}</button><h1>${t('ui.allTitle')}</h1><p class="small">${t('ui.allText')}</p>`;
@@ -1651,6 +1671,7 @@ const ACTS = {
   tab(el) { view = el.dataset.v; render(); scrollTo(0, 0); },
   setTheme(el) { D.settings.theme = el.dataset.v || null; applyTheme(); rerender(); },
   place(el) { D.placeId = el.dataset.id; rerender(); },
+  exOpen(el) { exSel = { kind: el.dataset.kind, id: el.dataset.id, from: el.dataset.from }; view = 'ex'; render(); scrollTo(0, 0); },
   startMods(el) { startItems(el.dataset.ids.split(',').map(id => ({ kind: 'module', id }))); },
   startTest(el) { startItems([{ kind: 'test', id: el.dataset.id }]); },
   techDone() { nextStep(); },

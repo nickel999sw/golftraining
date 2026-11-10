@@ -1,6 +1,6 @@
 # Plan 10 nov: Titta på en övning utan att starta
 
-**Status:** utkast, väntar på Niklas ja.
+**Status:** godkänd 10 nov 2026 av Niklas, med rekommendationen på fråga 1 (ett tryck på raden öppnar Övning).
 
 **Gren:** `feat/ovning-info` i worktree `~/Code/.worktrees/golftraining-ovning-info`.
 
@@ -48,6 +48,15 @@
 ## 4. Steg och stopp
 1. **Specen godkänns.** STOPP: ditt ja.
 2. **Bygge, tester och skärmbilder.** STOPP: du ser skärmbilderna.
+   - **Resultat 10 nov** (grenen `feat/ovning-info`, inte pushad):
+     - Koden finns i `index.html`: `exHTML` efter `exerciseHTML`, handlingen `exOpen`, vyn `ex` i `render` och `exSel` bredvid `view`.
+     - Korten i Alla övningar är knappar (`.card.ex`).
+     - Nya texter under `I18N.sv.ui`: `start`, `exSteps` och `exStep`.
+     - `npm test` ger 48 tester, varav 5 nya i `tests/ex.test.mjs`.
+     - Två rader i `app.test.mjs` letar nu efter `data-kind="mod" data-id=…`, eftersom startsidans rader inte längre har `data-ids`.
+     - I `all.test.mjs` slutar ett kort nu på `</button>`.
+     - Cacheversionen är v12.
+     - Skärmbilder i `skarmbilder/ovning-info-2026-11-10/`.
 3. **Sammanslagning, push och deploy.** Frågas om var för sig.
 
 ## 5. Fråga till Niklas
