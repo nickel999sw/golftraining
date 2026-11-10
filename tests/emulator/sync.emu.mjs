@@ -76,6 +76,30 @@ try {
   await C.SYNC.attach(C.SYNC.fsAdapter(sameRealm(as('uB', 'bo@example.com')), 'uA'), { uid: 'uB', name: 'Bo' });
   ok(C.SYNC.state() === 'local' || C.SYNC.state() === 'phone' || C.SYNC.state() === 'denied', 'en annan användare kan inte läsa eller skriva i uA:s träning (' + C.SYNC.state() + ')');
   ok((await raw()).s.length === 3, 'ingenting skrevs i uA:s samling');
+
+  console.log('-- Inspelstestet (40): extra med listor av maps och null, utan ändrade regler (plan 10 nov)');
+  const E = loadApp(); E.onConfirm(() => true); E.D.placeId = 'brohof';
+  E.click('startTest', { id: 'approach40' });
+  [[['LW', 70], ['SW', 85], ['GW', 98]], [['PW', 110], ['9i', 122], ['8i', 135]], [['7i', 145], ['6i', 155], ['5i', 165]], [['3W', 200], ['3H', 185], ['5i', 165]]]
+    .forEach((b, bi) => b.forEach(([c, d], i) => { E.el(`#a40k-${bi}-${i}`).value = c; E.el(`#a40c-${bi}-${i}`).value = String(d); }));
+  E.click('a40SetSave'); E.click('a40Start');
+  for (let i = 0; i < 40; i++) {
+    if (E.D.cur.st.pause != null) E.click('a40Next');
+    if (i % 4 === 0) E.click('a40Hit', { v: '1' }); else { E.el('#a40Carry').value = String(E.D.cur.st.plan[i].target + (i % 3)); E.click('a40Reg'); }
+  }
+  E.click('a40Save'); E.click('testDone'); E.click('endSessionNow');
+  const er = E.D.tests.approach40.results[0], es = E.D.sessions[0];
+  await E.SYNC.attach(E.SYNC.fsAdapter(fdbA, 'uA'), { uid: 'uA', name: 'Anna' });
+  let ed = (await raw()).t.find(x => x.id === er.id);
+  ok(ed && ed.testId === 'approach40' && ed.v === er.v && ed.extra.shots.length === 40 && ed.extra.setup.length === 4, `approach40 skrevs med 40 slag och 4 block (v ${ed?.v})`);
+  ok(ed && ed.extra.shots[0].carry === null && ed.extra.shots[0].side === null && ed.extra.shots[1].side === false, 'carry och sidled null utan radar, false med');
+  const F = loadApp(); F.onConfirm(() => true);
+  await F.SYNC.attach(F.SYNC.fsAdapter(fdbA, 'uA'), { uid: 'uA', name: 'Anna' });
+  const fr = F.D.tests.approach40?.results[0];
+  ok(fr && JSON.stringify(fr.shots) === JSON.stringify(er.shots) && JSON.stringify(fr.setup) === JSON.stringify(er.setup), 'en annan enhet läser tillbaka samma slag och klubbor');
+  E.ACTS.delSession({ dataset: { id: es.id } }); await E.SYNC.flush();
+  ed = (await raw()).t.find(x => x.id === er.id);
+  ok(!ed, 'Ta bort pass: approach40-resultatet är borta i Firestore');
 } catch (e) { console.error('FAIL', e); fails++; }
 
 await env.cleanup();

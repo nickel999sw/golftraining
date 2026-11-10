@@ -45,7 +45,7 @@ export function loadApp(seed = []) {
   vm.runInContext(script(), ctx, { filename: 'index.html' });
   // Toppnivåns const-bindningar delas mellan skript i samma kontext, precis som i webbläsaren.
   const api = vm.runInContext(`({ MODULES, GENS, TESTS, STATIONS, DEFAULT_PLACES, GROUP_ORDER, L, t, fits, makeSeries, shotHTML,
-    ACTS, SYNC, get D() { return D; }, render, suggestions, startView, get currentView() { return view; } })`, ctx);
+    ACTS, SYNC, A40, get D() { return D; }, render, suggestions, startView, get currentView() { return view; } })`, ctx);
   api.view = () => $('#view').innerHTML;
   api.storage = () => [...store];
   api.el = $;
