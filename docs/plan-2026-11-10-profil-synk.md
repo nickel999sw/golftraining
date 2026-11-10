@@ -84,6 +84,20 @@ I planen 29 okt föreslog jag ett dokument, `training/profile`. Jag föreslår n
 - `theme` och `placeId` skickas aldrig, och `approach40: null` och `period: null` sparas som `null`.
 - Platsen tas bort på enhet A, och enhet B tar in det och byter `placeId`.
 - Backup-import med ja lägger rätt dokument i utkorgen.
+- **Skrivsökvägar:** appen skriver bara till sina egna dokument (tillagt 10 nov). Skyddet gäller den delade databasen, där reglerna inte kan skilja Golftraining från Golfrounds. Det prövas så här:
+  - Ett falskt `fdb` skickas in i `fsAdapter`. Det registrerar varje kedja av `collection` och `doc` och varje `set`, `delete` och `get`.
+  - Med det körs ett helt flöde:
+    - pass och testresultat sparas;
+    - ett pass tas bort;
+    - en backup importeras;
+    - klubbor och carry, en plats och Längdtabell ändras;
+    - inloggning och läsning görs.
+  - **Krav:**
+    - varje anrop börjar med `users/<inloggad uid>`;
+    - varje skrivning och radering har sökvägen `trainingSessions/<id>`, `trainingTests/<id>` eller `training/(settings|places|yardage)`;
+    - radering sker bara i `trainingSessions` och `trainingTests`, aldrig i `training`;
+    - läsning sker bara av `trainingSessions`, `trainingTests` och `training`.
+  - En sökväg utanför listan, till exempel `rounds/x`, får testet att falla. Det kontrolleras med en medveten mutation.
 
 **Emulatorn** (`demo-golfrounds`), med Golfrounds regler från regelgrenen:
 - skriv och läs de tre dokumenten;
